@@ -269,25 +269,34 @@ The card label (bottom line) should be the short trigger description from the ba
 
 ### Part 4: Session Score
 
+Display as a bordered box. Adapt the width to fit the longest content line.
+
+If new high score:
 ```
   ⚡ SESSION SCORE
-  ┌──────────────────┬──────────────┬──────────────────┐
-  │  Score           │  Multiplier  │  Final           │
-  ├──────────────────┼──────────────┼──────────────────┤
-  │  [rawScore] pts  │  ×[mult]x    │  [finalScore] pts│
-  ├──────────────────┴──────────────┴──────────────────┤
-  │  🎆 NEW HIGH SCORE!  Previous: [old] pts           │
-  └────────────────────────────────────────────────────┘
+  ┌─────────────┬─────────────┬─────────────┐
+  │ Score       │ Multiplier  │ Final       │
+  ├─────────────┼─────────────┼─────────────┤
+  │  [raw] pts  │ [mult]x d[N]│ [final] pts │
+  ├─────────────┴─────────────┴─────────────┤
+  │  🎆 NEW HIGH SCORE!                     │
+  │  Previous: [old] pts ([date] — "[title]")│
+  └─────────────────────────────────────────┘
 ```
 
-Rules for this section:
-- Score column: `rawScore` with "pts" suffix
-- Multiplier column: streak multiplier formatted as "×1.2x" (includes streak day count if > 1)
-- Final column: `finalScore` with "pts" suffix
-- The spanning bottom row changes based on whether this is a new high score:
-  - New high score: `🎆 NEW HIGH SCORE!  Previous: [old score] pts ([old date] — "[old title]")`
-  - Not a new high score: `Personal best: [best score] pts ([date] — "[title]")`
-- Pad all lines so the right border │ aligns consistently with the 3-column rows above
+If NOT new high score:
+```
+  ⚡ SESSION SCORE
+  ┌─────────────┬─────────────┬─────────────┐
+  │ Score       │ Multiplier  │ Final       │
+  ├─────────────┼─────────────┼─────────────┤
+  │  [raw] pts  │ [mult]x d[N]│ [final] pts │
+  ├─────────────┴─────────────┴─────────────┤
+  │  Best: [score] pts ([date] — "[title]") │
+  └─────────────────────────────────────────┘
+```
+
+Column rules: Score = raw score, Multiplier = "[mult]x d[streak]" (e.g. "1.5x d5"), Final = raw × multiplier. Adapt column widths to fit content. The bottom row spans all columns for the high score / personal best line.
 
 ### Part 5a: Today's Sessions
 

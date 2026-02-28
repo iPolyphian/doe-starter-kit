@@ -6,7 +6,7 @@ Read STATE.md and tasks/todo.md. Run `git log --oneline` to see this session's c
 ├─────────────────────────────────────────────────┤
 │  MISSION   [feature name] [APP/INFRA] vX.Y      │
 │  PROGRESS  ██████░░░░ N/M steps                  │
-│  STATUS    [what's actually happening right now]  │
+│  STATUS    [one-line summary of what's happening] │
 │                                                  │
 │  DONE                                            │
 │  ✓ [completed step name]                         │
@@ -28,7 +28,7 @@ Read STATE.md and tasks/todo.md. Run `git log --oneline` to see this session's c
 
 Rules:
 - Progress bar: use █ for done steps, ░ for remaining. Scale to 10 characters total.
-- STATUS: one plain-English sentence describing what's actually happening in the session right now. Determine this by reading the conversation history. It may differ from the MISSION — e.g. "Debugging a CSS overflow on the card component", "Experimenting with table formatting for the changelog", "Housekeeping — cleaning up leftover test files". If work is aligned with the active step, just summarise that step — e.g. "Building the council data execution script".
+- STATUS: one plain-English sentence describing what's actually happening right now in the session. This may differ from the MISSION — e.g. you might be debugging, experimenting, or doing housekeeping unrelated to the current feature step. Look at the conversation history to determine this. If work is aligned with the active step, just summarise that step.
 - DONE section: list completed steps from the current feature (steps with [x]).
 - ACTIVE section: the step currently being worked on (first unchecked step). If nothing is actively being worked on, show "Awaiting next step".
 - PENDING section: remaining unchecked steps after the active one. Omit section if none.

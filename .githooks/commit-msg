@@ -1,7 +1,7 @@
 #!/bin/sh
 # Strip AI co-author trailers from commit messages.
 # This runs automatically on every commit via git hooks.
-sed -i '/^Co-authored-by:.*[Cc]laude/d' "$1"
-sed -i '/^Co-authored-by:.*[Aa]nthropic/d' "$1"
+sed -i '' '/^Co-authored-by:.*[Cc]laude/d' "$1"
+sed -i '' '/^Co-authored-by:.*[Aa]nthropic/d' "$1"
 # Clean up any trailing blank lines left behind
-sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$1"
+sed -i '' -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$1"
