@@ -16,8 +16,10 @@ Keep the universal DOE Claude Code Starter Kit repository in sync with improveme
 /add-dir ~/doe-starter-kit
 ```
 
-### Step 2: Identify what changed
-Compare files that exist in both the current project and the starter kit:
+### Step 2: Check if anything changed
+Compare files that exist in both the current project and the starter kit. If all syncable files are identical, say "Starter kit is up to date — nothing to sync" and stop.
+
+Files to compare:
 - CLAUDE.md (rules, triggers, directory structure)
 - tasks/todo.md (format rules only — not task content)
 - directives/*.md (universal ones only)

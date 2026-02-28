@@ -2,13 +2,14 @@ First, check if ~/doe-starter-kit is accessible. If not, run: /add-dir ~/doe-sta
 
 Then read directives/starter-kit-sync.md and follow it precisely. The directive covers:
 
-1. Identify which DOE framework files changed in this project since the last sync (CLAUDE.md rules, todo.md format rules, directives, commands, hooks, audit script, learnings)
-2. For each changed file, strip ALL project-specific content (names, paths, data, examples) and replace with generic equivalents
-3. Show me the diff for each file before applying — wait for my approval
-4. Copy approved files to ~/doe-starter-kit/
-5. Verify: grep for project-specific references — must return zero results
-6. Commit to the starter kit repo with message: "Sync from [project name]: [summary of what changed]"
-7. Push to GitHub
+1. Diff all syncable files between this project and ~/doe-starter-kit. If nothing has changed, say "Starter kit is up to date — nothing to sync" and stop.
+2. For files that differ, identify which changes are universal DOE improvements vs project-specific content
+3. For each changed file, strip ALL project-specific content (names, paths, data, examples) and replace with generic equivalents
+4. Show me the diff for each file before applying — wait for my approval
+5. Copy approved files to ~/doe-starter-kit/
+6. Verify: grep for project-specific references — must return zero results
+7. Commit to the starter kit repo with message: "Sync from [project name]: [summary of what changed]"
+8. Push to GitHub
 
 Rules:
 - Only sync universal DOE improvements. Never sync project-specific tasks, data, plans, or domain content.
