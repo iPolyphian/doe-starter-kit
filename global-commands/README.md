@@ -46,6 +46,6 @@ Fast checks only (<1 second) — front-matter, staleness, task format, version m
 Mid-session situation report. Shows current feature progress, completed/active/pending steps, session commits, elapsed time, blockers, and queue. Uses session timer if available, falls back to first-commit method. Read-only — no changes made.
 *Added 28/02/26 · Updated 28/02/26 (session timer)*
 
-### 11. `/sync-kit`
+### 11. `/sync-doe`
 Syncs universal DOE framework improvements from the current project back to the starter kit repo (`~/doe-starter-kit`). Reads `directives/starter-kit-sync.md`, strips project-specific content, shows diffs for approval, commits and pushes. Uses `/add-dir` if the starter kit isn't already loaded.
 *Added 28/02/26*

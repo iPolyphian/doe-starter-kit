@@ -23,7 +23,7 @@ A template repository containing everything you need to run Claude Code with gua
 - **STATE.md** — Session memory (blockers, current position)
 - **Directives** — SOPs for documentation governance, claim auditing, starter kit sync
 - **Audit system** — Automated false-positive detection with pre-commit hook
-- **11 slash commands** — `/stand-up`, `/crack-on`, `/wrap` (gamified), `/sitrep`, `/sync-kit`, `/pitch`, `/audit`, `/roast`, `/eli5`, `/quick-audit`, `/shower-thought`
+- **11 slash commands** — `/stand-up`, `/crack-on`, `/wrap` (gamified), `/sitrep`, `/sync-doe`, `/pitch`, `/audit`, `/roast`, `/eli5`, `/quick-audit`, `/shower-thought`
 - **Session timer** — `/stand-up` and `/crack-on` start a clock, `/sitrep` and `/wrap` report elapsed time
 - **Gamification** — Session scoring, badges, streaks, leaderboard, themed wrap-up cards
 - **Git hooks** — Pre-commit claim audit, commit message cleanup
@@ -59,7 +59,7 @@ See **CUSTOMIZATION.md** for the full guide. Short version:
 
 ## Versioning
 
-The starter kit uses semantic versioning with GitHub releases. Every `/sync-kit` run that pushes changes will bump the version, update CHANGELOG.md, tag the commit, and create a release. See CHANGELOG.md for the full history.
+The starter kit uses semantic versioning with GitHub releases. Every `/sync-doe` run that pushes changes will bump the version, update CHANGELOG.md, tag the commit, and create a release. See CHANGELOG.md for the full history.
 
 ## File Count
 

@@ -99,7 +99,7 @@ All slash commands install to `~/.claude/commands/` so they work across every DO
 | eli5.md | `~/.claude/commands/` | Type `/eli5` — explain current work like you're 5 |
 | shower-thought.md | `~/.claude/commands/` | Type `/shower-thought` — one weird programming observation |
 | sitrep.md | `~/.claude/commands/` | Type `/sitrep` — mid-session situation report with progress, commits, elapsed time |
-| sync-kit.md | `~/.claude/commands/` | Type `/sync-kit` — sync DOE improvements back to the starter kit repo |
+| sync-doe.md | `~/.claude/commands/` | Type `/sync-doe` — sync DOE improvements back to the starter kit repo |
 | README.md | `~/.claude/commands/` | Quick reference for all 11 slash commands |
 
 ### 📐 The Plans & Sync
@@ -168,7 +168,7 @@ SESSION END (or /wrap)
 | `/audit` | Full claim audit — all checks, detailed explanations |
 | `/quick-audit` | Fast checks only (<1 second) — front-matter, staleness, task format |
 | `/sitrep` | Mid-session situation report — progress bar, commits, elapsed time, blockers, context usage |
-| `/sync-kit` | Sync universal DOE improvements from current project to the starter kit repo |
+| `/sync-doe` | Sync universal DOE improvements from current project to the starter kit repo |
 
 ## What's project-level vs machine-level
 
@@ -222,7 +222,7 @@ MACHINE (lives on your computer, applies to all projects)
     ├── audit.md
     ├── quick-audit.md
     ├── sitrep.md
-    └── sync-kit.md
+    └── sync-doe.md
 ```
 
 Total: 39 files across 8 directories. If you see a file not on this list, it shouldn't be there.

@@ -20,8 +20,8 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 - **DOE Kit awareness** — `/stand-up`, `/crack-on`, `/sitrep`, and `/wrap` now check `~/doe-starter-kit` if it exists
 - `/stand-up` and `/crack-on` show kit version + pending change count at session start
 - `/sitrep` shows `DOE KIT` row with version and sync status
-- `/wrap` nudges `/sync-kit` when DOE files have changed since last sync
-- All four commands recommend `/sync-kit` when pending changes are detected
+- `/wrap` nudges `/sync-doe` when DOE files have changed since last sync
+- All four commands recommend `/sync-doe` when pending changes are detected
 
 ---
 
@@ -37,7 +37,7 @@ Initial release. 40 files across 8 directories.
 - **CUSTOMIZATION.md** — Guide for adapting the kit to new projects
 - **Directives** — `_TEMPLATE.md`, `documentation-governance.md`, `claim-auditing.md`, `starter-kit-sync.md`
 - **Execution** — `audit_claims.py` with universal checks and project extension point
-- **11 slash commands** — `/stand-up`, `/crack-on`, `/wrap` (gamified), `/sitrep`, `/sync-kit`, `/pitch`, `/audit`, `/quick-audit`, `/roast`, `/eli5`, `/shower-thought`
+- **11 slash commands** — `/stand-up`, `/crack-on`, `/wrap` (gamified), `/sitrep`, `/sync-doe`, `/pitch`, `/audit`, `/quick-audit`, `/roast`, `/eli5`, `/shower-thought`
 - **Guardrail hooks** — `block_dangerous_commands.py`, `block_secrets_in_code.py`, `protect_directives.py`
 - **Git hooks** — `commit-msg` (strip AI co-author trailers), `pre-commit` (fast audit)
 - **Session timer** — `/stand-up` and `/crack-on` start clock, `/sitrep` and `/wrap` report duration
@@ -50,5 +50,5 @@ Initial release. 40 files across 8 directories.
 - `/wrap` score table has separate high score / non-high score templates with `d[streak]` multiplier format
 
 ### Changed
-- `/sync-kit` includes up-to-date check — stops early if nothing to sync
+- `/sync-doe` includes up-to-date check — stops early if nothing to sync
 - Sync directive includes safety guardrails: pull-before-compare, three-way diff, additive merging, git stash backup

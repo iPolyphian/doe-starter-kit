@@ -6,7 +6,7 @@ Before ending this session, complete all steps in order.
 2. **Update tasks/todo.md** — Make sure all completed steps have timestamps. Move any completed features to Done if needed.
 3. **Check for learnings** — If anything failed and was fixed, or a useful pattern was discovered, log it to learnings.md or ~/.claude/CLAUDE.md.
 4. **Commit and push** — Make sure all work is committed. No uncommitted changes should remain.
-5. **DOE Kit sync check** — If `~/doe-starter-kit` exists, quick-diff key syncable files (CLAUDE.md, ~/.claude/commands/*.md, .githooks/*, .claude/hooks/*.py) against the starter kit. If any files have changed since the last sync (especially if new universal learnings were added to `~/.claude/CLAUDE.md` this session), add a nudge line at the end of the housekeeping output: `💡 [N] DOE files changed since last sync — consider running /sync-kit`. If everything is synced, skip silently.
+5. **DOE Kit sync check** — If `~/doe-starter-kit` exists, quick-diff key syncable files (CLAUDE.md, ~/.claude/commands/*.md, .githooks/*, .claude/hooks/*.py) against the starter kit. If any files have changed since the last sync (especially if new universal learnings were added to `~/.claude/CLAUDE.md` this session), add a nudge line at the end of the housekeeping output: `💡 [N] DOE files changed since last sync — consider running /sync-doe`. If everything is synced, skip silently.
 
 ## Step 2: Gather Session Metrics
 
@@ -414,11 +414,11 @@ List commits in chronological order (oldest first, newest last).
 ══════════════════════════════════════════════
   STATE.md ✅ | todo.md ✅ | stats.json ✅ | Committed ✅
   Session [N] | Streak: [X] days | Lifetime: [Y] commits
-  DOE Kit: vX.Y.Z · [synced ✓ / N pending — /sync-kit]
+  DOE Kit: vX.Y.Z · [synced ✓ / N pending — /sync-doe]
 ══════════════════════════════════════════════
 ```
 
-The DOE Kit line uses the same check as step 5 (housekeeping). If `~/doe-starter-kit` doesn't exist, omit the line. Show `synced ✓` if all syncable files match, or `N pending — /sync-kit` if any differ.
+The DOE Kit line uses the same check as step 5 (housekeeping). If `~/doe-starter-kit` doesn't exist, omit the line. Show `synced ✓` if all syncable files match, or `N pending — /sync-doe` if any differ.
 
 ## Important Rules
 
