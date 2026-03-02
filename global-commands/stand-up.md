@@ -25,10 +25,16 @@ Show a bordered kick-off card, then present a plan and wait for sign-off:
 │  PROGRESS   ██████░░░░ N/M steps                  │
 │  DOE KIT    vX.Y.Z · [synced ✓ / N — /sync-doe]  │
 │  BLOCKERS   [from STATE.md or "None"]             │
+│  WARNINGS   [audit WARN/FAIL summary or "None ✓"] │
+│    ⚠️ [detail line for each WARN/FAIL item]        │
 │  LEARNINGS  N entries · last updated DD/MM        │
 ├──────────────────────────────────────────────────┤
 │  PLAN                                             │
 │  → [proposed next steps as bullets]               │
+│                                                   │
+│  FOCUS                                            │
+│  · [coaching bullet from stats.json analysis]     │
+│  · [coaching bullet]                              │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -38,8 +44,17 @@ Card rules:
 - PROGRESS: count [x] and [ ] steps for the current feature in todo.md ## Current. Bar uses █ for done, ░ for remaining, scaled to 10 characters. If no current feature, omit this line.
 - DOE KIT: `vX.Y.Z · synced ✓` if clean, `vX.Y.Z · N files with pending changes — /sync-doe` if any differ. Omit entirely if `~/doe-starter-kit` doesn't exist.
 - BLOCKERS: from STATE.md ## Blockers & Edge Cases. "None" if empty.
+- WARNINGS: Run `python3 execution/audit_claims.py --hook --json` and parse the JSON output. If any findings have severity "WARN" or "FAIL", show a summary count (e.g. "2 audit WARNs") followed by indented detail lines for each non-PASS item — use `⚠️` prefix for WARN and `❌` for FAIL. Each detail line shows the file name and message from the finding. If the first WARN/FAIL item is actionable in this session (e.g. a stale doc or missing version tag), add an indented `→ Fix now?` suggestion. If all findings are PASS, show `None ✓`. If the audit script doesn't exist or fails, show `Skipped — no audit script`.
 - LEARNINGS: count bullet-point lines in learnings.md (lines starting with `- `). Show last-modified date from the front-matter `Last updated` field if present, otherwise use `stat` or `git log -1` on the file.
 - PLAN: the proposed next steps — what you recommend doing this session. This is the "present a plan" part.
+- FOCUS: After PLAN, analyse `.claude/stats.json` (if it exists) to surface 2-3 coaching bullets based on `recentSessions` (last 5-10 entries). Look for these patterns and show whichever are most relevant:
+  - **Infrastructure vs product ratio:** Count sessions where the commit messages or todo.md steps were [INFRA] vs [APP]. If heavily skewed, note it (e.g. "4/5 recent sessions were [INFRA] — consider shipping product").
+  - **Stale WARNs:** If the WARNINGS section above shows items, and the same items appeared in previous sessions (check if the warning is about a doc that's been stale for multiple minor versions), flag persistence.
+  - **Commits/session trend:** Calculate average commits across recent sessions. If trending down or consistently low (< 2), suggest aiming higher.
+  - **Steps completed trend:** Calculate average steps completed per session. If consistently 0, flag it.
+  - **Time-of-day patterns:** Check session dates/times. If most sessions are very late (after midnight), note the pattern.
+  - **Score trends:** If average score is declining across recent sessions, note it.
+  Show 2-3 bullets max. Keep coaching tone constructive and specific — use real numbers. If stats.json doesn't exist or has no recentSessions, omit the FOCUS section entirely.
 - BORDER: size the box to fit the longest content line. All lines padded with spaces so the right border │ aligns consistently. Same conventions as /sitrep and /vitals.
 
 Wait for sign-off before executing anything.

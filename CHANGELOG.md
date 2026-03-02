@@ -7,6 +7,20 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.6.0] — 2026-03-02
+
+### Added
+- **`/eod`** — new end-of-day report command. Aggregates all sessions, commits, features, and position into one bordered summary. Shows day stats, session list, semantic "What Got Done" grouping, position at EOD, and day vibe.
+- **`execution/wrap_stats.py`** — new deterministic scoring script (978 lines). Handles all session scoring computation: git metrics, streak, multiplier, raw/final score, badge evaluation (with once-per-day dedup), high score check, leaderboard consolidation. Outputs JSON for the `/wrap` prompt to render.
+
+### Changed
+- **`/stand-up`** — added WARNINGS section (surfaces audit WARN/FAIL findings in kick-off card with detail lines and "Fix now?" suggestions) and FOCUS section (2-3 coaching bullets from `stats.json` analysis: infra/product ratio, stale WARNs, commits/session trends, steps completed, time-of-day patterns, score trends)
+- **`/vitals`** — added mandatory audit detail lines rule: WARN/FAIL items must each be shown on indented detail lines, using `--json` flag for reliable parsing
+- **`/roast`** — added "And you..." developer habit analysis section: roasts session timing, infra/product ratio, score trends, badge patterns, commits/session, steps throughput, and streak from `stats.json`
+- **`/wrap`** — rewrote to delegate all scoring computation to `execution/wrap_stats.py`. Steps 2+3 replaced with single script call. Display sections now reference `result.*` JSON fields. Prompt reduced from ~22K to ~17K chars.
+
+---
+
 ## [v1.5.0] — 2026-03-02
 
 ### Changed

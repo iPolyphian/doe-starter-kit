@@ -2,7 +2,7 @@ Before showing the reference below, run a quick health check:
 
 1. **Version:** Read `~/.claude/.doe-kit-version`. If it exists, show the version and install date. If not, show "DOE Kit: not installed — run `./setup.sh` from the starter kit".
 
-2. **Installation check:** List all `.md` files in `~/.claude/commands/` and compare against the 13 expected commands below. Report installed count (e.g. "13/13 commands installed" or "11/13 commands installed — missing: /audit, /quick-audit").
+2. **Installation check:** List all `.md` files in `~/.claude/commands/` and compare against the 14 expected commands below. Report installed count (e.g. "14/14 commands installed" or "11/14 commands installed — missing: /audit, /quick-audit").
 
 3. **Update check:** Run `gh release view --repo iPolyphian/doe-starter-kit --json tagName -q .tagName` to get the latest release version. Compare with the installed version from step 1. If newer, show: "Update available: vX.Y.Z → run `cd ~/doe-starter-kit && git pull && ./setup.sh`". If current, show "✓ up to date". If the command fails (offline, no gh CLI), skip silently and just show "update check: skipped (offline or gh CLI not available)".
 
@@ -10,7 +10,7 @@ Format the health check as a compact status block:
 
 ```
 DOE Kit v1.3.0 (installed 02/03/26) · ✓ up to date
-13/13 commands installed
+14/14 commands installed
 ```
 
 Or if issues are found:
@@ -27,7 +27,7 @@ Then show the full reference below.
 
 # Slash Commands
 
-Quick reference for all 13 `/commands`. These are global — install once with `./setup.sh`, available in every project. `/stand-up` is context-aware — it detects whether a session is active and adapts its output accordingly.
+Quick reference for all 14 `/commands`. These are global — install once with `./setup.sh`, available in every project. `/stand-up` is context-aware — it detects whether a session is active and adapts its output accordingly.
 
 ---
 
@@ -45,7 +45,10 @@ Same context read as `/stand-up` kick-off mode, but picks up the next incomplete
 Mid-session situation report. Shows mission, progress bar, completed/active/pending steps, commits, elapsed time, context usage, blockers, and queue. Read-only — no changes made. **Use at:** any time, to check status.
 
 ### `/wrap`
-End-of-session routine. Updates STATE.md, todo.md, learnings.md. Computes session stats, awards badges, prints a themed wrap-up card with score, timeline, and leaderboard. **Use at:** session end.
+End-of-session routine. Updates STATE.md, todo.md, learnings.md. Runs `execution/wrap_stats.py` for deterministic scoring, awards badges, prints a themed wrap-up card with score, timeline, and leaderboard. **Use at:** session end.
+
+### `/eod`
+End-of-day report. Aggregates all sessions, commits, features, and position into one bordered summary. Shows day stats, session list with scores/badges, semantic "What Got Done" grouping by [APP]/[INFRA], position at EOD, and day vibe. Read-only — no files modified. **Use at:** end of day, to see everything accomplished.
 
 ---
 
@@ -68,7 +71,7 @@ Workspace health check — git status, quick audit, DOE Kit sync, STATE.md align
 Generates 3–5 product ideas with structured pitches (size, type, value, effort). Only adds to ROADMAP.md with explicit approval. **Use when:** you want fresh feature ideas.
 
 ### `/roast`
-Reads the codebase and roasts it. Specific, brutal, funny — references real files and real decisions, not generic jokes. **Use when:** you need a laugh.
+Reads the codebase and roasts it, then roasts the developer's habits from `stats.json`. Specific, brutal, funny — references real files, real decisions, real badge patterns, and real session data. **Use when:** you need a laugh.
 
 ### `/eli5`
 Explains the current project and active work as if to a curious 5-year-old. Dinosaurs and biscuits included. **Use when:** you need to reset perspective or simplify complexity.

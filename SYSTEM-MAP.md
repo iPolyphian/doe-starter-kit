@@ -82,6 +82,7 @@ CLAUDE.md tells Claude to check these before starting work:
 | File | Goes to | Purpose |
 |------|---------|---------|
 | audit_claims.py | `./execution/` | Automated false-positive detection. 5 universal checks. Extensible with project-specific checks via `@register()` decorator. |
+| wrap_stats.py | `./execution/` | Deterministic session scoring. Gathers git metrics, computes streak/multiplier/score/badges, updates stats.json, outputs JSON for `/wrap` to render. |
 
 ### ⚡ The Commands (global — install once, available in every project)
 
@@ -89,14 +90,15 @@ All slash commands install to `~/.claude/commands/` so they work across every DO
 
 | File | Goes to | Purpose |
 |------|---------|---------|
-| wrap.md | `~/.claude/commands/` | Type `/wrap` — gamified session summary with scoring, badges, streaks, genre title cards |
+| wrap.md | `~/.claude/commands/` | Type `/wrap` — gamified session summary; calls `execution/wrap_stats.py` for deterministic scoring, badges, streaks, genre title cards |
+| eod.md | `~/.claude/commands/` | Type `/eod` — end-of-day report aggregating all sessions, commits, features, and position |
 | pitch.md | `~/.claude/commands/` | Type `/pitch` — generate 3-5 product improvement ideas based on current state |
 | audit.md | `~/.claude/commands/` | Type `/audit` — full claim audit with explanations |
 | quick-audit.md | `~/.claude/commands/` | Type `/quick-audit` — fast checks only (<1 second) |
 | vitals.md | `~/.claude/commands/` | Type `/vitals` — workspace health check (git, audit, DOE sync, STATE alignment, temp files) |
 | stand-up.md | `~/.claude/commands/` | Type `/stand-up` — dual-mode: kick-off (no session) starts clock + plan; status (mid-session) shows daily status card |
 | crack-on.md | `~/.claude/commands/` | Type `/crack-on` — start session clock, pick up next step, commit, push, stop |
-| roast.md | `~/.claude/commands/` | Type `/roast` — comedy roast of the codebase |
+| roast.md | `~/.claude/commands/` | Type `/roast` — comedy roast of the codebase + developer habits from stats.json |
 | eli5.md | `~/.claude/commands/` | Type `/eli5` — explain current work like you're 5 |
 | shower-thought.md | `~/.claude/commands/` | Type `/shower-thought` — one weird programming observation |
 | sitrep.md | `~/.claude/commands/` | Type `/sitrep` — mid-session situation report with progress, commits, elapsed time |
@@ -139,7 +141,8 @@ DURING WORK
 ├─→ .githooks/pre-commit → runs fast claim audit before every commit
 │
 ├─→ execution/ → Claude runs scripts instead of inline code
-│   └─→ audit_claims.py → automated false-positive detection
+│   ├─→ audit_claims.py → automated false-positive detection
+│   └─→ wrap_stats.py → deterministic session scoring for /wrap
 ├─→ .claude/plans/ → Claude reads feature designs
 ├─→ .tmp/ → scratch space for intermediate files
 │
@@ -193,7 +196,8 @@ PROJECT (lives in your repo, shared via git)
 │   ├── claim-auditing.md
 │   └── starter-kit-sync.md
 ├── execution/
-│   └── audit_claims.py
+│   ├── audit_claims.py
+│   └── wrap_stats.py
 ├── .claude/
 │   ├── settings.json
 │   ├── stats.json

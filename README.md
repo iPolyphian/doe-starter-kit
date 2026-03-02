@@ -30,7 +30,7 @@ A template repository containing everything you need to run Claude Code with gua
 - **STATE.md** — Session memory (blockers, current position)
 - **Directives** — SOPs for documentation governance, claim auditing, starter kit sync
 - **Audit system** — Automated false-positive detection with pre-commit hook
-- **13 slash commands** — session lifecycle, quality checks, utilities, and infrastructure (see below)
+- **14 slash commands** — session lifecycle, quality checks, utilities, and infrastructure (see below)
 - **Session timer** — `/stand-up` (in kick-off mode) and `/crack-on` start a clock, `/sitrep` and `/wrap` report elapsed time
 - **Gamification** — Session scoring, badges, streaks, leaderboard, themed wrap-up cards
 - **Git hooks** — Pre-commit claim audit, commit message cleanup
@@ -43,11 +43,11 @@ A template repository containing everything you need to run Claude Code with gua
 
 ## Slash Commands
 
-13 commands in `global-commands/`. Install with `./setup.sh` or copy manually. Run `/commands` inside Claude Code for the full reference and installation health check.
+14 commands in `global-commands/`. Install with `./setup.sh` or copy manually. Run `/commands` inside Claude Code for the full reference and installation health check.
 
 | Category | Commands | Purpose |
 |----------|----------|---------|
-| **Session Lifecycle** | `/stand-up`, `/crack-on`, `/sitrep`, `/wrap` | Dual-mode stand-up, track progress, end with gamified wrap-up |
+| **Session Lifecycle** | `/stand-up`, `/crack-on`, `/sitrep`, `/wrap`, `/eod` | Dual-mode stand-up, track progress, gamified wrap-up, end-of-day report |
 | **Quality** | `/audit`, `/quick-audit`, `/vitals` | Claim auditing, workspace health checks |
 | **Utility** | `/pitch`, `/roast`, `/eli5`, `/shower-thought` | Feature ideas, code roasts, ELI5, programming observations |
 | **Infrastructure** | `/sync-doe`, `/commands` | Sync DOE improvements; installation health check |

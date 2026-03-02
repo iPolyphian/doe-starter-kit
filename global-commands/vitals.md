@@ -48,6 +48,7 @@ If issues found, show details inline:
 
 - Show ALL 5 checks every time, even if they pass — the bordered block should always have the same structure so it's scannable.
 - Use ✓ for passing checks, ⚠️ for issues.
+- **Audit detail lines are mandatory.** When the audit has any WARN or FAIL findings, show each non-PASS item on its own indented line below the summary. Format: `│           WARN: <file> — <message>  │` (or `FAIL:` prefix for failures). Use the `--json` flag (`python3 execution/audit_claims.py --hook --json`) to parse findings reliably. If all PASS, no detail lines needed.
 - The summary line at the bottom counts how many checks have issues. If 0, say "All clear — ready to go."
 - Keep it compact — this should be a 5-second glance, not a report.
 - Do NOT fix any issues automatically. Just report them. The user decides what to act on.
