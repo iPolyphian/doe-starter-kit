@@ -7,6 +7,16 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.5.0] — 2026-03-02
+
+### Changed
+- **`/stand-up`** — rewritten as context-aware dual-mode command. Detects `.tmp/.session-start`: **kick-off mode** (no session) starts clock, reads project state, shows bordered card with plan, waits for sign-off. **Status mode** (session active) shows bordered daily status card with progress, momentum, activity since last milestone, blockers, pending decisions, and queue. Read-only in status mode.
+- **`/commands`** — updated `/stand-up` description for dual-mode, updated smart filter section
+- **Reference docs** — updated stand-up descriptions across README, SYSTEM-MAP, CUSTOMIZATION, and global-commands/README
+- **CUSTOMIZATION** — corrected command count from 11 to 13 (added `/vitals`, `/commands` to list)
+
+---
+
 ## [v1.4.0] — 2026-03-02
 
 ### Added

@@ -10,7 +10,7 @@ These files work in any project without modification.
 
 | File | What it does |
 |------|-------------|
-| `global-commands/*.md` | All 11 slash commands — `/stand-up`, `/crack-on`, `/wrap`, `/sitrep`, `/sync-doe`, `/roast`, `/eli5`, `/pitch`, `/shower-thought`, `/audit`, `/quick-audit` |
+| `global-commands/*.md` | All 13 slash commands — `/stand-up`, `/crack-on`, `/wrap`, `/sitrep`, `/vitals`, `/sync-doe`, `/commands`, `/roast`, `/eli5`, `/pitch`, `/shower-thought`, `/audit`, `/quick-audit` |
 | `global-commands/README.md` | Documents all slash commands |
 | `directives/_TEMPLATE.md` | Template for creating new SOP directives |
 | `directives/starter-kit-sync.md` | How to sync improvements back to this repo |

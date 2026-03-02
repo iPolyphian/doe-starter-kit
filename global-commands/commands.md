@@ -27,19 +27,19 @@ Then show the full reference below.
 
 # Slash Commands
 
-Quick reference for all 13 `/commands`. These are global — install once with `./setup.sh`, available in every project.
+Quick reference for all 13 `/commands`. These are global — install once with `./setup.sh`, available in every project. `/stand-up` is context-aware — it detects whether a session is active and adapts its output accordingly.
 
 ---
 
 ## Session Lifecycle
 
-Commands that bookend your work sessions. `/stand-up` and `/crack-on` start the session timer (writes to `.tmp/.session-start`), which `/sitrep` and `/wrap` read for elapsed time.
+Commands that bookend your work sessions. `/stand-up` (in kick-off mode) and `/crack-on` start the session timer (writes to `.tmp/.session-start`), which `/sitrep` and `/wrap` read for elapsed time.
 
 ### `/stand-up`
-Reads project state (CLAUDE.md, STATE.md, todo.md, learnings.md). Shows what's in progress and what's next. Presents a plan and waits for sign-off before doing anything. **Use at:** session start.
+Context-aware dual-mode command. **Kick-off mode** (no active session): starts the clock, reads project state (CLAUDE.md, STATE.md, todo.md, learnings.md), shows a bordered kick-off card with project context, presents a plan, and waits for sign-off. **Status mode** (session already running): shows a bordered daily status card with progress, momentum, recent activity since last milestone, blockers, pending decisions, and queue. Read-only in status mode — no clock, no execution. **Use at:** session start, or any time mid-project to check where things stand.
 
 ### `/crack-on`
-Same context read as `/stand-up`, but picks up the next incomplete step and executes it immediately. One step — commit, push, stop, report. **Use at:** mid-session, when you want to resume without planning.
+Same context read as `/stand-up` kick-off mode, but picks up the next incomplete step and executes it immediately. One step — commit, push, stop, report. **Use at:** mid-session, when you want to resume without planning.
 
 ### `/sitrep`
 Mid-session situation report. Shows mission, progress bar, completed/active/pending steps, commits, elapsed time, context usage, blockers, and queue. Read-only — no changes made. **Use at:** any time, to check status.
@@ -90,7 +90,7 @@ This command. Shows installation health check and the full command reference. **
 
 ## Smart Filter (DOE Kit Sync Checks)
 
-The four lifecycle commands (`/stand-up`, `/crack-on`, `/sitrep`, `/wrap`) check whether your project has DOE changes worth syncing to the starter kit. When comparing CLAUDE.md, they use a smart filter:
+The lifecycle commands (`/stand-up` in kick-off mode, `/crack-on`, `/sitrep`, `/wrap`) check whether your project has DOE changes worth syncing to the starter kit. When comparing CLAUDE.md, they use a smart filter:
 
 **Counts as pending** — changes to universal DOE sections: Operating Rules, Guardrails, Code Hygiene, Self-Annealing, Break Glass, Architecture: DOE.
 

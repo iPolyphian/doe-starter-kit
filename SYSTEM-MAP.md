@@ -94,7 +94,7 @@ All slash commands install to `~/.claude/commands/` so they work across every DO
 | audit.md | `~/.claude/commands/` | Type `/audit` — full claim audit with explanations |
 | quick-audit.md | `~/.claude/commands/` | Type `/quick-audit` — fast checks only (<1 second) |
 | vitals.md | `~/.claude/commands/` | Type `/vitals` — workspace health check (git, audit, DOE sync, STATE alignment, temp files) |
-| stand-up.md | `~/.claude/commands/` | Type `/stand-up` — start session clock, read state, present plan, wait for sign-off |
+| stand-up.md | `~/.claude/commands/` | Type `/stand-up` — dual-mode: kick-off (no session) starts clock + plan; status (mid-session) shows daily status card |
 | crack-on.md | `~/.claude/commands/` | Type `/crack-on` — start session clock, pick up next step, commit, push, stop |
 | roast.md | `~/.claude/commands/` | Type `/roast` — comedy roast of the codebase |
 | eli5.md | `~/.claude/commands/` | Type `/eli5` — explain current work like you're 5 |
@@ -117,7 +117,7 @@ SESSION START
 │
 ├─→ CLAUDE.md (auto-loaded — the rules)
 ├─→ ~/.claude/CLAUDE.md (auto-loaded — universal learnings)  
-├─→ /stand-up or /crack-on starts session clock → .tmp/.session-start
+├─→ /stand-up (kick-off mode) or /crack-on starts session clock → .tmp/.session-start
 │
 ├─→ Rule #1 says: check todo.md + STATE.md
 │   ├─→ tasks/todo.md → shows incomplete steps
@@ -159,7 +159,7 @@ SESSION END (or /wrap)
 
 | Command | What it does |
 |---------|-------------|
-| `/stand-up` | Start session clock, read state, show what's in progress and next, present plan, wait for sign-off |
+| `/stand-up` | Dual-mode: kick-off (no session) starts clock + bordered card + plan; status (mid-session) shows progress, momentum, blockers, decisions |
 | `/crack-on` | Start session clock, read state, pick up next incomplete step, commit, push, stop, report |
 | `/wrap` | End-of-session routine: housekeeping, git metrics, stats.json, gamified summary |
 | `/pitch` | Generate 3-5 product improvement ideas. Approved ideas go to ROADMAP.md |

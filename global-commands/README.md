@@ -1,6 +1,6 @@
 # Global Commands
 
-12 slash commands for Claude Code. Install with `./setup.sh` from the kit root, or manually:
+13 slash commands for Claude Code. Install with `./setup.sh` from the kit root, or manually:
 
 ```bash
 cp global-commands/*.md ~/.claude/commands/
