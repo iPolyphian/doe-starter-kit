@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.7.2] — 2026-03-03
+
+### Fixed
+- **`execution/audit_claims.py`** — skip version tag WARN for `[INFRA]` tasks. Infrastructure features don't bump app version, so their todo steps never have version tags. `parse_completed_tasks()` now tracks heading context and `check_task_format()` skips the check for `[INFRA]` sections.
+
+---
+
 ## [v1.7.0] — 2026-03-02
 
 ### Changed

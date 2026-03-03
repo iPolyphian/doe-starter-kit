@@ -289,7 +289,11 @@ def parse_completed_tasks(path: Path) -> list[dict]:
     """Parse all [x] completed items from a task file."""
     tasks = []
     text = path.read_text(encoding="utf-8")
+    current_heading = ""
     for i, line in enumerate(text.split("\n"), 1):
+        # Track ### headings to detect [INFRA] vs [APP] sections
+        if line.startswith("### "):
+            current_heading = line
         m = _TASK_DONE_RE.match(line)
         if not m:
             continue
@@ -306,6 +310,7 @@ def parse_completed_tasks(path: Path) -> list[dict]:
             "name": name,
             "version": version_m.group(1) if version_m else None,
             "timestamp": ts_m.group(1) if ts_m else None,
+            "infra": "[INFRA]" in current_heading,
         })
     return tasks
 
@@ -412,8 +417,9 @@ def check_task_format(report: AuditReport):
             continue
 
         no_timestamp = [t for t in tasks if not t["timestamp"]]
-        no_version = [t for t in tasks if not t["version"]]
-        good = [t for t in tasks if t["timestamp"] and t["version"]]
+        # [INFRA] tasks don't bump app version — skip version tag check
+        no_version = [t for t in tasks if not t["version"] and not t.get("infra")]
+        good = [t for t in tasks if t["timestamp"] and (t["version"] or t.get("infra"))]
 
         if no_timestamp:
             for t in no_timestamp:
