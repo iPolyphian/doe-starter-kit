@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.7.4] — 2026-03-03
+
+### Removed
+- **`/wrap`** — removed fortune cookie line from session footer. Adds noise without value.
+
+---
+
 ## [v1.7.3] — 2026-03-03
 
 ### Changed

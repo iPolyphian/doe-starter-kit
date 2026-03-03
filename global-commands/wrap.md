@@ -226,11 +226,8 @@ Then the footer:
 ══════════════════════════════════════════════
   STATE.md ✅ | todo.md ✅ | stats.json ✅ | Committed ✅
   Session [N] · 🔥 Day [streak] · Lifetime: [Y] commits
-  🥠 "[fortune cookie — a witty one-liner about coding, shipping, or the session]"
 ══════════════════════════════════════════════
 ```
-
-The fortune cookie should be a short, original quip — think fortune cookie meets programming wisdom. Different every session.
 
 ## Important Rules
 
