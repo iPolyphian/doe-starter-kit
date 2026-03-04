@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.12.0] — 2026-03-04
+
+### Changed
+- **`/commands` reference** — updated from 15 to 22 commands. Added `/fact-check` to Quality section. Added new Visual section with 6 commands: `/project-recap`, `/diff-review`, `/plan-review`, `/generate-visual-plan`, `/generate-web-diagram`, `/generate-slides`.
+
+---
+
 ## [v1.11.8] — 2026-03-04
 
 ### Fixed

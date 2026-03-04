@@ -2,7 +2,7 @@ Before showing the reference below, run a quick health check:
 
 1. **Version:** Read `~/.claude/.doe-kit-version`. If it exists, show the version and install date. If not, show "DOE Kit: not installed — run `./setup.sh` from the starter kit".
 
-2. **Installation check:** List all `.md` files in `~/.claude/commands/` and compare against the 15 expected commands below. Report installed count (e.g. "15/15 commands installed" or "13/15 — missing: /audit, /quick-audit").
+2. **Installation check:** List all `.md` files in `~/.claude/commands/` and compare against the 22 expected commands below. Report installed count (e.g. "22/22 commands installed" or "20/22 — missing: /audit, /quick-audit").
 
 3. **Update check:** Run `gh release view --repo iPolyphian/doe-starter-kit --json tagName -q .tagName` to get the latest release version. Compare with the installed version from step 1. If newer, show: "Update available: vX.Y.Z → run `cd ~/doe-starter-kit && git pull && ./setup.sh`". If current, show "✓ up to date". If the command fails (offline, no gh CLI), skip silently and just show "update check: skipped (offline or gh CLI not available)".
 
@@ -10,14 +10,14 @@ Format the health check as a compact status block:
 
 ```
 DOE Kit v1.3.0 (installed 02/03/26) · ✓ up to date
-15/15 commands installed
+22/22 commands installed
 ```
 
 Or if issues are found:
 
 ```
 DOE Kit v1.3.0 (installed 02/03/26) · update available: v1.4.0
-13/15 commands installed — missing: /audit, /quick-audit
+20/22 commands installed — missing: /audit, /quick-audit
 → Run: cd ~/doe-starter-kit && git pull && ./setup.sh
 ```
 
@@ -27,7 +27,7 @@ Then show the full reference below.
 
 # Slash Commands
 
-Quick reference for all 15 `/commands`. These are global — install once with `./setup.sh`, available in every project. `/stand-up` is context-aware — it detects whether a session is active and adapts its output accordingly.
+Quick reference for all 22 `/commands`. These are global — install once with `./setup.sh`, available in every project. `/stand-up` is context-aware — it detects whether a session is active and adapts its output accordingly.
 
 ---
 
@@ -62,6 +62,33 @@ Fast checks only (<1 second) — front-matter, staleness, task format, version m
 
 ### `/vitals`
 Workspace health check — git status, quick audit, DOE Kit sync, STATE.md alignment, stale temp files. Shows a bordered summary with ✓/⚠️ per check. Reports only, doesn't fix. **Use at:** session start (after stand-up), before wrapping, or any time you want a quick sanity check.
+
+### `/fact-check`
+Verifies the factual accuracy of a document against the actual codebase. Identifies inaccuracies and corrects them in place with a verification summary. **Use at:** after major changes, before releases, or when docs may have drifted from reality.
+
+---
+
+## Visual
+
+Commands that generate beautiful standalone HTML pages for visual understanding.
+
+### `/project-recap`
+Rebuilds a mental model of a project's current state, recent decisions, and cognitive debt hotspots. Generates a visual HTML recap over a configurable time window. **Use when:** returning to a project after time away, or when you need to see the big picture.
+
+### `/diff-review`
+Generates a visual HTML diff showing before/after architecture comparison with code review analysis. Auto-detects scope from branch names, commit hashes, or PR numbers. **Use when:** reviewing changes before merging or after a feature branch.
+
+### `/plan-review`
+Compares current codebase state against a proposed implementation plan as a visual HTML review. Blueprint/editorial aesthetics. **Use when:** evaluating whether a plan is ready to execute.
+
+### `/generate-visual-plan`
+Produces a detailed visual HTML implementation plan with state machines, code snippets, edge cases, and feature specifications. **Use when:** designing a complex feature and want a visual spec.
+
+### `/generate-web-diagram`
+Generates a beautiful standalone HTML diagram with Mermaid visualizations and optional AI-generated illustrations. Opens in the browser. **Use when:** you need architecture diagrams, flow charts, or system maps.
+
+### `/generate-slides`
+Creates a magazine-quality HTML slide deck with distinctive aesthetics (Midnight Editorial, Warm Signal, etc.) and Mermaid diagram support. **Use when:** presenting ideas, pitches, or technical concepts.
 
 ---
 
