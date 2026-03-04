@@ -7,6 +7,14 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.9.1] — 2026-03-04
+
+### Added
+- **`copy_plan_to_project.py` hook** — PostToolUse hook that auto-copies plans written to `~/.claude/plans/` into the current project's `.claude/plans/` directory. Fires after `write|edit` tool calls targeting `~/.claude/plans/*.md`.
+- **PostToolUse section in `settings.json`** — registers the plan-copy hook
+
+---
+
 ## [v1.9.0] — 2026-03-04
 
 ### Changed

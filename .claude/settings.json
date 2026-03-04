@@ -26,6 +26,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "write|edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/copy_plan_to_project.py",
+            "description": "Auto-copy plans from ~/.claude/plans/ into project .claude/plans/"
+          }
+        ]
+      }
     ]
   }
 }
