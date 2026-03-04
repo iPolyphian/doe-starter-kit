@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.11.7] — 2026-03-04
+
+### Changed
+- **`/wrap` layout** — moved NEXT UP section to render after the footer (was between Decisions and Numbers). Renumbered parts 6-9.
+
+---
+
 ## [v1.11.6] — 2026-03-04
 
 ### Fixed

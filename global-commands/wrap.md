@@ -109,14 +109,7 @@ List commits in chronological order from `result.metrics.commitLog`.
      • [learnings written, or "None this session"]
 ```
 
-### Part 6: Next Up
-
-```
-  🎯 NEXT UP
-  [What to do next session — pull from todo.md]
-```
-
-### Part 7: The Numbers
+### Part 6: The Numbers
 
 Use `result.metrics` for all values. For agents spawned, count how many times the Agent tool was invoked during this session (review your own conversation history). Count each `Agent` tool call as 1, regardless of whether it ran in foreground or background.
 
@@ -133,7 +126,7 @@ Use `result.metrics` for all values. For agents spawned, count how many times th
 ══════════════════════════════════════════════
 ```
 
-### Part 8: Session Timeline
+### Part 7: Session Timeline
 
 Use `result.metrics.commitLog` for commit times and messages. Read `.tmp/.session-start` for the start time.
 
@@ -154,7 +147,7 @@ Rules:
 - Total at bottom: minutes from session start to now, and 100%.
 - If `.tmp/.session-start` doesn't exist, skip this section and print: `⏱️ No session timeline — start with /crack-on or /stand-up`.
 
-### Part 9: Last 10 Days Leaderboard
+### Part 8: Last 10 Days Leaderboard
 
 Use `result.leaderboard` (already consolidated per day, 10 entries). Mark today's row with `*`. Days with null commits show `--`.
 
@@ -173,7 +166,7 @@ Use `result.leaderboard` (already consolidated per day, 10 entries). Mark today'
 
 Always include the header row and separator. Adapt column widths to fit content. Model column shows `[name] / [thinking]` abbreviated: hi = high, md = medium, lo = low. Use the model and thinking level from the current session for today's row. For past days, pull from `stats.json` `recentSessions` if available, otherwise show `--`.
 
-### Part 10: System Checks & Footer
+### Part 9: System Checks & Footer
 
 Show audit results and DOE Kit sync status in a bordered block. **Generate this box programmatically** — collect all content lines into a list, find the max length, then use `.ljust(max_len)` to pad every line to the same width before adding Unicode box-drawing borders (`┌─┐`, `└─┘`, `│`). Never hand-pad this box.
 
@@ -195,6 +188,9 @@ Then the footer:
   STATE.md ✅ | todo.md ✅ | stats.json ✅ | Committed ✅
   Session [N] · 🔥 Day [streak] · Lifetime: [Y] commits
 ════════════════════════════════════════════════════════════════
+
+  🎯 NEXT UP
+  [What to do next session — pull from todo.md]
 ```
 
 ## Important Rules
