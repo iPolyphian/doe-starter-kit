@@ -20,7 +20,7 @@ If all clear:
   ┌──────────────────────────────────────────────────────────┐
   │  Git:     Clean ✓                                        │
   │  Audit:   5 PASS · 0 WARN · 0 FAIL ✓                    │
-  │  DOE Kit: v1.3.0 · synced ✓                              │
+  │  DOE Kit: v1.3.0 ✓                                        │
   │  STATE:   Aligned ✓ (Constituency Comparison v0.16.x)    │
   │  .tmp/:   Clean ✓                                        │
   ├──────────────────────────────────────────────────────────┤
@@ -36,7 +36,7 @@ If issues found, show details inline:
   │           M ROADMAP.md, M STATE.md, M tasks/todo.md      │
   │  Audit:   3 PASS · 1 WARN · 0 FAIL ⚠️                    │
   │           WARN: learnings.md — 2 minor versions behind   │
-  │  DOE Kit: v1.3.0 · 2 files changed — /sync-doe ⚠️        │
+  │  DOE Kit: v1.3.0 * ⚠️                                      │
   │  STATE:   Aligned ✓                                      │
   │  .tmp/:   1 stale file ⚠️ (last-audit.txt)                │
   ├──────────────────────────────────────────────────────────┤

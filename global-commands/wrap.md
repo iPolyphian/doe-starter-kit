@@ -174,11 +174,11 @@ Rules:
 - Always show both Audit and DOE Kit lines inside the border.
 - If audit has only PASS results, show one line with counts and "all clear".
 - If audit has WARN or FAIL, show summary line + indented detail for each non-PASS finding.
-- DOE Kit: `synced` if all files match, `N files changed, run /sync-doe` if any differ. If `~/doe-starter-kit` doesn't exist, show `DOE Kit: not installed`.
+- DOE Kit: `vX.Y.Z` if all files match, `vX.Y.Z *` if any differ (the `*` means /sync-doe needed). If `~/doe-starter-kit` doesn't exist, show `DOE Kit: not installed`.
 
 Example content lines (padding is illustrative — real padding must be computed):
 - `  Audit:   5 PASS, 0 WARN, 0 FAIL -- all clear`
-- `  DOE Kit: v1.3.0 -- synced`
+- `  DOE Kit: v1.3.0`
 - `    FAIL  HTML file is v0.15.0 but STATE.md says v0.15.1`
 - `    WARN  learnings.md -- 2 minor versions behind`
 

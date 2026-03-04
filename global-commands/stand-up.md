@@ -23,9 +23,9 @@ Show a bordered kick-off card, then present a plan and wait for sign-off:
 │  PROJECT    [dir name] vX.Y.Z                     │
 │  FEATURE    [active feature] [APP/INFRA] vX.Y.x   │
 │  PROGRESS   ██████░░░░ N/M steps                  │
-│  DOE KIT    vX.Y.Z · [synced ✓ / N — /sync-doe]  │
+│  DOE KIT    vX.Y.Z [synced / * if pending]        │
 │  BLOCKERS   [from STATE.md or "None"]             │
-│  WARNINGS   [audit WARN/FAIL summary or "None ✓"] │
+│  WARNINGS   [audit WARN/FAIL items]               │
 │    ⚠️ [detail line for each WARN/FAIL item]        │
 │  LEARNINGS  N entries · last updated DD/MM        │
 ├──────────────────────────────────────────────────┤
@@ -45,9 +45,9 @@ Card rules:
 - PROJECT: current directory name + version from STATE.md "Current app version". If no version in STATE.md, omit the version.
 - FEATURE: from STATE.md "Active feature" line. If no active feature, show "No active feature".
 - PROGRESS: count [x] and [ ] steps for the current feature in todo.md ## Current. Bar uses █ for done, ░ for remaining, scaled to 10 characters. If no current feature, omit this line.
-- DOE KIT: `vX.Y.Z · synced ✓` if clean, `vX.Y.Z · N files with pending changes — /sync-doe` if any differ. Omit entirely if `~/doe-starter-kit` doesn't exist.
+- DOE KIT: `vX.Y.Z` if synced, `vX.Y.Z *` if any files differ (the `*` means /sync-doe needed). Omit entirely if `~/doe-starter-kit` doesn't exist.
 - BLOCKERS: from STATE.md ## Blockers & Edge Cases. "None" if empty.
-- WARNINGS: Run `python3 execution/audit_claims.py --hook --json` and parse the JSON output. If any findings have severity "WARN" or "FAIL", show a summary count (e.g. "2 audit WARNs") followed by indented detail lines for each non-PASS item — use `⚠️` prefix for WARN and `❌` for FAIL. Each detail line shows the file name and message from the finding. If the first WARN/FAIL item is actionable in this session (e.g. a stale doc or missing version tag), add an indented `→ Fix now?` suggestion. If all findings are PASS, show `None ✓`. If the audit script doesn't exist or fails, show `Skipped — no audit script`.
+- WARNINGS: Run `python3 execution/audit_claims.py --hook --json` and parse the JSON output. If any findings have severity "WARN" or "FAIL", show a WARNINGS row with a summary count (e.g. "2 audit WARNs") followed by indented detail lines for each non-PASS item — use `⚠️` prefix for WARN and `❌` for FAIL. Each detail line shows the file name and message from the finding. If the first WARN/FAIL item is actionable in this session (e.g. a stale doc or missing version tag), add an indented `→ Fix now?` suggestion. **If all findings are PASS, omit the WARNINGS section entirely** — it only appears when there are problems. If the audit script doesn't exist or fails, also omit.
 - LEARNINGS: count bullet-point lines in learnings.md (lines starting with `- `). Show last-modified date from the front-matter `Last updated` field if present, otherwise use `stat` or `git log -1` on the file.
 - PLAN: the proposed next steps — what you recommend doing this session. This is the "present a plan" part.
 - FOCUS: After PLAN, analyse `.claude/stats.json` (if it exists) to surface 2-3 coaching bullets based on `recentSessions` (last 5-10 entries). Look for these patterns and show whichever are most relevant:

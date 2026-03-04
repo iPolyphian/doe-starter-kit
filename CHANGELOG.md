@@ -7,6 +7,18 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.12.4] — 2026-03-04
+
+Standardised DOE sync status format across all 6 global commands. Compact notation replaces verbose text.
+
+### Changed
+- DOE sync status: compact `*` format across `/commands`, `/crack-on`, `/sitrep`, `/stand-up`, `/vitals`, `/wrap`
+- Synced state: bare version (no tick, no "synced" text)
+- Unsynced state: `vX.Y.Z *` (asterisk suffix)
+- `/stand-up` WARNINGS: omit section when all PASS (was showing "None ✓")
+
+---
+
 ## [v1.12.3] — 2026-03-04
 
 Compressed CLAUDE.md from 117 to 83 lines by moving Break Glass to a directive and tightening 3 rules. Overhauled /sitrep.

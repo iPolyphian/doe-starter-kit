@@ -133,4 +133,4 @@ The lifecycle commands (`/stand-up` in kick-off mode, `/crack-on`, `/sitrep`, `/
 
 **Ignored** — project-specific additions: Directory Structure entries, Progressive Disclosure triggers, project-specific comments. Rule of thumb: additions on top of the kit template are project-specific; modifications to existing template content are universal.
 
-If pending changes are detected, the commands suggest running `/sync-doe`.
+If changes are detected, the commands show `DOE vX.Y.Z *` — the `*` means `/sync-doe` is needed.
