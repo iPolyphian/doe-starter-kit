@@ -33,7 +33,7 @@ Quick reference for all 15 `/commands`. These are global — install once with `
 
 ## Session Lifecycle
 
-Commands that bookend your work sessions. `/stand-up` (in kick-off mode) and `/crack-on` start the session timer (writes to `.tmp/.session-start`), which `/sitrep` and `/wrap` read for elapsed time.
+Commands that bookend your work sessions. `/stand-up` (in kick-off mode) and `/crack-on` start the session timer (writes to `.tmp/.session-start-$$`, per-PID for multi-terminal safety), which `/sitrep` and `/wrap` read for elapsed time.
 
 ### `/stand-up`
 Context-aware dual-mode command. **Kick-off mode** (no active session): starts the clock, reads project state (CLAUDE.md, STATE.md, todo.md, learnings.md), shows a bordered kick-off card with project context, presents a plan, and waits for sign-off. **Status mode** (session already running): shows a bordered daily status card with progress, momentum, recent activity since last milestone, blockers, pending decisions, and queue. Read-only in status mode — no clock, no execution. **Use at:** session start, or any time mid-project to check where things stand.

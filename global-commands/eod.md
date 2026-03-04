@@ -6,7 +6,7 @@ This is a read-only summary command. Do NOT modify any files or start/stop sessi
 
 Collect all of the following before building the card:
 
-1. **Today's sessions** — Read `.claude/stats.json` and filter `recentSessions` where `date` matches today (YYYY-MM-DD). Count wrapped sessions. Check if `.tmp/.session-start` exists — if so, there's an active unwrapped session.
+1. **Today's sessions** — Read `.claude/stats.json` and filter `recentSessions` where `date` matches today (YYYY-MM-DD). Count wrapped sessions. Check if any `.tmp/.session-start-*` files exist — for each, verify the PID is alive with `kill -0 "$pid" 2>/dev/null`. Living PIDs = active unwrapped sessions.
 
 2. **Today's commits** — Run `git log --oneline --since="$(date +%Y-%m-%d)T00:00:00"` to get all commits from today. Also run `git diff --shortstat $(git log --reverse --since="$(date +%Y-%m-%d)T00:00:00" --format="%H" | head -1)^..HEAD` for total lines/files (handle edge case where there's only one commit today — use the commit itself, not commit^).
 
@@ -18,7 +18,7 @@ Collect all of the following before building the card:
 
 6. **Queue** — Read `tasks/todo.md` ## Queue for upcoming features.
 
-7. **Plan files created today** — Run `find .claude/plans/ -name "*.md" -newer .tmp/.session-start 2>/dev/null | wc -l` or check git log for plan file commits today.
+7. **Plan files created today** — Run `find .claude/plans/ -name "*.md" -newer .tmp/.session-start-$$ 2>/dev/null | wc -l` or check git log for plan file commits today.
 
 8. **Learnings logged today** — Check if `learnings.md` appears in today's commits via `git log --since="$(date +%Y-%m-%d)T00:00:00" --name-only --format="" | grep learnings.md | wc -l`.
 
@@ -58,10 +58,10 @@ Show a single bordered card:
 
 ## Card Rules
 
-- **SESSIONS:** Count from stats.json `recentSessions` for today + check for active session (`.tmp/.session-start` exists). Show "N today (X wrapped)" if no active session, or "N today (X wrapped, 1 active)" if session clock is running.
+- **SESSIONS:** Count from stats.json `recentSessions` for today + check for active sessions by scanning `.tmp/.session-start-*` files and verifying each PID is alive with `kill -0`. Show "N today (X wrapped)" if no active sessions, or "N today (X wrapped, Y active)" if any live PID files exist.
 - **STREAK:** From stats.json `streak.current`. Show "Day N".
 - **DAY STATS:** Aggregate from git commands. Count commits, files touched, insertions/deletions. Count features completed and steps completed from todo.md. Count plan files from git log. Count learnings from git log.
-- **SESSIONS list:** Show each wrapped session from stats.json: title, sessionDuration. If there's an active session, show it last as "(active)" with duration computed from `.tmp/.session-start` to now. Newest first.
+- **SESSIONS list:** Show each wrapped session from stats.json: title, sessionDuration. For active sessions, scan `.tmp/.session-start-*` files, verify each PID is alive with `kill -0`, and show each as "(active PID NNNNN)" with duration computed from that file's timestamp to now. Newest first.
 - **WHAT GOT DONE:** This is the key section. Read all commit messages from today. Group them by feature/task using the headings in todo.md (both ## Current and ## Done). Classify each group as [APP] or [INFRA] using the type tags from todo.md headings. Summarise each group in plain English — describe what actually happened, not raw commit messages. Order: shipped features first, then in-progress features, then housekeeping/planning. If only one type exists, skip the other.
 - **POSITION AT EOD:** From STATE.md active feature + todo.md progress (count [x] vs [ ] steps). Queue from todo.md ## Queue (show feature names + type tags). Blockers from STATE.md ## Blockers & Edge Cases ("None" if empty).
 - **DAY VIBE:** Pick the best match:

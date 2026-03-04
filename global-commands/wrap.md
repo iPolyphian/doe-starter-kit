@@ -6,20 +6,21 @@ Before ending this session, complete all steps in order.
 2. **Update tasks/todo.md** — Make sure all completed steps have timestamps. Move any completed features to Done if needed.
 3. **Check for learnings** — If anything failed and was fixed, or a useful pattern was discovered, log it to learnings.md or ~/.claude/CLAUDE.md.
 4. **Commit and push** — Make sure all work is committed. No uncommitted changes should remain.
-5. **DOE Kit sync check** — If `~/doe-starter-kit` exists, quick-diff key syncable files (CLAUDE.md, ~/.claude/commands/*.md, .githooks/*, .claude/hooks/*.py) against the starter kit. If any files have changed since the last sync (especially if new universal learnings were added to `~/.claude/CLAUDE.md` this session), record the count for the System Checks section. If everything is synced, record as synced.
-6. **Quick audit** — Run `python3 execution/audit_claims.py --hook` (fast checks only). Record the PASS/WARN/FAIL counts for the System Checks section. If any FAIL items exist, fix them before proceeding. WARN items can be noted and left for the next session.
+5. **Clean up session timer** — Run `rm -f .tmp/.session-start-$$; for f in .tmp/.session-start-*; do pid="${f##*-}"; kill -0 "$pid" 2>/dev/null || rm -f "$f"; done` to delete own PID file and prune dead PIDs.
+6. **DOE Kit sync check** — If `~/doe-starter-kit` exists, quick-diff key syncable files (CLAUDE.md, ~/.claude/commands/*.md, .githooks/*, .claude/hooks/*.py) against the starter kit. If any files have changed since the last sync (especially if new universal learnings were added to `~/.claude/CLAUDE.md` this session), record the count for the System Checks section. If everything is synced, record as synced.
+7. **Quick audit** — Run `python3 execution/audit_claims.py --hook` (fast checks only). Record the PASS/WARN/FAIL counts for the System Checks section. If any FAIL items exist, fix them before proceeding. WARN items can be noted and left for the next session.
 
 ## Step 2: Compute Session Stats
 
-Find the first commit of this session: look at `git log --oneline` and identify where your work started (after the last "Update session stats" or "wrap" commit, or use the session start time from `.tmp/.session-start`).
+Find the first commit of this session: look at `git log --oneline` and identify where your work started (after the last "Update session stats" or "wrap" commit, or use the session start time from `.tmp/.session-start-$$`).
 
-Read `.tmp/.session-start` for the session start ISO timestamp. If it doesn't exist, use the first commit time.
+Read `.tmp/.session-start-$$` for the session start ISO timestamp. If it doesn't exist, use the first commit time.
 
 Run the stats script:
 ```bash
 python3 execution/wrap_stats.py \
   --since <first-session-commit-hash> \
-  --session-start <ISO-timestamp-from-.tmp/.session-start> \
+  --session-start <ISO-timestamp-from-.tmp/.session-start-$$> \
   --todo tasks/todo.md \
   --stats .claude/stats.json
 ```
@@ -91,7 +92,7 @@ Use `result.metrics` for all values.
 
 ### Part 4: Session Timeline
 
-Use `result.metrics.commitLog` for commit times and messages. Read `.tmp/.session-start` for the start time.
+Use `result.metrics.commitLog` for commit times and messages. Read `.tmp/.session-start-$$` for the start time.
 
 ```
   SESSION TIMELINE
@@ -105,10 +106,10 @@ Use `result.metrics.commitLog` for commit times and messages. Read `.tmp/.sessio
 ```
 
 Rules:
-- First row is always "Session started" with the local time from `.tmp/.session-start`.
+- First row is always "Session started" with the local time from `.tmp/.session-start-$$`.
 - Each subsequent row: local time of the commit, commit message, minutes since the previous event (right-aligned), and percentage of total session time (right-aligned).
 - Total at bottom: minutes from session start to now, and 100%.
-- If `.tmp/.session-start` doesn't exist, skip this section and print: `⏱️ No session timeline — start with /crack-on or /stand-up`.
+- If `.tmp/.session-start-$$` doesn't exist, skip this section and print: `⏱️ No session timeline — start with /crack-on or /stand-up`.
 
 ### Part 5: One-Stat Highlight
 

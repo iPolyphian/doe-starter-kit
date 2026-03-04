@@ -7,6 +7,14 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.10.0] — 2026-03-04
+
+### Changed
+- **Per-PID session timers for multi-terminal safety.** Session clock files changed from `.tmp/.session-start` to `.tmp/.session-start-$$` (shell PID). Each terminal gets an independent timer. Stale PID files are pruned on `/crack-on`, `/stand-up`, and `/wrap` via `kill -0` checks. `/eod` scans all PID files to detect multiple active sessions. Updated all 6 command files: `crack-on.md`, `stand-up.md`, `sitrep.md`, `wrap.md`, `eod.md`, `commands.md`.
+- **Progress bar border exception** in `stand-up.md` — `█` and `░` characters now explicitly permitted inside bordered boxes (they render at fixed width in terminals).
+
+---
+
 ## [v1.9.4] — 2026-03-04
 
 ### Added
