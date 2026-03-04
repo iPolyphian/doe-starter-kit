@@ -32,10 +32,10 @@ Pick the matching status. **Generate boxes programmatically** — use a Python s
 
 **Nothing to sync:**
 ```
+⏭️  NO CHANGES
 ┌──────────────────────────────────────────────────────┐
 │  SYNC RESULT                                         │
 ├──────────────────────────────────────────────────────┤
-│  NO CHANGES                                          │
 │  [1-2 line explanation]                              │
 │  Kit: vX.Y.Z (unchanged)                            │
 └──────────────────────────────────────────────────────┘
@@ -43,10 +43,10 @@ Pick the matching status. **Generate boxes programmatically** — use a Python s
 
 **Changes approved and pushed:**
 ```
+✅ SYNCED
 ┌──────────────────────────────────────────────────────┐
 │  SYNC RESULT                                         │
 ├──────────────────────────────────────────────────────┤
-│  SYNCED                                              │
 │  [1-2 line summary of what was synced]               │
 │  Kit: vX.Y.Z -> vX.Y.Z                              │
 └──────────────────────────────────────────────────────┘
@@ -54,10 +54,10 @@ Pick the matching status. **Generate boxes programmatically** — use a Python s
 
 **User declined proposed changes:**
 ```
+❌ REJECTED
 ┌──────────────────────────────────────────────────────┐
 │  SYNC RESULT                                         │
 ├──────────────────────────────────────────────────────┤
-│  REJECTED                                            │
 │  [What was proposed and why it was declined]         │
 │  Kit: vX.Y.Z (unchanged)                            │
 └──────────────────────────────────────────────────────┘
@@ -65,10 +65,10 @@ Pick the matching status. **Generate boxes programmatically** — use a Python s
 
 **Blocked by an issue:**
 ```
+⚠️  BLOCKED
 ┌──────────────────────────────────────────────────────┐
 │  SYNC RESULT                                         │
 ├──────────────────────────────────────────────────────┤
-│  BLOCKED                                             │
 │  [What went wrong -- e.g. conflicts, missing dir]   │
 │  Kit: vX.Y.Z (unchanged)                            │
 └──────────────────────────────────────────────────────┘

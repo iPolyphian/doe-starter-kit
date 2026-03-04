@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.10.2] — 2026-03-04
+
+### Changed
+- **`sync-doe.md` result box templates** — moved status emojis above the box as standalone signal lines (e.g. `✅ SYNCED` before the bordered box). Emojis stay visible for quick-glance scanning without breaking box-drawing alignment.
+
+---
+
 ## [v1.10.1] — 2026-03-04
 
 ### Fixed
