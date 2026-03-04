@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.9.4] — 2026-03-04
+
+### Added
+- **Code Hygiene rule: plans go in the project.** New CLAUDE.md rule requiring plans to be written to the project's `.claude/plans/` directory with descriptive filenames, not to `~/.claude/plans/`. Prevents plan files from landing in the global directory where they're invisible to the project.
+
+---
+
 ## [v1.9.3] — 2026-03-04
 
 ### Fixed

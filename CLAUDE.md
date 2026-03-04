@@ -49,6 +49,7 @@ IMPORTANT: Never do execution inline when a script exists. Check `execution/` fi
 - **One task, one session.** If the conversation drifts to an unrelated topic, recommend the user run `/clear` before continuing. Do not let unrelated context accumulate.
 - **Refactor is not rewrite.** When asked to refactor, change structure only. Do not change behaviour. If behaviour must change, say so explicitly and get approval.
 - **No orphan files.** If you replace a file, delete the old one. Never leave unused files behind.
+- **Plans go in the project, not global.** Always write plans to `.claude/plans/` in the project root with a descriptive filename. Never write to `~/.claude/plans/`. If plan mode suggests a global path, override it.
 - **YOU MUST place files in designated directories.** Follow the directory structure below exactly. Do not create files in the project root or invent new directories without approval.
 
 ## Directory Structure
