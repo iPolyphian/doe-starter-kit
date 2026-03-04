@@ -118,7 +118,7 @@ List commits in chronological order from `result.metrics.commitLog`.
 
 ### Part 7: The Numbers
 
-Use `result.metrics` for all values.
+Use `result.metrics` for all values. For agents spawned, count how many times the Agent tool was invoked during this session (review your own conversation history). Count each `Agent` tool call as 1, regardless of whether it ran in foreground or background.
 
 ```
 ══════════════════════════════════════════════
@@ -127,7 +127,8 @@ Use `result.metrics` for all values.
 
      🔖 [X] commits        📁 [X] files changed
      📏 +[X] / -[Y] lines  📋 [X] steps completed
-     ⏱️ [sessionDuration] total session time
+     ⏱️ [sessionDuration] session time
+     🤖 [X] agents spawned
 
 ══════════════════════════════════════════════
 ```
@@ -153,17 +154,7 @@ Rules:
 - Total at bottom: minutes from session start to now, and 100%.
 - If `.tmp/.session-start-$$` doesn't exist, skip this section and print: `⏱️ No session timeline — start with /crack-on or /stand-up`.
 
-### Part 9: One-Stat Highlight
-
-Pick the single most impressive metric from this session and frame it with witty context. Priority order: (1) lines added if >= 500, (2) commits if >= 10, (3) files touched if >= 8, (4) steps completed if >= 3, (5) lines removed if > lines added, (6) whatever is most notable.
-
-```
-  ⭐ [metric + witty one-liner about it]
-```
-
-Example: `⭐ +1,297 lines — that's roughly 26 pages of code. Someone's been busy.`
-
-### Part 10: Last 10 Days Leaderboard
+### Part 9: Last 10 Days Leaderboard
 
 Use `result.leaderboard` (already consolidated per day, 10 entries). Mark today's row with `*`. Days with null commits show `--`.
 
@@ -182,35 +173,21 @@ Use `result.leaderboard` (already consolidated per day, 10 entries). Mark today'
 
 Always include the header row and separator. Adapt column widths to fit content. Model column shows `[name] / [thinking]` abbreviated: hi = high, md = medium, lo = low. Use the model and thinking level from the current session for today's row. For past days, pull from `stats.json` `recentSessions` if available, otherwise show `--`.
 
-### Part 11: System Checks & Footer
+### Part 10: System Checks & Footer
 
-Show audit results and DOE Kit sync status in a bordered block:
-
-If all clear:
-```
-  🔍 SYSTEM CHECKS
-  ┌──────────────────────────────────────────────────────────┐
-  │  Audit:   5 PASS, 0 WARN, 0 FAIL -- all clear           │
-  │  DOE Kit: v1.3.0 -- synced                               │
-  └──────────────────────────────────────────────────────────┘
-```
-
-If issues found, expand with detail lines:
-```
-  🔍 SYSTEM CHECKS
-  ┌──────────────────────────────────────────────────────────┐
-  │  Audit:   3 PASS, 1 WARN, 1 FAIL                        │
-  │    FAIL  HTML file is v0.15.0 but STATE.md says v0.15.1  │
-  │    WARN  learnings.md -- 2 minor versions behind         │
-  │  DOE Kit: v1.3.0 -- 2 files changed, run /sync-doe      │
-  └──────────────────────────────────────────────────────────┘
-```
+Show audit results and DOE Kit sync status in a bordered block. **Generate this box programmatically** — collect all content lines into a list, find the max length, then use `.ljust(max_len)` to pad every line to the same width before adding `│` borders and `─` top/bottom borders. Never hand-pad this box.
 
 Rules:
 - Always show both Audit and DOE Kit lines inside the border.
 - If audit has only PASS results, show one line with counts and "all clear".
 - If audit has WARN or FAIL, show summary line + indented detail for each non-PASS finding.
 - DOE Kit: `synced` if all files match, `N files changed, run /sync-doe` if any differ. If `~/doe-starter-kit` doesn't exist, show `DOE Kit: not installed`.
+
+Example content lines (padding is illustrative — real padding must be computed):
+- `  Audit:   5 PASS, 0 WARN, 0 FAIL -- all clear`
+- `  DOE Kit: v1.3.0 -- synced`
+- `    FAIL  HTML file is v0.15.0 but STATE.md says v0.15.1`
+- `    WARN  learnings.md -- 2 minor versions behind`
 
 Then the footer:
 ```

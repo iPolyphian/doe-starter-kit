@@ -7,6 +7,20 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.11.2] — 2026-03-04
+
+### Added
+- **`/wrap` agents stat** — new "agents spawned" metric in The Numbers section, counted from Agent tool calls in the session
+
+### Changed
+- **`/wrap` session time label** — shortened from "total session time" to "session time"
+- **`/wrap` system checks box** — replaced hand-padded example boxes with programmatic generation instruction (collect lines, find max length, `.ljust()`)
+
+### Removed
+- **`/wrap` One-Stat Highlight** — removed Part 9 (redundant with The Numbers). Parts renumbered from 11 to 10.
+
+---
+
 ## [v1.11.1] — 2026-03-04
 
 ### Changed
