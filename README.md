@@ -9,29 +9,32 @@ A template repository containing everything you need to run Claude Code with gua
 ## Quick Start
 
 1. Clone this repo or copy files into your project
-2. Run `./setup.sh` (installs commands, activates hooks, writes version receipt)
+2. Run `./setup.sh` (installs commands, hooks, and scripts to `~/.claude/`, merges settings, activates git hooks, writes version receipt)
 3. Start Claude Code and type `/stand-up`
 
 <details>
 <summary>Manual setup (if you prefer not to use the script)</summary>
 
 1. Copy `global-commands/*.md` (except README.md) to `~/.claude/commands/`
-2. Copy `universal-claude-md-template.md` to `~/.claude/CLAUDE.md` (if you don't have one)
-3. Run `git config core.hooksPath .githooks` to activate hooks
-4. Start Claude Code — it reads CLAUDE.md automatically
+2. Copy `global-hooks/*.py` to `~/.claude/hooks/`
+3. Copy `global-scripts/*.py` to `~/.claude/scripts/`
+4. Copy `universal-claude-md-template.md` to `~/.claude/CLAUDE.md` (if you don't have one)
+5. Merge PostToolUse hooks from `global-hooks/` into `~/.claude/settings.json`
+6. Run `git config core.hooksPath .githooks` to activate git hooks
+7. Start Claude Code — it reads CLAUDE.md automatically
 
 </details>
 
 ## What's Included
 
-**Framework (43 files)**
+**Framework (49 files)**
 
 - **CLAUDE.md** — 9 operating rules, progressive disclosure triggers, guardrails
 - **STATE.md** — Session memory (blockers, current position)
 - **Directives** — SOPs for documentation governance, claim auditing, starter kit sync
 - **Audit system** — Automated false-positive detection with pre-commit hook
-- **Multi-agent coordination** — Wave management, task claiming, heartbeats, merge protocol for parallel Claude Code sessions (`/hq` dashboard)
-- **14 slash commands** — session lifecycle, quality checks, utilities, and infrastructure (see below)
+- **Multi-agent coordination** — Wave management, task claiming, heartbeats, merge protocol for parallel Claude Code sessions (`/hq` dashboard). Installs globally to `~/.claude/scripts/` and `~/.claude/hooks/`.
+- **15 slash commands** — session lifecycle, quality checks, utilities, and infrastructure (see below)
 - **Session timer** — `/stand-up` (in kick-off mode) and `/crack-on` start a clock, `/sitrep` and `/wrap` report elapsed time
 - **Gamification** — Session scoring, badges, streaks, leaderboard, themed wrap-up cards
 - **Git hooks** — Pre-commit claim audit, commit message cleanup
@@ -45,13 +48,14 @@ A template repository containing everything you need to run Claude Code with gua
 
 ## Slash Commands
 
-14 commands in `global-commands/`. Install with `./setup.sh` or copy manually. Run `/commands` inside Claude Code for the full reference and installation health check.
+15 commands in `global-commands/`. Install with `./setup.sh` or copy manually. Run `/commands` inside Claude Code for the full reference and installation health check.
 
 | Category | Commands | Purpose |
 |----------|----------|---------|
 | **Session Lifecycle** | `/stand-up`, `/crack-on`, `/sitrep`, `/wrap`, `/eod` | Dual-mode stand-up, track progress, gamified wrap-up, end-of-day report |
 | **Quality** | `/audit`, `/quick-audit`, `/vitals` | Claim auditing, workspace health checks |
 | **Utility** | `/pitch`, `/roast`, `/eli5`, `/shower-thought` | Feature ideas, code roasts, ELI5, programming observations |
+| **Multi-Agent** | `/hq` | Wave dashboard for parallel Claude Code sessions |
 | **Infrastructure** | `/sync-doe`, `/commands` | Sync DOE improvements; installation health check |
 
 **Smart filter:** The lifecycle commands check for DOE Kit sync opportunities. When comparing CLAUDE.md, they distinguish universal changes (Operating Rules, Guardrails, etc.) from project-specific additions (Directory Structure, triggers) — so you only get nudged when there's something genuinely worth syncing.
@@ -85,4 +89,4 @@ The starter kit uses semantic versioning with GitHub releases. Every `/sync-doe`
 
 ## File Count
 
-46 files across 8 directories. See SYSTEM-MAP.md for the complete map.
+49 files across 10 directories. See SYSTEM-MAP.md for the complete map.

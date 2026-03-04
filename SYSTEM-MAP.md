@@ -37,7 +37,7 @@ CLAUDE.md tells Claude to check these before starting work:
 | File | Goes to | Lines | Purpose |
 |------|---------|-------|---------|
 | CLAUDE.md | `./CLAUDE.md` | ~115 | The operating system. 9 rules, guardrails with proof requirement, break glass procedure, code hygiene. Auto-loaded. |
-| settings.json | `./.claude/settings.json` | ~40 | 3 PreToolUse hooks + 2 PostToolUse hooks (heartbeat, context monitor) |
+| settings.json | `./.claude/settings.json` | ~25 | 3 PreToolUse guardrail hooks (PostToolUse hooks now in global `~/.claude/settings.json`) |
 | SYSTEM-MAP.md | `./SYSTEM-MAP.md` | — | This breakdown. For you, not Claude. |
 | CUSTOMIZATION.md | `./CUSTOMIZATION.md` | — | What to keep, customize, or clear when starting a new project. For you, not Claude. |
 
@@ -48,8 +48,6 @@ CLAUDE.md tells Claude to check these before starting work:
 | protect_directives.py | `./.claude/hooks/` | Blocks editing existing SOPs. Allows creating new ones. |
 | block_secrets_in_code.py | `./.claude/hooks/` | Blocks API keys outside .env |
 | block_dangerous_commands.py | `./.claude/hooks/` | Blocks force-push, rm -rf, etc |
-| heartbeat.py | `./.claude/hooks/` | PostToolUse: updates session heartbeat every 30s during active waves |
-| context_monitor.py | `./.claude/hooks/` | PostToolUse: warns at 60% context usage, stops at 80% for graceful handoff |
 | commit-msg | `./.githooks/` | Strips AI co-author trailers from git commits |
 | pre-commit | `./.githooks/` | Runs fast claim audit checks before every commit. Blocks on FAILs. |
 
@@ -86,13 +84,6 @@ CLAUDE.md tells Claude to check these before starting work:
 | audit_claims.py | `./execution/` | Automated false-positive detection. 6 universal checks (incl. active wave detection). Extensible with project-specific checks via `@register()` decorator. |
 | wrap_stats.py | `./execution/` | Deterministic session scoring. Gathers git metrics, computes streak/multiplier/score/badges, updates stats.json, outputs JSON for `/wrap` to render. |
 
-### 🔀 Multi-Agent Coordination (optional — for parallel Claude Code sessions)
-
-| File | Goes to | Purpose |
-|------|---------|---------|
-| multi_agent.py | `./execution/` | Wave management, task claiming, session registry, heartbeats, merge protocol, cost tracking. All state in `.tmp/waves/`. |
-| hq.md | `./.claude/commands/` | Type `/hq` — project-level dashboard for wave status, terminal liveness, task progress, merge order. |
-
 ### ⚡ The Commands (global — install once, available in every project)
 
 All slash commands install to `~/.claude/commands/` so they work across every DOE project. They reference relative paths (`STATE.md`, `tasks/todo.md`, etc.) so they're project-agnostic.
@@ -112,7 +103,18 @@ All slash commands install to `~/.claude/commands/` so they work across every DO
 | shower-thought.md | `~/.claude/commands/` | Type `/shower-thought` — one weird programming observation |
 | sitrep.md | `~/.claude/commands/` | Type `/sitrep` — mid-session situation report with progress, commits, elapsed time |
 | sync-doe.md | `~/.claude/commands/` | Type `/sync-doe` — sync DOE improvements back to the starter kit repo |
-| README.md | `~/.claude/commands/` | Quick reference for all 11 slash commands |
+| hq.md | `~/.claude/commands/` | Type `/hq` — multi-agent dashboard for wave status, terminal liveness, task progress, merge order |
+| README.md | `~/.claude/commands/` | Quick reference for all 15 slash commands |
+
+### 🔀 Multi-Agent Coordination (global — install once, available in every project)
+
+Multi-agent files install to machine-level locations via `setup.sh`. They use `Path.cwd()` so they work from any project directory.
+
+| File | Goes to | Purpose |
+|------|---------|---------|
+| multi_agent.py | `~/.claude/scripts/` | Wave management, task claiming, session registry, heartbeats, merge protocol, cost tracking. All state in `.tmp/waves/`. Accepts `--project-root DIR` override. |
+| heartbeat.py | `~/.claude/hooks/` | PostToolUse: updates session heartbeat every 30s during active waves |
+| context_monitor.py | `~/.claude/hooks/` | PostToolUse: warns at 60% context usage, stops at 80% for graceful handoff |
 
 ### 📐 The Plans & Sync
 
@@ -143,18 +145,19 @@ SESSION START
 DURING WORK
 │
 ├─→ Rule #8 before every commit: check STATE.md + learnings.md + governed docs
-├─→ .claude/settings.json → fires hooks before/after actions
+├─→ .claude/settings.json → fires PreToolUse guardrail hooks
 │   ├─→ protect_directives.py → blocks edits to existing SOPs
 │   ├─→ block_secrets_in_code.py → blocks API keys outside .env
-│   ├─→ block_dangerous_commands.py → blocks force-push, rm -rf, etc.
+│   └─→ block_dangerous_commands.py → blocks force-push, rm -rf, etc.
+├─→ ~/.claude/settings.json → fires PostToolUse hooks (merged by setup.sh)
 │   ├─→ heartbeat.py → updates session heartbeat during waves
 │   └─→ context_monitor.py → warns when context is running low
 ├─→ .githooks/pre-commit → runs fast claim audit before every commit
 │
 ├─→ execution/ → Claude runs scripts instead of inline code
 │   ├─→ audit_claims.py → automated false-positive detection
-│   ├─→ multi_agent.py → wave coordination for parallel sessions
 │   └─→ wrap_stats.py → deterministic session scoring for /wrap
+├─→ ~/.claude/scripts/multi_agent.py → wave coordination for parallel sessions
 ├─→ .claude/plans/ → Claude reads feature designs
 ├─→ .tmp/ → scratch space for intermediate files
 │
@@ -185,6 +188,7 @@ SESSION END (or /wrap)
 | `/quick-audit` | Fast checks only (<1 second) — front-matter, staleness, task format |
 | `/vitals` | Workspace health check — git, audit, DOE sync, STATE alignment, temp files |
 | `/sitrep` | Mid-session situation report — progress bar, commits, elapsed time, blockers, context usage |
+| `/hq` | Multi-agent dashboard — wave status, terminal liveness, task progress, merge order |
 | `/sync-doe` | Sync universal DOE improvements from current project to the starter kit repo |
 
 ## What's project-level vs machine-level
@@ -209,20 +213,15 @@ PROJECT (lives in your repo, shared via git)
 │   └── starter-kit-sync.md
 ├── execution/
 │   ├── audit_claims.py
-│   ├── multi_agent.py
 │   └── wrap_stats.py
 ├── .claude/
-│   ├── settings.json
+│   ├── settings.json (PreToolUse only)
 │   ├── stats.json
 │   ├── claude-chat-sync-prompt.md
-│   ├── commands/
-│   │   └── hq.md
 │   ├── hooks/
 │   │   ├── protect_directives.py
 │   │   ├── block_secrets_in_code.py
-│   │   ├── block_dangerous_commands.py
-│   │   ├── heartbeat.py
-│   │   └── context_monitor.py
+│   │   └── block_dangerous_commands.py
 │   └── plans/
 │       └── gamified-wrap.md
 ├── .githooks/
@@ -233,20 +232,28 @@ PROJECT (lives in your repo, shared via git)
 
 MACHINE (lives on your computer, applies to all projects)
 ├── ~/.claude/CLAUDE.md
-└── ~/.claude/commands/
-    ├── README.md
-    ├── wrap.md
-    ├── pitch.md
-    ├── stand-up.md
-    ├── crack-on.md
-    ├── roast.md
-    ├── eli5.md
-    ├── shower-thought.md
-    ├── audit.md
-    ├── quick-audit.md
-    ├── vitals.md
-    ├── sitrep.md
-    └── sync-doe.md
+├── ~/.claude/settings.json (PostToolUse hooks merged by setup.sh)
+├── ~/.claude/commands/
+│   ├── README.md
+│   ├── wrap.md
+│   ├── pitch.md
+│   ├── stand-up.md
+│   ├── crack-on.md
+│   ├── roast.md
+│   ├── eli5.md
+│   ├── shower-thought.md
+│   ├── audit.md
+│   ├── quick-audit.md
+│   ├── vitals.md
+│   ├── sitrep.md
+│   ├── sync-doe.md
+│   ├── hq.md
+│   └── eod.md
+├── ~/.claude/hooks/
+│   ├── heartbeat.py
+│   └── context_monitor.py
+└── ~/.claude/scripts/
+    └── multi_agent.py
 ```
 
-Total: 43 files across 8 directories. If you see a file not on this list, it shouldn't be there.
+Total: 49 files across 10 directories. If you see a file not on this list, it shouldn't be there.

@@ -7,6 +7,17 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.9.0] — 2026-03-04
+
+### Changed
+- **Multi-agent system moved to global install** — no more per-project copies. `multi_agent.py` → `~/.claude/scripts/`, `heartbeat.py` + `context_monitor.py` → `~/.claude/hooks/`, `/hq` → `~/.claude/commands/`. Install once, works across all projects.
+- **`setup.sh` extended** — 3 new install sections: hooks to `~/.claude/hooks/`, scripts to `~/.claude/scripts/`, merges PostToolUse into `~/.claude/settings.json`
+- **Path refactor** — all multi-agent Python files use `Path.cwd()` instead of `Path(__file__)` for global execution
+- **`--project-root` override** — `multi_agent.py` accepts `--project-root DIR` to specify the project directory explicitly
+- **Template `.claude/settings.json` now PreToolUse-only** — PostToolUse hooks are merged into the global settings by `setup.sh`
+
+---
+
 ## [v1.8.0] — 2026-03-04
 
 ### Added

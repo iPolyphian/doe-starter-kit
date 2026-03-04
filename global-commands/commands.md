@@ -2,7 +2,7 @@ Before showing the reference below, run a quick health check:
 
 1. **Version:** Read `~/.claude/.doe-kit-version`. If it exists, show the version and install date. If not, show "DOE Kit: not installed — run `./setup.sh` from the starter kit".
 
-2. **Installation check:** List all `.md` files in `~/.claude/commands/` and compare against the 13 expected commands below. Report installed count (e.g. "13/13 commands installed" or "11/13 — missing: /audit, /quick-audit").
+2. **Installation check:** List all `.md` files in `~/.claude/commands/` and compare against the 15 expected commands below. Report installed count (e.g. "15/15 commands installed" or "13/15 — missing: /audit, /quick-audit").
 
 3. **Update check:** Run `gh release view --repo iPolyphian/doe-starter-kit --json tagName -q .tagName` to get the latest release version. Compare with the installed version from step 1. If newer, show: "Update available: vX.Y.Z → run `cd ~/doe-starter-kit && git pull && ./setup.sh`". If current, show "✓ up to date". If the command fails (offline, no gh CLI), skip silently and just show "update check: skipped (offline or gh CLI not available)".
 
@@ -10,14 +10,14 @@ Format the health check as a compact status block:
 
 ```
 DOE Kit v1.3.0 (installed 02/03/26) · ✓ up to date
-13/13 commands installed
+15/15 commands installed
 ```
 
 Or if issues are found:
 
 ```
 DOE Kit v1.3.0 (installed 02/03/26) · update available: v1.4.0
-10/12 commands installed — missing: /audit, /quick-audit
+13/15 commands installed — missing: /audit, /quick-audit
 → Run: cd ~/doe-starter-kit && git pull && ./setup.sh
 ```
 
@@ -27,7 +27,7 @@ Then show the full reference below.
 
 # Slash Commands
 
-Quick reference for all 13 `/commands`. These are global — install once with `./setup.sh`, available in every project. `/stand-up` is context-aware — it detects whether a session is active and adapts its output accordingly.
+Quick reference for all 15 `/commands`. These are global — install once with `./setup.sh`, available in every project. `/stand-up` is context-aware — it detects whether a session is active and adapts its output accordingly.
 
 ---
 
@@ -46,6 +46,9 @@ Mid-session situation report. Shows mission, progress bar, completed/active/pend
 
 ### `/wrap`
 End-of-session routine. Updates STATE.md, todo.md, learnings.md. Computes session stats, prints a themed wrap-up card with haiku, timeline, and leaderboard. **Use at:** session end.
+
+### `/eod`
+End-of-day report. Aggregates all sessions, commits, features, and position into one bordered summary. Shows day stats, session list, semantic "What Got Done" grouping, position at EOD, and day vibe. **Use at:** end of day, after your last `/wrap`.
 
 ---
 
@@ -85,6 +88,13 @@ Syncs universal DOE framework improvements from the current project back to the 
 
 ### `/commands`
 This command. Shows installation health check and the full command reference. **Use when:** you want to verify your setup or check for updates.
+
+---
+
+## Multi-Agent
+
+### `/hq`
+Multi-agent dashboard for parallel Claude Code sessions. Shows wave status, terminal liveness, task progress, cost estimates, and merge order. Modes: no active wave (help text), active wave (live dashboard). Requires `~/.claude/scripts/multi_agent.py` (installed by `setup.sh`). **Use when:** running parallel Claude Code sessions via wave management.
 
 ---
 
