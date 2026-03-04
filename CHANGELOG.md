@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.11.5] — 2026-03-04
+
+### Changed
+- **Box-drawing rules** — clarified in 5 global commands (`/audit`, `/sitrep`, `/stand-up`, `/sync-doe`, `/wrap`): explicitly use Unicode box-drawing characters (`┌─┐`, `├─┤`, `└─┘`, `│`) for borders, ASCII-only for content inside borders
+
+---
+
 ## [v1.11.4] — 2026-03-04
 
 ### Changed

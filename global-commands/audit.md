@@ -1,6 +1,6 @@
 Run a full claim audit: `python3 execution/audit_claims.py`
 
-Show the complete script output, then print a bordered result box summarising the outcome. **Generate the box programmatically** — collect all content lines into a list, find the max length, then use `.ljust(max_len)` to pad every line to the same width before adding `│` borders and `─` top/bottom borders. Never hand-pad the box. Use ASCII-only inside borders.
+Show the complete script output, then print a bordered result box summarising the outcome. **Generate the box programmatically** — collect all content lines into a list, find the max length, then use `.ljust(max_len)` to pad every line to the same width before adding Unicode box-drawing borders (`┌─┐`, `└─┘`, `│`). Never hand-pad the box. Content inside borders must be ASCII-only (no emojis).
 
 Pick the matching status:
 

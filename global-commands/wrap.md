@@ -175,7 +175,7 @@ Always include the header row and separator. Adapt column widths to fit content.
 
 ### Part 10: System Checks & Footer
 
-Show audit results and DOE Kit sync status in a bordered block. **Generate this box programmatically** — collect all content lines into a list, find the max length, then use `.ljust(max_len)` to pad every line to the same width before adding `│` borders and `─` top/bottom borders. Never hand-pad this box.
+Show audit results and DOE Kit sync status in a bordered block. **Generate this box programmatically** — collect all content lines into a list, find the max length, then use `.ljust(max_len)` to pad every line to the same width before adding Unicode box-drawing borders (`┌─┐`, `└─┘`, `│`). Never hand-pad this box.
 
 Rules:
 - Always show both Audit and DOE Kit lines inside the border.
@@ -205,4 +205,4 @@ Then the footer:
 - If stats.json doesn't exist yet, this is session 1. Don't make a big deal about firsts.
 - Commit stats.json BEFORE printing the wrap-up so the push includes it.
 - Model info is shown in the LAST 10 DAYS leaderboard table, not the footer.
-- **Box-drawing alignment:** All bordered boxes (timeline, leaderboard, system checks) must use ASCII-only characters inside the `│` borders. No emojis, no Unicode symbols (no `·`, `✓`, `⚠️`, `—`, `…`). Use ASCII equivalents: commas for separators, `--` for dashes, `ok`/`all clear` for checkmarks. Emojis are fine in section headers OUTSIDE the box. **Generate boxes programmatically** — use a Python snippet with `.ljust(W)` to pad content lines to the exact inner width. Never hand-pad bordered output. If a commit message contains non-ASCII characters, replace them with ASCII equivalents before placing in a box.
+- **Box-drawing alignment:** Use Unicode box-drawing characters for borders (`┌─┐`, `├─┤`, `└─┘`, `│`). Content inside the `│` borders must be ASCII-only: no emojis, no Unicode symbols (no `·`, `✓`, `⚠️`, `—`, `…`). Use ASCII equivalents: commas for separators, `--` for dashes, `ok`/`all clear` for checkmarks. Emojis are fine in section headers OUTSIDE the box. **Generate boxes programmatically** — use a Python snippet with `.ljust(W)` to pad content lines to the exact inner width. Never hand-pad bordered output. If a commit message contains non-ASCII characters, replace them with ASCII equivalents before placing in a box.
