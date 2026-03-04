@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.11.0] — 2026-03-04
+
+### Added
+- **7 new universal commands:** `diff-review.md` (visual HTML diff review), `fact-check.md` (verify doc accuracy against codebase), `generate-slides.md` (magazine-quality HTML slide decks), `generate-visual-plan.md` (visual HTML implementation plans), `generate-web-diagram.md` (standalone HTML diagrams), `plan-review.md` (visual HTML plan review), `project-recap.md` (visual HTML project recap).
+
+---
+
 ## [v1.10.2] — 2026-03-04
 
 ### Changed
