@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.12.1] — 2026-03-04
+
+### Added
+- **Universal learnings template** — added 3 Shell & Platform entries (emoji box-drawing, zsh nullglob, `$$` subshell PID), new Hooks & Session Files section (orphan file prevention), new Output section (single-block assembly, re-present script output as text). Template now has 6 sections and 11 learnings.
+
+---
+
 ## [v1.12.0] — 2026-03-04
 
 ### Changed
