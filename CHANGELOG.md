@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.11.3] — 2026-03-04
+
+### Changed
+- **`/audit` result box** — output now ends with a programmatic bordered result box (matching `/sync-doe` and `/wrap` style) showing PASS/WARN/FAIL counts and key stats
+
+---
+
 ## [v1.11.2] — 2026-03-04
 
 ### Added
