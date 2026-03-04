@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.11.8] — 2026-03-04
+
+### Fixed
+- **`/sync-doe` result box** — replaced hardcoded box width with dynamic computation (`W = max(len(line)) + 4`). Long summary lines no longer break the right border.
+
+---
+
 ## [v1.11.7] — 2026-03-04
 
 ### Changed

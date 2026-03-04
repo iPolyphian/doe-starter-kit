@@ -28,7 +28,7 @@ Rules:
 
 After completing all steps — or when stopping early because nothing changed — ALWAYS end the sync output with this bordered result box. This is the last thing printed, no exceptions.
 
-Pick the matching status. **Generate boxes programmatically** — use a Python snippet with `.ljust(W)` to pad content lines to the exact inner width. Never hand-pad bordered output. Use Unicode box-drawing characters for borders (`┌─┐`, `├─┤`, `└─┘`, `│`). Content inside borders must be ASCII-only (no emojis, no Unicode arrows) — use `->` instead of `→`, text labels instead of emoji icons.
+Pick the matching status. **Generate boxes programmatically** — collect all content lines into a list, find the max length, compute `W = max(len(line) for line in lines) + 4`, then use `.ljust(W-2)` to pad every line before adding `│` borders. Never hardcode W — always compute from content. Use Unicode box-drawing characters for borders (`┌─┐`, `├─┤`, `└─┘`, `│`). Content inside borders must be ASCII-only (no emojis, no Unicode arrows) — use `->` instead of `→`, text labels instead of emoji icons.
 
 **Nothing to sync:**
 ```
