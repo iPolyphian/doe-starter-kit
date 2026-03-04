@@ -94,7 +94,7 @@ Use `result.metrics` for all values.
 Use `result.metrics.commitLog` for commit times and messages. Read `.tmp/.session-start` for the start time.
 
 ```
-  ⏱️ SESSION TIMELINE
+  SESSION TIMELINE
   ┌───────┬──────────────────────────────────────────────┬──────┬──────┐
   │ 20:30 │ Session started                              │      │      │
   │ 20:44 │ Add feature showcase page (v0.13.4)          │  14m │  70% │
@@ -197,29 +197,29 @@ Show audit results and DOE Kit sync status in a bordered block:
 
 If all clear:
 ```
-  🔍 SYSTEM CHECKS
+  SYSTEM CHECKS
   ┌──────────────────────────────────────────────────────────┐
-  │  Audit:   5 PASS · 0 WARN · 0 FAIL ✓                   │
-  │  DOE Kit: v1.3.0 · synced ✓                             │
+  │  Audit:   5 PASS, 0 WARN, 0 FAIL -- all clear           │
+  │  DOE Kit: v1.3.0 -- synced                               │
   └──────────────────────────────────────────────────────────┘
 ```
 
 If issues found, expand with detail lines:
 ```
-  🔍 SYSTEM CHECKS
+  SYSTEM CHECKS
   ┌──────────────────────────────────────────────────────────┐
-  │  Audit:   3 PASS · 1 WARN · 1 FAIL ⚠️                   │
-  │    FAIL  HTML file is v0.15.0 but STATE.md says v0.15.1 │
-  │    WARN  learnings.md — 2 minor versions behind         │
-  │  DOE Kit: v1.3.0 · 2 files changed — /sync-doe ⚠️       │
+  │  Audit:   3 PASS, 1 WARN, 1 FAIL                        │
+  │    FAIL  HTML file is v0.15.0 but STATE.md says v0.15.1  │
+  │    WARN  learnings.md -- 2 minor versions behind         │
+  │  DOE Kit: v1.3.0 -- 2 files changed, run /sync-doe      │
   └──────────────────────────────────────────────────────────┘
 ```
 
 Rules:
 - Always show both Audit and DOE Kit lines inside the border.
-- If audit has only PASS results, show one line with counts + ✓.
+- If audit has only PASS results, show one line with counts and "all clear".
 - If audit has WARN or FAIL, show summary line + indented detail for each non-PASS finding.
-- DOE Kit: `synced ✓` if all files match, `N files changed — /sync-doe ⚠️` if any differ. If `~/doe-starter-kit` doesn't exist, show `DOE Kit: not installed`.
+- DOE Kit: `synced` if all files match, `N files changed, run /sync-doe` if any differ. If `~/doe-starter-kit` doesn't exist, show `DOE Kit: not installed`.
 
 Then the footer:
 ```
@@ -237,3 +237,4 @@ Then the footer:
 - If stats.json doesn't exist yet, this is session 1. Don't make a big deal about firsts.
 - Commit stats.json BEFORE printing the wrap-up so the push includes it.
 - Model info is shown in the LAST 10 DAYS leaderboard table, not the footer.
+- **Box-drawing alignment:** All bordered boxes (timeline, leaderboard, system checks) must use ASCII-only characters inside the `│` borders. No emojis, no Unicode symbols (no `·`, `✓`, `⚠️`, `—`, `…`). Use ASCII equivalents: commas for separators, `--` for dashes, `ok`/`all clear` for checkmarks. Emojis are fine in section headers OUTSIDE the box. Fixed width: pick the border width from the template, then pad every content line with trailing spaces so the right `│` aligns exactly. If a commit message contains non-ASCII characters, replace them with ASCII equivalents before placing in a box.
