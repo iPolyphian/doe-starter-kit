@@ -24,10 +24,13 @@ Read STATE.md and tasks/todo.md. Run `git log --oneline` to see this session's c
 │  DOE KIT   vX.Y.Z · [synced ✓ / N — /sync-doe]   │
 │  BLOCKERS  [any from STATE.md, or "None"]        │
 │  QUEUE     [next feature from Queue, or "Empty"] │
+├─────────────────────────────────────────────────┤
+│  Model: [model] · Thinking: [level]             │
 └─────────────────────────────────────────────────┘
 ```
 
 Rules:
+- MODEL ROW: Final row of the card, separated by `├──┤`. Shows `Model: [name] · Thinking: [level]`. IMPORTANT: This line is always shorter than other content lines. You MUST pad it with trailing spaces so the right `│` is at the exact same character position as every other `│` in the card. Count the inner width of the longest line, then pad the model row to match. No emojis (they break alignment). Model display names: `claude-opus-4-6` → "Opus 4.6", `claude-sonnet-4-6` → "Sonnet 4.6", `claude-haiku-4-5` → "Haiku 4.5". Thinking level from reasoning effort: ≤33 → "low", 34-66 → "medium", ≥67 → "high". If uncertain, show "default".
 - Progress bar: use █ for done steps, ░ for remaining. Scale to 10 characters total.
 - STATUS: one plain-English sentence describing what's actually happening right now in the session. This may differ from the MISSION — e.g. you might be debugging, experimenting, or doing housekeeping unrelated to the current feature step. Look at the conversation history to determine this. If work is aligned with the active step, just summarise that step.
 - DONE section: list completed steps from the current feature (steps with [x]).
@@ -40,5 +43,5 @@ Rules:
 - QUEUE: first feature from ## Queue in todo.md. "Empty" if nothing queued.
 - If no feature is in ## Current, show MISSION as "No active feature" and skip DONE/ACTIVE/PENDING. Just show commits, blockers, and queue.
 - CONTEXT: estimate your current context window usage as a percentage. Show the percentage and a recommendation: under 60% = "Plenty of room", 60-80% = "Consider /clear soon", over 80% = "Compact or /clear".
-- BORDER: size the box to fit the longest content line. All lines must be padded with spaces to match that width so the right border │ aligns consistently. Never let any line break the right border. Double-check every line has the same total character count before outputting.
+- BORDER: Fixed width — always 60 `─` characters between `│` borders (62 total per line). All content lines: `│` + 2 spaces + content + trailing spaces + `│` = 62 chars. If content would exceed 56 characters, truncate with `…`. Never dynamically size — the box is always the same width.
 - Do not execute anything. This is read-only.

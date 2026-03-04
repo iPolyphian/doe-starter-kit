@@ -35,10 +35,13 @@ Show a bordered kick-off card, then present a plan and wait for sign-off:
 │  FOCUS                                            │
 │  · [coaching bullet from stats.json analysis]     │
 │  · [coaching bullet]                              │
+├──────────────────────────────────────────────────┤
+│  Model: [model] · Thinking: [level]              │
 └──────────────────────────────────────────────────┘
 ```
 
 Card rules:
+- MODEL ROW: Final row of the card, separated by `├──┤`. Shows `Model: [name] · Thinking: [level]`. IMPORTANT: This line is always shorter than other content lines. You MUST pad it with trailing spaces so the right `│` is at the exact same character position as every other `│` in the card. Count the inner width of the longest line, then pad the model row to match. No emojis (they break alignment). You know your model ID from your system prompt (look for "The exact model ID is..."). Display names: `claude-opus-4-6` → "Opus 4.6", `claude-sonnet-4-6` → "Sonnet 4.6", `claude-haiku-4-5` → "Haiku 4.5". For thinking level, report your reasoning effort: ≤33 → "low", 34-66 → "medium", ≥67 → "high". If uncertain, show "default". This helps the user decide if they need to switch models before starting work.
 - PROJECT: current directory name + version from STATE.md "Current app version". If no version in STATE.md, omit the version.
 - FEATURE: from STATE.md "Active feature" line. If no active feature, show "No active feature".
 - PROGRESS: count [x] and [ ] steps for the current feature in todo.md ## Current. Bar uses █ for done, ░ for remaining, scaled to 10 characters. If no current feature, omit this line.
@@ -54,7 +57,7 @@ Card rules:
   - **Steps completed trend:** Calculate average steps completed per session. If consistently 0, flag it.
   - **Time-of-day patterns:** Check session dates/times. If most sessions are very late (after midnight), note the pattern.
   Show 2-3 bullets max. Keep coaching tone constructive and specific — use real numbers. If stats.json doesn't exist or has no recentSessions, omit the FOCUS section entirely.
-- BORDER: size the box to fit the longest content line. All lines padded with spaces so the right border │ aligns consistently. Same conventions as /sitrep and /vitals.
+- BORDER: Fixed width — always 60 `─` characters between `│` borders (62 total per line). All content lines: `│` + 2 spaces + content + trailing spaces + `│` = 62 chars. If content would exceed 56 characters, truncate with `…`. Never dynamically size — the box is always the same width.
 
 Wait for sign-off before executing anything.
 
@@ -85,10 +88,13 @@ Show a bordered status card:
 │  BLOCKERS     [from STATE.md or "None"]           │
 │  DECISIONS    [pending decisions or "None"]        │
 │  QUEUE        [next feature or "Empty"]           │
+├──────────────────────────────────────────────────┤
+│  Model: [model] · Thinking: [level]              │
 └──────────────────────────────────────────────────┘
 ```
 
 Card rules:
+- MODEL ROW: same as kick-off mode — final row with `Model: [name] · Thinking: [level]`, padded to match the card's full width.
 - WORKING ON: from todo.md ## Current heading — feature name, type tag [APP/INFRA], and version range. If no current feature, show "No active feature" and skip PROGRESS, PHASE GOAL, and SINCE LAST MILESTONE sections.
 - PHASE GOAL: read the feature description under ## Current in todo.md. If a plan file is referenced (e.g. "Plan: .claude/plans/..."), read it and summarise what "done" looks like for this feature in one sentence. If no plan file, summarise from the step list.
 - PROGRESS: count [x] and [ ] steps for the current feature. Bar uses █ for done, ░ for remaining, scaled to 10 characters. Show "N/M steps (X%)" where X is the percentage complete.
@@ -98,5 +104,5 @@ Card rules:
 - BLOCKERS: from STATE.md ## Blockers & Edge Cases. Show content or "None".
 - DECISIONS: scan STATE.md for any pending decisions, open questions, or items needing user input. "None" if nothing found.
 - QUEUE: first feature heading from ## Queue in todo.md. Show name + type tag, or "Empty" if nothing queued.
-- BORDER: size the box to fit the longest content line. All lines padded with spaces so the right border │ aligns consistently. Same conventions as /sitrep and /vitals.
+- BORDER: Fixed width — always 60 `─` characters between `│` borders (62 total per line). All content lines: `│` + 2 spaces + content + trailing spaces + `│` = 62 chars. If content would exceed 56 characters, truncate with `…`. Never dynamically size — the box is always the same width.
 - This is READ-ONLY. Do not start the session clock. Do not modify any files. Do not execute anything.

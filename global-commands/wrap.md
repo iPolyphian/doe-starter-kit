@@ -126,18 +126,18 @@ Use `result.leaderboard` (already consolidated per day, 10 entries). Mark today'
 
 ```
   📋 LAST 10 DAYS
-  ┌────────────┬──────────────┬──────────────────────────────┐
-  │ Date       │ Commits/Lines│ Title                        │
-  ├────────────┼──────────────┼──────────────────────────────┤
-  │ 02/03 *    │   4 / +146   │ THE BLUEPRINT OFFENSIVE      │
-  │ 01/03      │  18 / +1297  │ THE LAST CARD (+5 more)      │
-  │ 28/02      │  59 / +2627  │ THE VERSION WARS (+8)        │
-  │ 27/02      │           -- │ --                           │
-  │ ...        │              │                              │
-  └────────────┴──────────────┴──────────────────────────────┘
+  ┌────────────┬──────────────┬────────────────┬─────────────────────────┐
+  │ Date       │ Commits/Lines│ Model          │ Title                   │
+  ├────────────┼──────────────┼────────────────┼─────────────────────────┤
+  │ 02/03 *    │   4 / +146   │ Opus 4.6 / hi  │ THE BLUEPRINT OFFENSIVE │
+  │ 01/03      │  18 / +1297  │ Opus 4.6 / hi  │ THE LAST CARD (+5 more) │
+  │ 28/02      │  59 / +2627  │ Sonnet 4.6 / md│ THE VERSION WARS (+8)   │
+  │ 27/02      │           -- │ --             │ --                      │
+  │ ...        │              │                │                         │
+  └────────────┴──────────────┴────────────────┴─────────────────────────┘
 ```
 
-Always include the header row and separator. Adapt column widths to fit content.
+Always include the header row and separator. Adapt column widths to fit content. Model column shows `[name] / [thinking]` abbreviated: hi = high, md = medium, lo = low. Use the model and thinking level from the current session for today's row. For past days, pull from `stats.json` `recentSessions` if available, otherwise show `--`.
 
 ### Part 7: Vibe Check
 
@@ -236,3 +236,4 @@ Then the footer:
 - Title card must reference specific files, features, or data from this session.
 - If stats.json doesn't exist yet, this is session 1. Don't make a big deal about firsts.
 - Commit stats.json BEFORE printing the wrap-up so the push includes it.
+- Model info is shown in the LAST 10 DAYS leaderboard table, not the footer.
