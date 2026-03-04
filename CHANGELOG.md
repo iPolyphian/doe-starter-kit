@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.9.2] — 2026-03-04
+
+### Fixed
+- **`context_monitor.py` file accumulation** — replaced per-PID tracker files (`.context-{pid}.json`) with a single `.context-usage.json` that gets overwritten each tool call. Prevents hundreds of orphan files accumulating in `.tmp/` per session. Same fix applied to warn marker (`.context-warned-{pid}` → `.context-warned`).
+
+---
+
 ## [v1.9.1] — 2026-03-04
 
 ### Added

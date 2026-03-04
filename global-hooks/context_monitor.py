@@ -28,11 +28,10 @@ DEFAULT_BUDGET = 200_000
 def main():
     hook_input = json.load(sys.stdin)
 
-    pid = os.getpid()
-    tracker_file = TMP_DIR / f".context-{pid}.json"
+    tracker_file = TMP_DIR / ".context-usage.json"
 
     # Load or initialise tracker
-    tracker = _load_tracker(tracker_file, pid)
+    tracker = _load_tracker(tracker_file)
 
     # Estimate tokens from this tool use
     input_str = json.dumps(hook_input.get("tool_input", {}))
@@ -55,20 +54,20 @@ def main():
             f"Context at ~{pct:.0%} ({tracker['tokens']:,}/{budget:,} est. tokens) "
             f"— wrap up current work and commit NOW"
         )
-        _maybe_warn(pid, f"\U0001f6d1 {msg}")
+        _maybe_warn(f"\U0001f6d1 {msg}")
         print(json.dumps({"warning": msg}))
     elif pct >= WARN_PCT:
         msg = (
             f"Context at ~{pct:.0%} ({tracker['tokens']:,}/{budget:,} est. tokens) "
             f"— consider committing soon"
         )
-        _maybe_warn(pid, f"\u26a0\ufe0f {msg}")
+        _maybe_warn(f"\u26a0\ufe0f {msg}")
         print(json.dumps({"warning": msg}))
     else:
         print(json.dumps({}))
 
 
-def _load_tracker(tracker_file, pid):
+def _load_tracker(tracker_file):
     """Load existing tracker or initialise with budget detection."""
     if tracker_file.exists():
         try:
@@ -77,11 +76,11 @@ def _load_tracker(tracker_file, pid):
             pass
 
     # Initialise new tracker with budget detection
-    budget = _detect_budget(pid)
+    budget = _detect_budget()
     return {"tokens": 0, "budget": budget}
 
 
-def _detect_budget(pid):
+def _detect_budget():
     """Check active wave for model-specific budget, else use default."""
     sessions_file = WAVES_DIR / "sessions.json"
     if not sessions_file.exists():
@@ -89,7 +88,7 @@ def _detect_budget(pid):
 
     try:
         sessions = json.loads(sessions_file.read_text())
-        pid_str = str(pid)
+        pid_str = str(os.getpid())
 
         for session in sessions.get("sessions", []):
             sid = session.get("sessionId", "")
@@ -117,9 +116,9 @@ def _budget_for_task(task_id):
     return DEFAULT_BUDGET
 
 
-def _maybe_warn(pid, msg):
+def _maybe_warn(msg):
     """Write to stderr at most once per WARN_INTERVAL seconds."""
-    marker = TMP_DIR / f".context-warned-{pid}"
+    marker = TMP_DIR / ".context-warned"
     now = time.time()
 
     if marker.exists():
