@@ -51,3 +51,15 @@ if [ -n "$STAGED_FILES" ]; then
         fi
     done
 fi
+
+# ─── Contract verification (solo mode gate) ───
+# Checks current todo.md step's contract criteria are all [x] before allowing commit.
+# Skip with: SKIP_CONTRACT_CHECK=1 git commit -m '...'
+# Skip ALL hooks with: git commit --no-verify
+
+if [ "${SKIP_CONTRACT_CHECK:-0}" != "1" ]; then
+    python3 execution/check_contract.py 2>&1
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
+fi

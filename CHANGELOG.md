@@ -7,6 +7,15 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.18.4] — 2026-03-05
+
+Pre-commit hook now gates on contract verification before allowing commits.
+
+### Added
+- **`.githooks/pre-commit`** — contract verification gate calls `execution/check_contract.py` before commit; skip with `SKIP_CONTRACT_CHECK=1`
+
+---
+
 ## [v1.18.2] — 2026-03-05
 
 Contract auto-generation in `/agent-launch`.
