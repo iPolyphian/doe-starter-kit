@@ -7,6 +7,16 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.12.7] — 2026-03-05
+
+Upgraded /crack-on to bordered card format matching stand-up, sitrep, and other commands.
+
+### Changed
+- `/crack-on`: full bordered card with project in header, feature, progress bar, DOE Kit status, picking-up step with plain English summary, and model row
+- `/crack-on`: removed separate model check paragraph — now integrated into card
+
+---
+
 ## [v1.12.6] — 2026-03-05
 
 Bordered card alignment fix and bidirectional DOE sync detection across all 8 global command files.
