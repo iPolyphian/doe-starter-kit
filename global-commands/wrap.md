@@ -39,148 +39,107 @@ result.stats        → the full updated stats.json
 
 Commit stats.json with message: "Update session stats".
 
-## Step 3: Print Session Wrap-Up
+## Step 3: Generate HTML Wrap-Up
 
-Build the full wrap-up and print it as one block. Use the script's JSON output for all numbers.
+Build the wrap-up as an HTML page using `execution/wrap_html.py`. This renders beautifully in the browser instead of fighting terminal formatting.
 
-### Part 1: Title Card
+### 3a: Compose the wrap-up data
 
-Write a dramatic title and 3-4 line narrative about the session. Always reference specific files, features, or data from this session. Be melodramatic — think movie poster tagline meets opening crawl. One style, every time:
+Using the stats JSON from Step 2, compose a JSON object with this schema. You must write the creative content (title, narrative, journey, vibe) yourself based on what happened this session:
 
-```
-╔══════════════════════════════════════════╗
-║                                          ║
-║        P R O J E C T   N A M E          ║
-║                                          ║
-║     Episode [N]: [TITLE IN CAPS]         ║
-║                                          ║
-╚══════════════════════════════════════════╝
-
-[Dramatic opening line about the state of the codebase.]
-[Line referencing what was actually built this session.]
-[Line referencing specific challenges or data wrangled.]
-[Line about what lies ahead, trailing off into the distance...]
-```
-
-The project name is the current directory name (uppercased), displayed with spaces between each letter for a large, bold feel (e.g. `M O N T Y`). Episode N = `result.stats.lifetime.totalSessions`. Title and crawl MUST reference actual features, real files, and real problems. **Generate the title card programmatically** — use `.center(W)` to center each `║` line within the exact inner width (W = 42 minimum, expand if the spaced name or episode title is wider than 38 chars). Never hand-pad the title card. **Output the title card box inside a code fence** (triple backticks) so the terminal preserves leading spaces for centering. The narrative lines go below the code fence as plain markdown paragraphs — no leading spaces, no indentation. Each line is its own paragraph.
-
-### Part 2: Vibe Check
-
-Determine the vibe from what actually happened this session:
-- Smooth session, no failures, 5+ commits → `😎 Smooth sailing`
-- Clean but small session → `😌 Clean & quiet`
-- Had failures but recovered → `💪 Hard-fought win`
-- Had failures, messy → `🫠 We got there eventually`
-- Single quick fix → `🩹 Quick patch`
-- Massive output (1000+ lines) → `🏭 Factory floor`
-- Mostly docs/config changes → `🧹 Housekeeping`
-
-```
-  🎭 VIBE: [mood]
-```
-
-### Part 3: The Journey
-
-```
-  📜 THE JOURNEY
-  [2-4 lines telling the specific story of what happened this session.
-   Reference real files, real problems, real solutions.
-   If it was a grind, say so. If something clicked, celebrate it.
-   Be genuine — not generic summaries.]
-```
-
-### Part 4: Commits
-
-List commits in chronological order from `result.metrics.commitLog`.
-
-```
-  🔖 COMMITS
-     • [short hash] [message]
-     • [short hash] [message]
+```json
+{
+  "projectName": "PROJECT_DIR_NAME_UPPERCASED",
+  "episode": result.stats.lifetime.totalSessions,
+  "title": "Short Dramatic Title",
+  "narrative": [
+    "Dramatic opening line about the state of the codebase.",
+    "Line referencing what was actually built this session.",
+    "Line referencing specific challenges or data wrangled.",
+    "Line about what lies ahead, trailing off..."
+  ],
+  "vibe": {"emoji": "EMOJI", "text": "Vibe description"},
+  "journey": "2-4 sentences. Reference real files, real problems, real solutions. Be genuine.",
+  "metrics": {
+    "commits": N,
+    "linesAdded": N,
+    "linesRemoved": N,
+    "filesTouched": N,
+    "stepsCompleted": N,
+    "sessionDuration": "Xh Ym",
+    "agentsSpawned": N,
+    "commitLog": [
+      {"hash": "abc1234", "time": "HH:MM", "message": "Commit message", "type": "normal|fix|test"}
+    ]
+  },
+  "timeline": [
+    {"time": "HH:MM", "desc": "Session started", "dur": "", "type": "start"},
+    {"time": "HH:MM", "desc": "What happened", "dur": "Nm", "type": "normal|major|fix"}
+  ],
+  "decisions": ["Decision 1", "Decision 2"],
+  "learnings": ["Learning 1", "Learning 2"],
+  "checks": {
+    "audit": {"pass": N, "warn": N, "fail": N, "details": ["detail string if warn/fail"]},
+    "doeKit": {"version": "vX.Y.Z", "synced": true|false}
+  },
+  "footer": {
+    "session": N,
+    "streak": N,
+    "lifetimeCommits": N
+  },
+  "nextUp": "What to do next session -- pull from todo.md"
+}
 ```
 
-### Part 5: Decisions & Learnings
+### 3b: Vibe selection
 
-```
-  📝 DECISIONS LOGGED
-     • [decisions written to STATE.md, or "None this session"]
+Pick the vibe based on what happened:
+- Smooth session, no failures, 5+ commits: `{"emoji": "😎", "text": "Smooth sailing"}`
+- Clean but small session: `{"emoji": "😌", "text": "Clean & quiet"}`
+- Had failures but recovered: `{"emoji": "💪", "text": "Hard-fought win"}`
+- Had failures, messy: `{"emoji": "🫠", "text": "We got there eventually"}`
+- Single quick fix: `{"emoji": "🩹", "text": "Quick patch"}`
+- Massive output (1000+ lines): `{"emoji": "🏭", "text": "Factory floor"}`
+- Mostly docs/config changes: `{"emoji": "🧹", "text": "Housekeeping"}`
 
-  🧠 LEARNINGS CAPTURED
-     • [learnings written, or "None this session"]
-```
+### 3c: Timeline construction
 
-### Part 6: The Numbers
+Build the timeline from `result.metrics.commitLog`:
+- First entry: session start time from `.tmp/.session-start`, type "start"
+- Each commit: local time, short description (truncate long messages), duration since previous event, type:
+  - "major" for feature additions, new files, significant changes
+  - "fix" for bug fixes, corrections
+  - "normal" for everything else (housekeeping, docs, state updates)
+- Group rapid commits (< 1 min apart) into a single timeline entry
 
-Use `result.metrics` for all values. For agents spawned, count how many times the Agent tool was invoked during this session (review your own conversation history). Count each `Agent` tool call as 1, regardless of whether it ran in foreground or background.
+### 3d: Commit classification
 
-```
-══════════════════════════════════════════════
-  📊 THE NUMBERS
-══════════════════════════════════════════════
+For each commit in commitLog, set the type:
+- "test" if the message contains "test" and it's clearly a test artifact (not a test framework)
+- "fix" if the message starts with "Fix" or "fix:"
+- "normal" for everything else
 
-     🔖 [X] commits        📁 [X] files changed
-     📏 +[X] / -[Y] lines  📋 [X] steps completed
-     ⏱️ [sessionDuration] session time
-     🤖 [X] agents spawned
+### 3e: Generate and open
 
-══════════════════════════════════════════════
-```
-
-### Part 7: Session Timeline
-
-Use `result.metrics.commitLog` for commit times and messages. Read `.tmp/.session-start` for the start time.
-
-```
-  ⏱️ SESSION TIMELINE
-  ┌───────┬──────────────────────────────────────────────┬──────┬──────┐
-  │ 20:30 │ Session started                              │      │      │
-  │ 20:44 │ Add feature showcase page (v0.13.4)          │  14m │  70% │
-  │ 20:50 │ Update session stats                         │   6m │  30% │
-  ├───────┴──────────────────────────────────────────────┼──────┼──────┤
-  │                                               Total │  20m │ 100% │
-  └─────────────────────────────────────────────────────┴──────┴──────┘
+Run:
+```bash
+python3 execution/wrap_html.py --json '<the JSON string>' --output .tmp/wrap.html
 ```
 
-Rules:
-- First row is always "Session started" with the local time from `.tmp/.session-start`.
-- Each subsequent row: local time of the commit, commit message, minutes since the previous event (right-aligned), and percentage of total session time (right-aligned).
-- Total at bottom: minutes from session start to now, and 100%.
-- If `.tmp/.session-start` doesn't exist, skip this section and print: `⏱️ No session timeline — start with /crack-on or /stand-up`.
-
-### Part 8: System Checks & Footer
-
-Print the section heading first: `  🔍 SYSTEM CHECKS`
-
-Then show audit results and DOE Kit sync status in a bordered block. **Generate this box programmatically** — collect all content lines, compute `W = max(len(l) for l in lines) + 4`, define `line(c)` as `f"│  {c}".ljust(W + 1) + "│"`, then pass ALL rows through `line()` — never construct `f"│{...}│"` manually. Never hand-pad this box.
-
-Rules:
-- Always show both Audit and DOE Kit lines inside the border.
-- If audit has only PASS results, show one line with counts and "all clear".
-- If audit has WARN or FAIL, show summary line + indented detail for each non-PASS finding.
-- DOE Kit: Show kit's latest tag. `vX.Y.Z *` if either kit tag is newer than STATE.md's version or any syncable files differ (the `*` means `/sync-doe` or `/pull-doe` needed). `vX.Y.Z` if neither. If `~/doe-starter-kit` doesn't exist, show `DOE Kit: not installed`.
-
-Example content lines (padding is illustrative — real padding must be computed):
-- `  Audit:   5 PASS, 0 WARN, 0 FAIL -- all clear`
-- `  DOE Kit: v1.3.0`
-- `    FAIL  HTML file is v0.15.0 but STATE.md says v0.15.1`
-- `    WARN  learnings.md -- 2 minor versions behind`
-
-Then the footer:
+Then open in the browser:
+```bash
+open .tmp/wrap.html
 ```
-════════════════════════════════════════════════════════════════
-  STATE.md ✅ | todo.md ✅ | stats.json ✅ | Committed ✅
-  Session [N] · 🔥 Day [streak] · Lifetime: [Y] commits
-════════════════════════════════════════════════════════════════
 
-  🎯 NEXT UP
-  [What to do next session — pull from todo.md]
-```
+Print a one-line summary to the terminal: `Session [N] wrap-up opened in browser. [X] commits, [Y] steps, [duration].`
 
 ## Important Rules
 
 - Pull ALL numbers from the wrap_stats.py JSON output. Never estimate or make up stats.
-- The Journey section must be genuine — reference specific things that happened.
-- Title card must reference specific files, features, or data from this session.
-- If stats.json doesn't exist yet, this is session 1. Don't make a big deal about firsts.
-- Commit stats.json BEFORE printing the wrap-up so the push includes it.
-- **Box-drawing alignment:** Use Unicode box-drawing characters for borders (`┌─┐`, `├─┤`, `└─┘`, `│`). Content inside the `│` borders must be ASCII-only: no emojis, no Unicode symbols (no `·`, `✓`, `⚠️`, `—`, `…`). Use ASCII equivalents: commas for separators, `--` for dashes, `ok`/`all clear` for checkmarks. Emojis are fine in section headers OUTSIDE the box. **Generate boxes programmatically** — use a Python snippet with `.ljust(W)` to pad content lines to the exact inner width. Never hand-pad bordered output. If a commit message contains non-ASCII characters, replace them with ASCII equivalents before placing in a box.
+- The Journey section must be genuine -- reference specific things that happened.
+- Title and narrative MUST reference actual features, real files, and real problems from this session.
+- If stats.json doesn't exist yet, this is session 1.
+- Commit stats.json BEFORE generating the wrap-up so the push includes it.
+- The `decisions` array should list decisions written to STATE.md this session, or `["None this session"]`.
+- The `learnings` array should list learnings written to learnings.md or ~/.claude/CLAUDE.md, or `["None this session"]`.
+- For agents spawned, count how many times the Agent tool was invoked during this session.
