@@ -452,6 +452,19 @@ def cmd_claim(as_json=False, parent_pid=None):
     # Create worktree for the claimed task
     wt_path, branch = create_worktree(wave_id, claimed_task["taskId"])
 
+    # Verify worktree was actually created
+    if not Path(wt_path).exists():
+        print(f"ERROR: Worktree creation succeeded but directory not found: {wt_path}")
+        # Release the claim since we can't work in a missing worktree
+        def _release(claims_data):
+            claim = claims_data.get("claims", {}).get(claimed_task["taskId"])
+            if claim:
+                claim["status"] = "pending"
+                claim["releasedAt"] = now_iso()
+            return claims_data
+        atomic_modify(CLAIMS_FILE, _release)
+        sys.exit(1)
+
     # Update session with claimed task info + worktree
     def _update_session(sessions):
         for s in sessions.get("sessions", []):
@@ -502,6 +515,11 @@ def cmd_claim(as_json=False, parent_pid=None):
             print(f"  Owns: {', '.join(claimed_task['owns'])}")
         if claimed_task.get("reads"):
             print(f"  Reads: {', '.join(claimed_task['reads'])}")
+        print()
+        print("  Reminders:")
+        print("  - Do NOT edit shared files on master (todo.md, CLAUDE.md, learnings.md)")
+        print("  - Run /agent-verify before --complete to check contract criteria")
+        print("  - Use --complete <taskId> when done (runs verification gate)")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -615,6 +633,22 @@ def cmd_complete(task_id, tokens=0, commits=0, skip_verify=False):
 
     print(f"Task '{task_id}' marked as completed")
     print(f"  Worktree removed. Branch '{wave_id}/{task_id}' preserved for merge.")
+
+    # Post-complete guidance: check if all tasks are done
+    all_claims = atomic_read(CLAIMS_FILE)
+    all_statuses = [
+        all_claims.get("claims", {}).get(t["taskId"], {}).get("status", "pending")
+        for t in wave_data.get("tasks", [])
+    ]
+    remaining = sum(1 for s in all_statuses if s != "completed")
+    if remaining == 0:
+        print()
+        print("  All tasks complete. Merge from coordinator terminal: /hq --merge")
+        print("  This terminal's work is finished — safe to close.")
+    else:
+        print()
+        print(f"  Your task is done. {remaining} task(s) still in progress.")
+        print("  Safe to close this terminal.")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -896,6 +930,95 @@ def cmd_reclaim(as_json=False):
 
 
 # ══════════════════════════════════════════════════════════════
+# Todo.md update after merge
+# ══════════════════════════════════════════════════════════════
+
+def _update_todo_after_merge(wave_data, merged_task_ids):
+    """Mark merged wave tasks as [x] in todo.md, including contract criteria.
+
+    Matches wave tasks to todo.md steps via versionTag. For each matched step:
+    - Marks the step line from [ ] to [x] with completion timestamp
+    - Marks all contract criteria from [ ] to [x]
+
+    Only updates steps whose taskId is in merged_task_ids.
+    """
+    todo_path = PROJECT_ROOT / "tasks" / "todo.md"
+    if not todo_path.exists():
+        print("  WARN: tasks/todo.md not found — skipping todo update")
+        return
+
+    # Build versionTag → taskId mapping from wave
+    version_to_task = {}
+    for task in wave_data.get("tasks", []):
+        vtag = (task.get("versionTag") or "").strip()
+        if vtag and task["taskId"] in merged_task_ids:
+            version_to_task[vtag] = task["taskId"]
+
+    if not version_to_task:
+        print("  WARN: No versionTags to match in wave — skipping todo update")
+        return
+
+    lines = todo_path.read_text(encoding="utf-8").splitlines()
+    in_current = False
+    updated_steps = []
+    current_step_version = None
+    timestamp = datetime.now(timezone.utc).strftime("%H:%M %d/%m/%y")
+
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+
+        if stripped.startswith("## Current"):
+            in_current = True
+            continue
+        if in_current and stripped.startswith("## "):
+            in_current = False
+            current_step_version = None
+            continue
+
+        if not in_current:
+            continue
+
+        # Match step lines like: 1. [ ] Description -> v0.17.0
+        step_match = re.match(r"^(\s*)(\d+)\.\s+\[ \]\s+(.+?)(?:\s*->\s*(v[\d.]+))?\s*$", line)
+        if step_match:
+            indent, step_num, desc, version = step_match.groups()
+            version = (version or "").strip()
+            if version in version_to_task:
+                current_step_version = version
+                # Mark step as [x] with timestamp
+                lines[i] = f"{indent}{step_num}. [x] {desc} -> {version} *(completed {timestamp})*"
+                updated_steps.append(version)
+            else:
+                current_step_version = None
+            continue
+
+        # Also match already-started steps (in case of partial state)
+        started_match = re.match(r"^(\s*)(\d+)\.\s+\[[ x]\]\s+(.+?)(?:\s*->\s*(v[\d.]+))", line)
+        if started_match:
+            version = (started_match.group(4) or "").strip()
+            current_step_version = version if version in version_to_task else None
+            continue
+
+        # Mark contract criteria [x] if we're inside a matched step
+        if current_step_version and current_step_version in version_to_task:
+            criteria_match = re.match(r"^(\s*-\s+)\[ \]\s+(\[(?:auto|manual)\].*)$", stripped)
+            if criteria_match:
+                prefix = criteria_match.group(1)
+                rest = criteria_match.group(2)
+                # Preserve leading whitespace from original line
+                leading = line[:len(line) - len(line.lstrip())]
+                lines[i] = f"{leading}{prefix}[x] {rest}"
+
+    if updated_steps:
+        todo_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        print(f"  Todo.md updated: {len(updated_steps)} step(s) marked [x] ({', '.join(updated_steps)})")
+        print(f"  Run the feature retro now? (Changelog, roadmap, move to Done)")
+    else:
+        unmatched = list(version_to_task.keys())
+        print(f"  WARN: No matching steps found in todo.md for versions: {', '.join(unmatched)}")
+
+
+# ══════════════════════════════════════════════════════════════
 # --merge
 # ══════════════════════════════════════════════════════════════
 
@@ -1131,6 +1254,9 @@ def cmd_merge(as_json=False):
         "totalCommits": total_commits,
         "totalConflicts": total_conflicts,
     })
+
+    # Auto-update todo.md — mark merged steps [x] and their contract criteria [x]
+    _update_todo_after_merge(wave_data, merged)
 
     # Clean up wave state files and per-terminal session/heartbeat markers
     for f in (CLAIMS_FILE, SESSIONS_FILE):
