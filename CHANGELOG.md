@@ -7,6 +7,15 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.13.2] — 2026-03-05
+
+Task contracts — testable completion criteria for non-trivial todo.md steps.
+
+### Added
+- **Task contract format** in todo.md format rules — `Contract:` block with verifiable criteria. Prevents premature "done" marking on complex steps.
+
+---
+
 ## [v1.13.1] — 2026-03-05
 
 CLAUDE.md enrichments — identity reframe, research separation, sycophancy-aware verification, subagent context savings, and best practices trigger.

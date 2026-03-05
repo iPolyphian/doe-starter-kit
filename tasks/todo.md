@@ -14,6 +14,14 @@ FORMAT RULES (Claude: follow these when updating this file)
 - Keep ## Done trimmed to last 3 completed features. Move older ones to tasks/archive.md with all steps and timestamps preserved. Newest at top of archive.
 - Don't duplicate the product roadmap here. Reference it: "See ROADMAP.md"
 - Progress tracking happens HERE, not in .claude/plans/. Plans are reference docs.
+- **Task contracts** for non-trivial steps: add a `Contract:` block with testable completion criteria. Simple tasks (quick fixes, mechanical edits) keep one-line descriptions. Use contracts when the step has multiple outputs, affects existing behaviour, or could be marked "done" prematurely.
+  Format:
+  N. [ ] Step name → vX.Y.Z
+    Contract:
+    - [ ] When [action], then [expected result]
+    - [ ] Must not break [existing functionality]
+    - [ ] Verify: [specific check that must pass]
+    Agent cannot mark the step done until all contract items are verified.
 - This format can be changed — just update these rules and Claude will follow the new convention.
 -->
 
