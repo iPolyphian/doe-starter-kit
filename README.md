@@ -55,7 +55,7 @@ A template repository containing everything you need to run Claude Code with gua
 | **Session Lifecycle** | `/stand-up`, `/crack-on`, `/sitrep`, `/wrap`, `/eod` | Dual-mode stand-up, track progress, gamified wrap-up, end-of-day report |
 | **Quality** | `/audit`, `/quick-audit`, `/vitals`, `/fact-check`, `/review`, `/doe-health`, `/codemap` | Claim auditing, workspace health, adversarial review, diagnostics, project index |
 | **Visual** | `/project-recap`, `/diff-review`, `/plan-review`, `/generate-visual-plan`, `/generate-web-diagram`, `/generate-slides` | HTML visual explainers, diagrams, slide decks |
-| **Multi-Agent** | `/hq`, `/agent-launch`, `/agent-start` | Wave dashboard, automated wave builder, task claiming |
+| **Multi-Agent** | `/hq`, `/agent-launch` | Wave dashboard, automated wave builder + task claiming |
 | **Utility** | `/pitch`, `/roast`, `/eli5`, `/shower-thought` | Feature ideas, code roasts, ELI5, programming observations |
 | **Infrastructure** | `/sync-doe`, `/pull-doe`, `/commands` | Sync DOE improvements, pull kit updates, installation health check |
 
