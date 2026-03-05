@@ -7,6 +7,16 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.18.2] — 2026-03-05
+
+Contract auto-generation in `/agent-launch`.
+
+### Changed
+- **`/agent-launch`** — added Step 0: scans Queue and Current for missing contracts, auto-generates from plan files, presents for user approval before wave creation
+- **`global-commands/README.md`** — updated `/agent-launch` description
+
+---
+
 ## [v1.17.3] — 2026-03-05
 
 Complete verification coverage — solo, wave, and ad-hoc work.
