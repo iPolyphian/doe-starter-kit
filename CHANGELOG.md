@@ -7,6 +7,16 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.13.7] — 2026-03-05
+
+/codemap command and /wrap structural change detection.
+
+### Added
+- `/codemap` command — generates `.claude/codemap.md` with project structure, key files, data flow, and active patterns
+- `/wrap` step 8 — detects new/moved/deleted files and prompts to run /codemap
+
+---
+
 ## [v1.13.6] — 2026-03-05
 
 Self-annealing enhancement — root cause analysis and structured format for significant failures.

@@ -9,6 +9,7 @@ Before ending this session, complete all steps in order.
 5. **Clean up session timer** — Run `rm -f .tmp/.session-start` to delete the session timer file.
 6. **DOE Kit sync check** — If `~/doe-starter-kit` exists, check two things: (1) Is the kit tag newer than STATE.md's "DOE Starter Kit" version? (inbound). (2) Do any key syncable files differ? (outbound). Diff key files (CLAUDE.md, ~/.claude/commands/*.md, .githooks/*, .claude/hooks/*.py) against the starter kit. If either condition is true, record for the System Checks section (meaning `/sync-doe` or `/pull-doe` needed). If neither, record as synced.
 7. **Quick audit** — Run `python3 execution/audit_claims.py --hook` (fast checks only). Record the PASS/WARN/FAIL counts for the System Checks section. If any FAIL items exist, fix them before proceeding. WARN items can be noted and left for the next session.
+8. **Structural change check** — Run `git diff --name-status HEAD~$(git rev-list --count HEAD --since="$(cat .tmp/.session-start 2>/dev/null || echo '1 hour ago')") 2>/dev/null` to detect new/moved/deleted files this session. If structural changes are found (files added, renamed, or deleted — not just modified), ask: "Structural changes detected — run /codemap to update the project index?" Only run `/codemap` if the user says yes.
 
 ## Step 2: Compute Session Stats
 
