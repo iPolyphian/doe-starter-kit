@@ -31,14 +31,19 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-PROJECT_ROOT = Path.cwd()
+# Resolve project root (handles worktree context automatically)
+sys.path.insert(0, str(Path(__file__).parent))
+from doe_utils import resolve_project_root
+
+MAIN_ROOT, WORKTREE_ROOT = resolve_project_root()
+PROJECT_ROOT = MAIN_ROOT  # Wave state always resolves from main root
 WAVES_DIR = PROJECT_ROOT / ".tmp" / "waves"
 CLAIMS_FILE = WAVES_DIR / "claims.json"
 SESSIONS_FILE = WAVES_DIR / "sessions.json"
 STATS_FILE = PROJECT_ROOT / ".claude" / "stats.json"
 
 WIP_LIMIT = 2  # max tasks per terminal
-STALE_THRESHOLD = 120  # seconds (2 minutes)
+STALE_THRESHOLD = 300  # seconds (5 minutes)
 WAVE_COST_WARN = 4.00  # £ — warn if total wave cost exceeds this
 TOKEN_WARN = {"haiku": 50_000, "sonnet": 150_000, "opus": 300_000}  # per-task thresholds
 
@@ -527,21 +532,34 @@ def cmd_complete(task_id, tokens=0, commits=0, skip_verify=False):
         criteria = task.get("acceptanceCriteria", [])
         auto_criteria = []
         for ac in criteria:
-            if isinstance(ac, dict) and ac.get("type", "auto") == "auto" and ac.get("verify"):
-                auto_criteria.append(ac["verify"])
+            if isinstance(ac, dict):
+                if ac.get("type", "auto") == "auto" and ac.get("verify"):
+                    auto_criteria.append(ac["verify"])
+                # Skip manual criteria
             elif isinstance(ac, str):
-                auto_criteria.append(ac)
+                # Skip criteria prefixed with "manual:"
+                if not ac.strip().lower().startswith("manual:"):
+                    auto_criteria.append(ac)
 
         if auto_criteria:
+            # Resolve worktree path for file verification:
+            # Check claims for this task's worktree, fall back to WORKTREE_ROOT
+            claims = atomic_read(CLAIMS_FILE)
+            claim = claims.get("claims", {}).get(task_id, {})
+            verify_root = claim.get("worktree") or str(WORKTREE_ROOT)
+
             try:
-                sys.path.insert(0, str(PROJECT_ROOT))
+                # Try importing from main project root first, then worktree
+                for import_root in [str(PROJECT_ROOT), verify_root]:
+                    if import_root not in sys.path:
+                        sys.path.insert(0, import_root)
                 from execution.verify import run_all_criteria, run_build_step
-                build = run_build_step()
+                build = run_build_step(working_dir=verify_root)
                 if build and build["status"] == "FAIL":
                     print(f"VERIFICATION BLOCKED: Build failed — {build['detail']}")
                     print("  Fix the build or use --skip-verify to bypass")
                     sys.exit(1)
-                results = run_all_criteria(auto_criteria)
+                results = run_all_criteria(auto_criteria, working_dir=verify_root)
                 failures = [r for r in results if r["status"] == "FAIL"]
                 for r in results:
                     print(f"  [{r['status']}] {r['criterion']}")
@@ -1682,15 +1700,19 @@ def _analyze_wave(wave_data):
             promoted = []
             for i, ac in enumerate(task["acceptanceCriteria"]):
                 if isinstance(ac, str):
-                    # Auto-promote flat string to structured object
-                    promoted.append({"text": ac, "type": "auto", "verify": ac})
+                    # Detect manual criteria by prefix
+                    if ac.strip().lower().startswith("manual:"):
+                        promoted.append({"text": ac, "type": "manual", "verify": ""})
+                    else:
+                        # Auto-promote flat string to structured object
+                        promoted.append({"text": ac, "type": "auto", "verify": ac})
                 elif isinstance(ac, dict):
                     promoted.append(ac)
                 else:
                     findings.append(("WARN", f"Task '{tid}' criterion {i}: unexpected format"))
                     continue
 
-                # Validate executable patterns for auto criteria
+                # Validate executable patterns for auto criteria only
                 entry = promoted[-1]
                 if entry.get("type", "auto") == "auto":
                     verify_str = entry.get("verify", "")
@@ -2135,8 +2157,10 @@ def main():
     args = parser.parse_args()
 
     if args.project_root:
-        global PROJECT_ROOT, WAVES_DIR, CLAIMS_FILE, SESSIONS_FILE, STATS_FILE, WORKTREE_DIR
+        global PROJECT_ROOT, MAIN_ROOT, WORKTREE_ROOT, WAVES_DIR, CLAIMS_FILE, SESSIONS_FILE, STATS_FILE, WORKTREE_DIR
         PROJECT_ROOT = Path(args.project_root).resolve()
+        MAIN_ROOT = PROJECT_ROOT
+        WORKTREE_ROOT = Path.cwd()  # Keep actual cwd as worktree root
         WAVES_DIR = PROJECT_ROOT / ".tmp" / "waves"
         CLAIMS_FILE = WAVES_DIR / "claims.json"
         SESSIONS_FILE = WAVES_DIR / "sessions.json"
