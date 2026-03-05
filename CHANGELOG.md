@@ -7,6 +7,17 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.12.5] — 2026-03-05
+
+Model allocation rules — plans and subagents must specify which model and thinking level to use.
+
+### Changed
+- Rule 1: plans must include recommended model + thinking level per step
+- Rule 7: subagents must use deliberate model selection (Opus/Sonnet/Haiku)
+- `/sitrep`: DOE KIT diff wording fix ("check" vs "count")
+
+---
+
 ## [v1.12.4] — 2026-03-04
 
 Standardised DOE sync status format across all 6 global commands. Compact notation replaces verbose text.
