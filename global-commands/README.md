@@ -95,12 +95,8 @@ Multi-agent dashboard. Shows wave status, task claims, session health, and coord
 *Added 03/03/26*
 
 ### `/agent-launch`
-Automated wave builder. Scans Queue and Current for missing contracts, auto-generates them with user approval, then identifies parallelisable features, builds wave JSON, previews conflicts and cost estimate, and launches. After launch, prompts to run `/agent-start`.
+Dual-mode command. **Launch mode** (no active wave): scans Queue and Current for missing contracts, auto-generates them with user approval, identifies parallelisable features, builds wave JSON, previews conflicts and cost, launches, then auto-claims the first task and starts working. **Join mode** (active wave exists): claims the next unclaimed task and starts working immediately. One command for both — run `/agent-launch` in every terminal.
 *Added 04/03/26 · Updated 05/03/26*
-
-### `/agent-start`
-Claims the next available task from the active wave, cd's into its git worktree, shows the assignment details, and starts working immediately. Run in any terminal after `/agent-launch`.
-*Added 05/03/26*
 
 ## Utility
 

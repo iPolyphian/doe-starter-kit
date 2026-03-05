@@ -7,6 +7,18 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.19.0] — 2026-03-05
+
+Combined `/agent-launch` and `/agent-start` into a single dual-mode command.
+
+### Changed
+- **`/agent-launch`** — now auto-detects mode: Launch (no active wave) creates wave and auto-claims first task; Join (active wave) claims next unclaimed task. Replaces the two-command workflow with one command for all terminals.
+
+### Removed
+- **`/agent-start`** — absorbed into `/agent-launch` Join mode. No longer needed as a separate command.
+
+---
+
 ## [v1.18.4] — 2026-03-05
 
 Pre-commit hook now gates on contract verification before allowing commits.
