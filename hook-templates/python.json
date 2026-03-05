@@ -1,0 +1,20 @@
+{
+  "description": "Python quality hooks — activate by merging into .claude/settings.json",
+  "hooks": [
+    {
+      "matcher": "Write|Edit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "cat \"$CLAUDE_TOOL_INPUT\" | python3 -c \"\nimport sys, json, re\ndata = json.load(sys.stdin)\npath = data.get('file_path', data.get('path', ''))\nif not path.endswith('.py'):\n    sys.exit(0)\ncontent = data.get('content', '') + data.get('new_string', '')\nwarnings = []\nfor i, line in enumerate(content.splitlines(), 1):\n    stripped = line.strip()\n    if re.match(r'^except\\s*:', stripped) or re.match(r'^except\\s+Exception\\s*:', stripped):\n        warnings.append(f'  Line {i}: bare exception — catch a specific exception type')\nif warnings:\n    print('WARN: bare exception catching detected:', file=sys.stderr)\n    print('\\n'.join(warnings), file=sys.stderr)\n\"",
+          "description": "Warn if bare except: or except Exception: is used in Python files"
+        },
+        {
+          "type": "command",
+          "command": "cat \"$CLAUDE_TOOL_INPUT\" | python3 -c \"\nimport sys, json, re\ndata = json.load(sys.stdin)\npath = data.get('file_path', data.get('path', ''))\nif not path.endswith('.py'):\n    sys.exit(0)\ncontent = data.get('content', '') + data.get('new_string', '')\nwarnings = []\nfor i, line in enumerate(content.splitlines(), 1):\n    if 'shell=True' in line and ('subprocess' in line or 'Popen' in line or 'run(' in line or 'call(' in line or 'check_output' in line or 'check_call' in line):\n        warnings.append(f'  Line {i}: shell=True in subprocess — security risk, use a list of args instead')\nif warnings:\n    print('WARN: subprocess shell=True detected:', file=sys.stderr)\n    print('\\n'.join(warnings), file=sys.stderr)\n\"",
+          "description": "Warn if shell=True is used in subprocess calls"
+        }
+      ]
+    }
+  ]
+}

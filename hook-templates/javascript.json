@@ -1,0 +1,20 @@
+{
+  "description": "JavaScript quality hooks — activate by merging into .claude/settings.json",
+  "hooks": [
+    {
+      "matcher": "Write|Edit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "cat \"$CLAUDE_TOOL_INPUT\" | python3 -c \"\nimport sys, json\ndata = json.load(sys.stdin)\npath = data.get('file_path', data.get('path', ''))\nif not any(path.endswith(ext) for ext in ('.js', '.ts', '.jsx', '.tsx')):\n    sys.exit(0)\ncontent = data.get('content', '') + data.get('new_string', '')\nwarnings = []\nfor i, line in enumerate(content.splitlines(), 1):\n    stripped = line.strip()\n    if 'console.log' in stripped:\n        warnings.append(f'  Line {i}: console.log found — remove before committing')\nif warnings:\n    print('WARN: console.log detected:', file=sys.stderr)\n    print('\\n'.join(warnings), file=sys.stderr)\n\"",
+          "description": "Warn if console.log is being added to JS/TS files"
+        },
+        {
+          "type": "command",
+          "command": "cat \"$CLAUDE_TOOL_INPUT\" | python3 -c \"\nimport sys, json, re\ndata = json.load(sys.stdin)\npath = data.get('file_path', data.get('path', ''))\nif not any(path.endswith(ext) for ext in ('.js', '.ts', '.jsx', '.tsx')):\n    sys.exit(0)\ncontent = data.get('content', '') + data.get('new_string', '')\nwarnings = []\nfor i, line in enumerate(content.splitlines(), 1):\n    if re.search(r'[^=!<>]==[^=]', line) or re.search(r'!=[^=]', line):\n        if '===' not in line and '!==' not in line:\n            warnings.append(f'  Line {i}: non-strict equality — use === or !==')\nif warnings:\n    print('WARN: non-strict equality detected:', file=sys.stderr)\n    print('\\n'.join(warnings), file=sys.stderr)\n\"",
+          "description": "Warn if non-strict equality (== or !=) is used in JS/TS files"
+        }
+      ]
+    }
+  ]
+}

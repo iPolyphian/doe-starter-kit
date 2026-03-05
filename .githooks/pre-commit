@@ -16,3 +16,38 @@ if [ $EXIT_CODE -ne 0 ]; then
     echo "Fix issues or use --no-verify to skip."
     exit 1
 fi
+
+# ─── Audit sweep (warnings only — never blocks commit) ───
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null)
+
+# Check for console.log in JS/TS files
+JS_FILES=$(echo "$STAGED_FILES" | grep -E '\.(js|ts|jsx|tsx)$' || true)
+if [ -n "$JS_FILES" ]; then
+    for f in $JS_FILES; do
+        MATCHES=$(git diff --cached -- "$f" | grep -E '^\+.*console\.log' || true)
+        if [ -n "$MATCHES" ]; then
+            echo "⚠ console.log in $f (consider removing before production)" >&2
+        fi
+    done
+fi
+
+# Check for TODO without a reference (e.g. TODO(name) or TODO #123)
+if [ -n "$STAGED_FILES" ]; then
+    for f in $STAGED_FILES; do
+        MATCHES=$(git diff --cached -- "$f" | grep -E '^\+.*TODO' | grep -vE 'TODO\s*\(|TODO\s*#' || true)
+        if [ -n "$MATCHES" ]; then
+            echo "⚠ TODO without reference in $f — use TODO(name) or TODO #123" >&2
+        fi
+    done
+fi
+
+# Check for hardcoded localhost URLs
+if [ -n "$STAGED_FILES" ]; then
+    for f in $STAGED_FILES; do
+        MATCHES=$(git diff --cached -- "$f" | grep -E '^\+.*(localhost|127\.0\.0\.1|0\.0\.0\.0):[0-9]+' || true)
+        if [ -n "$MATCHES" ]; then
+            echo "⚠ Hardcoded localhost URL in $f — use config/env variable instead" >&2
+        fi
+    done
+fi

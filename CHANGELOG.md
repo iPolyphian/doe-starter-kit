@@ -7,6 +7,19 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.13.9] — 2026-03-05
+
+Hook templates and pre-commit audit sweep.
+
+### Added
+- `hook-templates/javascript.json` — Claude Code hook template: warns on `console.log` and non-strict equality (`==`/`!=`) in JS/TS files
+- `hook-templates/python.json` — Claude Code hook template: warns on bare exception catching and `shell=True` in subprocess calls
+- `hook-templates/universal.json` — reference doc for hooks already included in the kit
+- Pre-commit audit sweep — warnings (non-blocking) for `console.log` in JS/TS, bare `TODO` without reference, hardcoded localhost URLs
+- Hook Templates section in CUSTOMIZATION.md — explains activation process
+
+---
+
 ## [v1.13.8] — 2026-03-05
 
 /doe-health diagnostic command.

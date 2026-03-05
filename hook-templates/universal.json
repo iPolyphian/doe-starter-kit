@@ -1,0 +1,35 @@
+{
+  "description": "Universal hooks included with the DOE Starter Kit — these are already in .claude/settings.json and .githooks/. This file documents them as a reference.",
+  "claude_code_hooks": {
+    "description": "PreToolUse hooks in .claude/settings.json — active by default",
+    "hooks": [
+      {
+        "matcher": "write|create|edit",
+        "hooks": [
+          {
+            "description": "Block unilateral writes to directives/",
+            "command": "python3 .claude/hooks/protect_directives.py"
+          },
+          {
+            "description": "Block secrets outside .env",
+            "command": "python3 .claude/hooks/block_secrets_in_code.py"
+          }
+        ]
+      },
+      {
+        "matcher": "bash",
+        "hooks": [
+          {
+            "description": "Block destructive commands",
+            "command": "python3 .claude/hooks/block_dangerous_commands.py"
+          }
+        ]
+      }
+    ]
+  },
+  "git_hooks": {
+    "description": "Git hooks in .githooks/ — activate with: git config core.hooksPath .githooks",
+    "pre-commit": "Runs python3 execution/audit_claims.py --hook if the script exists. Blocks commit on FAIL.",
+    "commit-msg": "Strips AI co-author trailers (Co-Authored-By lines mentioning Claude/AI) from commit messages."
+  }
+}
