@@ -73,7 +73,7 @@ Show a single bordered card:
   - Single focused feature all day → "Deep work"
   - Lots of failures + fixes → "Trench warfare"
   Add a one-liner summary after the vibe label (e.g. "Builder's day — planned INFRA overhaul and shipped 5 command upgrades").
-- **BORDER:** Size the box to fit the longest content line. All lines padded with spaces so the right border │ aligns consistently.
+- **BORDER:** Size the box to fit the longest content line. **Generate programmatically** — define a `line(content)` helper: `f"│  {content}".ljust(W + 1) + "│"` where W is the inner width. ALL rows including the header MUST use this helper — never construct `f"│{...}│"` manually. For headers with right-aligned text: build the inner content string first (e.g. `f"{left}{right:>{W - 2 - len(left)}}"`) then pass through `line()`.
 
 ## Edge Cases
 

@@ -133,4 +133,4 @@ The lifecycle commands (`/stand-up` in kick-off mode, `/crack-on`, `/sitrep`, `/
 
 **Ignored** — project-specific additions: Directory Structure entries, Progressive Disclosure triggers, project-specific comments. Rule of thumb: additions on top of the kit template are project-specific; modifications to existing template content are universal.
 
-If changes are detected, the commands show `DOE vX.Y.Z *` — the `*` means `/sync-doe` is needed.
+Commands show `DOE vX.Y.Z *` when either the kit's latest tag is newer than STATE.md's synced version (inbound) or any syncable files differ between the project and kit (outbound). The `*` means run `/sync-doe` or `/pull-doe` — either will show what's needed.

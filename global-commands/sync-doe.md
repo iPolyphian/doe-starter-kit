@@ -26,7 +26,7 @@ Rules:
 
 ## Analysis Box (REQUIRED)
 
-After diffing all syncable files, present the analysis in a bordered box BEFORE proposing any changes. This is the decision-support summary the user reads to approve or reject. **Generate programmatically** — compute W from content, use `.ljust(W)` padding, Unicode box-drawing borders. Content inside borders must be ASCII-only.
+After diffing all syncable files, present the analysis in a bordered box BEFORE proposing any changes. This is the decision-support summary the user reads to approve or reject. **Generate programmatically** — compute W from content, define a `line(content)` helper: `f"│  {content}".ljust(W + 1) + "│"`. ALL rows including headers MUST use this helper — never construct `f"│{...}│"` manually. For headers with right-aligned text: build the inner content string first (e.g. `f"{left}{right:>{W - 2 - len(left)}}"`) then pass through `line()`. Unicode box-drawing borders. Content inside borders must be ASCII-only.
 
 Structure:
 - **Header row:** "UPDATES TO DOE" left-aligned, current kit version (from `~/.claude/.doe-kit-version`) right-aligned, with `├─┤` separator below
@@ -60,7 +60,7 @@ If the user approves, proceed with the sync. If not, skip to the Result Summary.
 
 After completing all steps — or when stopping early because nothing changed — ALWAYS end the sync output with this bordered result box. This is the last thing printed, no exceptions.
 
-Pick the matching status. **Generate boxes programmatically** — collect all content lines into a list, find the max length, compute `W = max(len(line) for line in lines) + 4`, then use `.ljust(W-2)` to pad every line before adding `│` borders. Never hardcode W — always compute from content. Use Unicode box-drawing characters for borders (`┌─┐`, `├─┤`, `└─┘`, `│`). Content inside borders must be ASCII-only (no emojis, no Unicode arrows) — use `->` instead of `→`, text labels instead of emoji icons.
+Pick the matching status. **Generate boxes programmatically** — collect all content lines into a list, compute `W = max(len(l) for l in lines) + 4`, define `line(c)` as `f"│  {c}".ljust(W + 1) + "│"`, then pass ALL rows through `line()` — never construct `f"│{...}│"` manually. Never hardcode W — always compute from content. Use Unicode box-drawing characters for borders (`┌─┐`, `├─┤`, `└─┘`, `│`). Content inside borders must be ASCII-only (no emojis, no Unicode arrows) — use `->` instead of `→`, text labels instead of emoji icons.
 
 **Nothing to sync:**
 ```

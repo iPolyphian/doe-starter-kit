@@ -7,6 +7,18 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.12.6] — 2026-03-05
+
+Bordered card alignment fix and bidirectional DOE sync detection across all 8 global command files.
+
+### Changed
+- All bordered commands: explicit `line()` helper pattern in BORDER rules — prevents header misalignment
+- All bordered commands: mandate "never construct `f"│{...}│"` manually" in generation rules
+- 5 commands: bidirectional sync detection (inbound tag comparison + outbound file diff, not just file diff)
+- Files: commands, crack-on, eod, sitrep, stand-up, sync-doe, vitals, wrap
+
+---
+
 ## [v1.12.5] — 2026-03-05
 
 Model allocation rules — plans and subagents must specify which model and thinking level to use.

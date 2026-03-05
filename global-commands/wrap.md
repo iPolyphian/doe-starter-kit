@@ -7,7 +7,7 @@ Before ending this session, complete all steps in order.
 3. **Check for learnings** — If anything failed and was fixed, or a useful pattern was discovered, log it to learnings.md or ~/.claude/CLAUDE.md.
 4. **Commit and push** — Make sure all work is committed. No uncommitted changes should remain.
 5. **Clean up session timer** — Run `rm -f .tmp/.session-start` to delete the session timer file.
-6. **DOE Kit sync check** — If `~/doe-starter-kit` exists, quick-diff key syncable files (CLAUDE.md, ~/.claude/commands/*.md, .githooks/*, .claude/hooks/*.py) against the starter kit. If any files have changed since the last sync (especially if new universal learnings were added to `~/.claude/CLAUDE.md` this session), record the count for the System Checks section. If everything is synced, record as synced.
+6. **DOE Kit sync check** — If `~/doe-starter-kit` exists, check two things: (1) Is the kit tag newer than STATE.md's "DOE Starter Kit" version? (inbound). (2) Do any key syncable files differ? (outbound). Diff key files (CLAUDE.md, ~/.claude/commands/*.md, .githooks/*, .claude/hooks/*.py) against the starter kit. If either condition is true, record for the System Checks section (meaning `/sync-doe` or `/pull-doe` needed). If neither, record as synced.
 7. **Quick audit** — Run `python3 execution/audit_claims.py --hook` (fast checks only). Record the PASS/WARN/FAIL counts for the System Checks section. If any FAIL items exist, fix them before proceeding. WARN items can be noted and left for the next session.
 
 ## Step 2: Compute Session Stats
@@ -168,13 +168,13 @@ Always include the header row and separator. Adapt column widths to fit content.
 
 ### Part 9: System Checks & Footer
 
-Show audit results and DOE Kit sync status in a bordered block. **Generate this box programmatically** — collect all content lines into a list, find the max length, then use `.ljust(max_len)` to pad every line to the same width before adding Unicode box-drawing borders (`┌─┐`, `└─┘`, `│`). Never hand-pad this box.
+Show audit results and DOE Kit sync status in a bordered block. **Generate this box programmatically** — collect all content lines, compute `W = max(len(l) for l in lines) + 4`, define `line(c)` as `f"│  {c}".ljust(W + 1) + "│"`, then pass ALL rows through `line()` — never construct `f"│{...}│"` manually. Never hand-pad this box.
 
 Rules:
 - Always show both Audit and DOE Kit lines inside the border.
 - If audit has only PASS results, show one line with counts and "all clear".
 - If audit has WARN or FAIL, show summary line + indented detail for each non-PASS finding.
-- DOE Kit: `vX.Y.Z` if all files match, `vX.Y.Z *` if any differ (the `*` means /sync-doe needed). If `~/doe-starter-kit` doesn't exist, show `DOE Kit: not installed`.
+- DOE Kit: Show kit's latest tag. `vX.Y.Z *` if either kit tag is newer than STATE.md's version or any syncable files differ (the `*` means `/sync-doe` or `/pull-doe` needed). `vX.Y.Z` if neither. If `~/doe-starter-kit` doesn't exist, show `DOE Kit: not installed`.
 
 Example content lines (padding is illustrative — real padding must be computed):
 - `  Audit:   5 PASS, 0 WARN, 0 FAIL -- all clear`

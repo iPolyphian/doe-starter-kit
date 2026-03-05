@@ -6,7 +6,7 @@ Run all 5 checks, then display results together:
 
 1. **Git status** — Run `git status`. Flag uncommitted changes (modified, staged, untracked). Clean = no changes.
 2. **Quick audit** — Run `python3 execution/audit_claims.py --hook` (fast checks only). Record PASS/WARN/FAIL counts. If the script doesn't exist, skip and show `Audit: no audit script`.
-3. **DOE Kit sync** — If `~/doe-starter-kit` exists, diff key syncable files (`~/.claude/commands/*.md` vs kit's `global-commands/*.md`, `.githooks/*`, `.claude/hooks/*`). For CLAUDE.md, only compare universal sections (Operating Rules, Guardrails, Code Hygiene, Self-Annealing, Break Glass) — ignore project-specific additions. Count files with real differences. If the directory doesn't exist, show `DOE Kit: not installed`.
+3. **DOE Kit sync** — If `~/doe-starter-kit` exists, check two things: (1) Is the kit tag newer than STATE.md's "DOE Starter Kit" version? (inbound). (2) Do any key syncable files differ? (outbound). Diff key syncable files (`~/.claude/commands/*.md` vs kit's `global-commands/*.md`, `.githooks/*`, `.claude/hooks/*`). For CLAUDE.md, only compare universal sections (Operating Rules, Guardrails, Code Hygiene, Self-Annealing, Break Glass) — ignore project-specific additions. If either condition is true, show `*`. If the directory doesn't exist, show `DOE Kit: not installed`.
 4. **STATE.md alignment** — Read STATE.md's "Active feature" line and compare with `tasks/todo.md` ## Current heading. Flag if they disagree (e.g. STATE says "None" but todo has a current feature, or vice versa).
 5. **Temp files** — Check `.tmp/` for files older than 24 hours. Flag stale files by name.
 
@@ -51,4 +51,5 @@ If issues found, show details inline:
 - **Audit detail lines are mandatory.** When the audit has any WARN or FAIL findings, show each non-PASS item on its own indented line below the summary. Format: `│           WARN: <file> — <message>  │` (or `FAIL:` prefix for failures). Use the `--json` flag (`python3 execution/audit_claims.py --hook --json`) to parse findings reliably. If all PASS, no detail lines needed.
 - The summary line at the bottom counts how many checks have issues. If 0, say "All clear — ready to go."
 - Keep it compact — this should be a 5-second glance, not a report.
+- **Generate the box programmatically** — define a `line(content)` helper: `f"│  {content}".ljust(W + 1) + "│"` where W is computed from the longest content line. ALL rows MUST use this helper — never construct `f"│{...}│"` manually. Never hand-pad bordered output.
 - Do NOT fix any issues automatically. Just report them. The user decides what to act on.
