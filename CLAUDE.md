@@ -80,6 +80,7 @@ When a task matches a trigger below, load the linked doc before starting:
 - Syncing DOE improvements to the starter kit repo, or completing an [INFRA] feature → read `directives/starter-kit-sync.md`
 - Pulling DOE kit updates into the project → read `directives/starter-kit-pull.md`
 - Before writing code, identify the primary language(s) → read the relevant best practices directive(s) in `directives/best-practices/` if they exist
+- Refactoring, restructuring, or proposing architectural changes → read `directives/architectural-invariants.md` first
 - Something went seriously wrong (bad commit, corrupted file, data damage) → read `directives/break-glass.md` and follow it
 
 <!-- Add project-specific triggers as the system grows -->

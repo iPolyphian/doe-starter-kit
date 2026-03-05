@@ -7,6 +7,16 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.13.4] — 2026-03-05
+
+Architectural invariants directive — non-negotiable truths that survive any refactor.
+
+### Added
+- `directives/architectural-invariants.md` — 10 invariants covering DOE architecture, session integrity, safety, and extensibility. Includes escalation process when changes would violate an invariant.
+- Progressive Disclosure trigger for architectural changes
+
+---
+
 ## [v1.13.3] — 2026-03-05
 
 /review command — adversarial code review via subagent.
