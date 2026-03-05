@@ -14,17 +14,7 @@ For each feature's uncompleted steps (lines starting with `- [ ]` or `N. [ ]`), 
    - `[APP]` features require at least one `[manual]` criterion per step (visual/behavioural checks)
    - `[INFRA]` features can be fully `[auto]`
 3. Write the contracts directly into `tasks/todo.md` under each step
-4. Present the contracts to the user for approval:
-   ```
-   Generated contracts for [N] steps across [M] features.
-
-   [Feature Name] Step 1:
-     Contract:
-     - [ ] [auto] description. Verify: pattern
-     - [ ] [manual] description
-
-   Approve contracts? (yes / edit / cancel)
-   ```
+4. Present the contracts to the user for approval in a bordered box. Use the same BORDER rules as Step 4 (ljust `line()` helper, Unicode box-drawing, ASCII-only content). Group by feature with separators. Footer row: `Approve? "yes" to write | "edit" to modify | "cancel" to stop`.
 5. Wait for approval before proceeding. On "edit", ask what to change. On "cancel", stop.
 
 **If all steps already have valid contracts**, skip to Step 1.
@@ -188,7 +178,7 @@ Show a bordered preview card:
 └──────────────────────────────────────────────────────────────┘
 ```
 
-Generate this box programmatically — compute W from content, use `line()` helper. Content inside borders must be ASCII-only.
+BORDER: **Generate boxes programmatically** — define a `line(content)` helper: `f"│  {content}".ljust(W + 1) + "│"` where W is the inner width (number of `─` between corners). ALL rows including headers MUST use this helper — never construct `f"│{...}│"` manually. For headers with right-aligned text: build the inner content string first (e.g. `f"{left}{right:>{W - 2 - len(left)}}"`) then pass through `line()`. Use `|` not `·` for inline separators (middle dots have ambiguous width). Content inside borders must be ASCII-only. Borders use Unicode box-drawing (`┌─┐`, `├─┤`, `└─┘`, `│`).
 
 Wait for the user's response.
 
