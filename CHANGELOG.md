@@ -7,6 +7,22 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.14.2] — 2026-03-05
+
+Round 2 adversarial review fixes + new `/agent-launch` command.
+
+### Fixed
+- **CRITICAL: Session ID isolation** — `.session-id` now written to worktree `.tmp/` (not project root), so each terminal reads its own identity in multi-terminal mode
+- **Reclaim log accuracy** — captures task-to-session mapping before modifying claims, so log entries attribute the correct stale session to each task
+- **Context monitor glob** — matches all wave file names (not just `wave-*.json`), so budget detection works with custom waveIds like `comparison-filter`
+- **Wave completion cleanup** — removes orphaned `.session-id`, `.last-heartbeat`, `.context-usage.json`, `.context-warned` files after merge
+
+### Added
+- **`/agent-launch` command** — reads todo.md Queue, builds wave file, runs preview, launches on approval
+- **Failed task retry docs** — documented that failed tasks are intentionally retryable (not terminal state)
+
+---
+
 ## [v1.14.1] — 2026-03-05
 
 Should-fix multi-agent bugs from adversarial review.

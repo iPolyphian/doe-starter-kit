@@ -470,8 +470,10 @@ def cmd_claim(as_json=False):
         "branch": branch,
     })
 
-    # Write session ID file so hooks (heartbeat, context monitor) can find it
-    session_id_file = PROJECT_ROOT / ".tmp" / ".session-id"
+    # Write session ID file to WORKTREE .tmp/ so each terminal is isolated.
+    # Hooks use Path.cwd() which resolves to the worktree, so they find the right file.
+    wt = Path(wt_path)
+    session_id_file = wt / ".tmp" / ".session-id"
     session_id_file.parent.mkdir(parents=True, exist_ok=True)
     session_id_file.write_text(sid)
 
@@ -630,7 +632,12 @@ def cmd_abandon(task_id):
 # ══════════════════════════════════════════════════════════════
 
 def cmd_fail(task_id, reason=""):
-    """Mark a claimed task as failed. Keeps worktree and branch for debugging."""
+    """Mark a claimed task as failed. Keeps worktree and branch for debugging.
+
+    NOTE: Failed tasks are intentionally retryable — another terminal can re-claim
+    them via --claim (status "failed" is not in the skip list). This allows retry
+    after transient failures without manual intervention.
+    """
     wave_path, wave_data = find_active_wave()
     if not wave_data:
         print("ERROR: No active wave found")
@@ -779,14 +786,16 @@ def cmd_reclaim(as_json=False):
             print("No stale sessions found. All terminals are healthy.")
         return
 
-    # Release claims from stale sessions
-    reclaimed = []
+    # Release claims from stale sessions — capture task→session mapping for logging
+    reclaimed = []       # list of task IDs
+    reclaim_map = {}     # taskId → stale sessionId (captured before modification)
 
     def _release_stale(claims_data):
         for s in stale_sessions:
             sid = s["sessionId"]
             for tid, claim in claims_data.get("claims", {}).items():
                 if claim.get("sessionId") == sid and claim.get("status") == "in_progress":
+                    reclaim_map[tid] = sid
                     claim["status"] = "pending"
                     claim["releasedAt"] = now_iso()
                     claim["releasedFrom"] = sid
@@ -809,19 +818,13 @@ def cmd_reclaim(as_json=False):
     for tid in reclaimed:
         remove_worktree(tid, delete_branch=False)
 
-    # Log events
+    # Log events — use pre-captured mapping (not re-read from modified file)
     for tid in reclaimed:
-        stale_sid = next(
-            (s["sessionId"] for s in stale_sessions
-             if any(c.get("sessionId") == s["sessionId"]
-                    for c in atomic_read(CLAIMS_FILE).get("claims", {}).values())),
-            "unknown"
-        )
         append_log(wave_id, {
             "timestamp": now_iso(),
             "type": "reclaim",
             "taskId": tid,
-            "staleSession": stale_sid,
+            "staleSession": reclaim_map.get(tid, "unknown"),
             "reclaimedBy": get_session_id(),
         })
 
@@ -1027,10 +1030,14 @@ def cmd_merge(as_json=False):
         "totalConflicts": total_conflicts,
     })
 
-    # Clean up wave state files
+    # Clean up wave state files and orphaned session/heartbeat markers
     for f in (CLAIMS_FILE, SESSIONS_FILE):
         if f.exists():
             f.unlink()
+    for marker_name in (".session-id", ".last-heartbeat", ".context-usage.json", ".context-warned"):
+        marker = PROJECT_ROOT / ".tmp" / marker_name
+        if marker.exists():
+            marker.unlink()
 
     print(f"All {len(merged)} tasks merged. Wave '{wave_id}' completed.")
     print(f"  Branches cleaned up. Wave state files removed.")

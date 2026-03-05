@@ -107,10 +107,15 @@ def _detect_budget():
     return DEFAULT_BUDGET
 
 
+RESERVED_FILES = {"claims.json", "sessions.json", "stats.json"}
+
+
 def _budget_for_task(task_id):
     """Look up model budget from the active wave file."""
     try:
-        for f in sorted(WAVES_DIR.glob("wave-*.json")):
+        for f in sorted(WAVES_DIR.glob("*.json")):
+            if f.name.endswith("-log.json") or f.name in RESERVED_FILES:
+                continue
             wave = json.loads(f.read_text())
             for task in wave.get("tasks", []):
                 if task.get("taskId") == task_id:
