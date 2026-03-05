@@ -1,6 +1,6 @@
 # Global Commands
 
-22 slash commands for Claude Code. Install with `./setup.sh` from the kit root, or manually:
+27 slash commands for Claude Code. Install with `./setup.sh` from the kit root, or manually:
 
 ```bash
 cp global-commands/*.md ~/.claude/commands/
@@ -13,8 +13,8 @@ Once installed, run `/commands` inside Claude Code for the full reference and in
 | Category | Commands |
 |----------|----------|
 | **Session Lifecycle** | `/stand-up`, `/crack-on`, `/sitrep`, `/wrap`, `/eod` |
-| **Quality** | `/audit`, `/quick-audit`, `/vitals`, `/fact-check` |
+| **Quality** | `/audit`, `/quick-audit`, `/vitals`, `/fact-check`, `/review`, `/doe-health`, `/codemap` |
 | **Visual** | `/project-recap`, `/diff-review`, `/plan-review`, `/generate-visual-plan`, `/generate-web-diagram`, `/generate-slides` |
-| **Multi-Agent** | `/hq` |
+| **Multi-Agent** | `/hq`, `/agent-launch` |
 | **Utility** | `/pitch`, `/roast`, `/eli5`, `/shower-thought` |
-| **Infrastructure** | `/sync-doe`, `/commands` |
+| **Infrastructure** | `/sync-doe`, `/pull-doe`, `/commands` |
