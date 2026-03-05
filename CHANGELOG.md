@@ -7,6 +7,16 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.15.1] — 2026-03-05
+
+Remove Last 10 Days leaderboard from /wrap.
+
+### Removed
+- **`/wrap` Part 8 (Last 10 Days Leaderboard)** -- entire section, template, rules, and `result.leaderboard` reference
+- Leaderboard mention from README.md /wrap description
+
+---
+
 ## [v1.15.0] — 2026-03-05
 
 Card format cleanup and smart CLAUDE.md diffing across all DOE Kit-aware commands.

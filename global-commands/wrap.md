@@ -34,7 +34,6 @@ Parse the JSON output. The key fields:
 result.metrics      → commits, linesAdded, linesRemoved, filesTouched,
                       stepsCompleted, sessionDuration, commitLog
 result.streak       → current streak day count
-result.leaderboard  → 10-entry consolidated leaderboard (commits/lines per day)
 result.stats        → the full updated stats.json
 ```
 
@@ -148,26 +147,7 @@ Rules:
 - Total at bottom: minutes from session start to now, and 100%.
 - If `.tmp/.session-start` doesn't exist, skip this section and print: `⏱️ No session timeline — start with /crack-on or /stand-up`.
 
-### Part 8: Last 10 Days Leaderboard
-
-Use `result.leaderboard` (already consolidated per day, 10 entries). Mark today's row with `*`. Days with null commits show `--`.
-
-```
-  📋 LAST 10 DAYS
-  ┌────────────┬──────────────┬────────────────┬─────────────────────────┐
-  │ Date       │ Commits/Lines│ Model          │ Title                   │
-  ├────────────┼──────────────┼────────────────┼─────────────────────────┤
-  │ 02/03 *    │   4 / +146   │ Opus 4.6 / hi  │ THE BLUEPRINT OFFENSIVE │
-  │ 01/03      │  18 / +1297  │ Opus 4.6 / hi  │ THE LAST CARD (+5 more) │
-  │ 28/02      │  59 / +2627  │ Sonnet 4.6 / md│ THE VERSION WARS (+8)   │
-  │ 27/02      │           -- │ --             │ --                      │
-  │ ...        │              │                │                         │
-  └────────────┴──────────────┴────────────────┴─────────────────────────┘
-```
-
-Always include the header row and separator. Adapt column widths to fit content. Model column shows `[name] / [thinking]` abbreviated: hi = high, md = medium, lo = low. Use the model and thinking level from the current session for today's row. For past days, pull from `stats.json` `recentSessions` if available, otherwise show `--`.
-
-### Part 9: System Checks & Footer
+### Part 8: System Checks & Footer
 
 Print the section heading first: `  🔍 SYSTEM CHECKS`
 
@@ -203,5 +183,4 @@ Then the footer:
 - Title card must reference specific files, features, or data from this session.
 - If stats.json doesn't exist yet, this is session 1. Don't make a big deal about firsts.
 - Commit stats.json BEFORE printing the wrap-up so the push includes it.
-- Model info is shown in the LAST 10 DAYS leaderboard table, not the footer.
 - **Box-drawing alignment:** Use Unicode box-drawing characters for borders (`┌─┐`, `├─┤`, `└─┘`, `│`). Content inside the `│` borders must be ASCII-only: no emojis, no Unicode symbols (no `·`, `✓`, `⚠️`, `—`, `…`). Use ASCII equivalents: commas for separators, `--` for dashes, `ok`/`all clear` for checkmarks. Emojis are fine in section headers OUTSIDE the box. **Generate boxes programmatically** — use a Python snippet with `.ljust(W)` to pad content lines to the exact inner width. Never hand-pad bordered output. If a commit message contains non-ASCII characters, replace them with ASCII equivalents before placing in a box.

@@ -23,7 +23,7 @@ Mid-session situation report. Shows current feature progress, completed/active/p
 *Added 28/02/26 · Updated 28/02/26*
 
 ### `/wrap`
-End-of-session routine. Updates STATE.md, todo.md, learnings.md. Computes session stats, prints a themed wrap-up card with title card, numbers, timeline, leaderboard, system checks, and agents-spawned count.
+End-of-session routine. Updates STATE.md, todo.md, learnings.md. Computes session stats, prints a themed wrap-up card with title card, numbers, timeline, system checks, and agents-spawned count.
 *Added 27/02/26 · Updated 04/03/26*
 
 ### `/eod`
