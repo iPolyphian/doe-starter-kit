@@ -183,7 +183,7 @@ def find_active_wave():
     waves = list(WAVES_DIR.glob("*.json"))
     # Exclude log files, claims, sessions
     waves = [w for w in waves
-             if not w.name.endswith("-log.json") and w.name not in RESERVED_FILES]
+             if not w.name.endswith("-log.json") and w.name not in RESERVED_FILES and not w.name.startswith(".")]
     waves.sort(key=_wave_sort_key)
     for wave_path in reversed(waves):  # newest first
         data = atomic_read(wave_path)
@@ -198,7 +198,7 @@ def find_latest_wave():
         return None, None
     waves = list(WAVES_DIR.glob("*.json"))
     waves = [w for w in waves
-             if not w.name.endswith("-log.json") and w.name not in RESERVED_FILES]
+             if not w.name.endswith("-log.json") and w.name not in RESERVED_FILES and not w.name.startswith(".")]
     waves.sort(key=_wave_sort_key)
     for wave_path in reversed(waves):  # newest first
         data = atomic_read(wave_path)
@@ -351,7 +351,7 @@ def cmd_init_wave(wave_file_arg):
 # --claim
 # ══════════════════════════════════════════════════════════════
 
-def cmd_claim(as_json=False):
+def cmd_claim(as_json=False, parent_pid=None):
     """Claim the next available task for this session."""
     wave_path, wave_data = find_active_wave()
     if not wave_data:
@@ -470,10 +470,11 @@ def cmd_claim(as_json=False):
         "branch": branch,
     })
 
-    # Write session ID file to WORKTREE .tmp/ so each terminal is isolated.
-    # Hooks use Path.cwd() which resolves to the worktree, so they find the right file.
-    wt = Path(wt_path)
-    session_id_file = wt / ".tmp" / ".session-id"
+    # Write session ID to a PID-specific file in PROJECT_ROOT.
+    # Hooks use os.getppid() (= Claude Code PID) to find their terminal's file.
+    # Bash tool's $PPID is the same Claude Code PID, passed via --parent-pid.
+    ppid = parent_pid or os.getppid()
+    session_id_file = PROJECT_ROOT / ".tmp" / f".session-id-{ppid}"
     session_id_file.parent.mkdir(parents=True, exist_ok=True)
     session_id_file.write_text(sid)
 
@@ -1030,14 +1031,17 @@ def cmd_merge(as_json=False):
         "totalConflicts": total_conflicts,
     })
 
-    # Clean up wave state files and orphaned session/heartbeat markers
+    # Clean up wave state files and per-terminal session/heartbeat markers
     for f in (CLAIMS_FILE, SESSIONS_FILE):
         if f.exists():
             f.unlink()
-    for marker_name in (".session-id", ".last-heartbeat", ".context-usage.json", ".context-warned"):
-        marker = PROJECT_ROOT / ".tmp" / marker_name
-        if marker.exists():
-            marker.unlink()
+    # Clean up PID-specific marker files (pattern: .session-id-*, .last-heartbeat-*, etc.)
+    tmp_dir = PROJECT_ROOT / ".tmp"
+    if tmp_dir.exists():
+        for pattern in (".session-id-*", ".last-heartbeat-*",
+                        ".context-usage-*.json", ".context-warned-*"):
+            for marker in tmp_dir.glob(pattern):
+                marker.unlink(missing_ok=True)
 
     print(f"All {len(merged)} tasks merged. Wave '{wave_id}' completed.")
     print(f"  Branches cleaned up. Wave state files removed.")
@@ -2007,6 +2011,8 @@ def main():
                         help="Token count to record (for --complete)")
     parser.add_argument("--commits", type=int, default=0,
                         help="Commit count to record (for --complete)")
+    parser.add_argument("--parent-pid", dest="parent_pid", type=int, metavar="PID",
+                        help="Claude Code PID for per-terminal session-id files (pass $PPID)")
     parser.add_argument("--project-root", dest="project_root", metavar="DIR",
                         help="Override project root (default: current directory)")
 
@@ -2028,7 +2034,7 @@ def main():
     if args.wave_file:
         cmd_init_wave(args.wave_file)
     elif args.claim:
-        cmd_claim(as_json=args.json)
+        cmd_claim(as_json=args.json, parent_pid=args.parent_pid)
     elif args.task_id:
         cmd_complete(args.task_id, tokens=args.tokens, commits=args.commits)
     elif args.status:

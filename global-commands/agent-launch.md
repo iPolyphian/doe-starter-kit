@@ -23,7 +23,7 @@ For each task, determine:
 - **versionTag**: from the step's version tag in todo.md (e.g. `v0.16.0`)
 - **dependsOn**: task IDs this task must wait for (empty if independent)
 
-Write the wave file to `.tmp/waves/wave-{N}.json` where N is the next available number.
+Write the wave file to `.tmp/waves/.draft-wave.json` (draft location — not visible to `find_active_wave` or `find_latest_wave`).
 
 Use this schema:
 ```json
@@ -54,7 +54,7 @@ Use this schema:
 
 ## Step 3: Preview
 
-Run `python3 ~/.claude/scripts/multi_agent.py --preview .tmp/waves/wave-{N}.json --json` and parse the output.
+Run `python3 ~/.claude/scripts/multi_agent.py --preview .tmp/waves/.draft-wave.json --json` and parse the output.
 
 Show a bordered preview card:
 
@@ -88,22 +88,25 @@ Wait for the user's response.
 
 ## Step 4: Launch or adjust
 
-- **"go"** → Run `python3 ~/.claude/scripts/multi_agent.py --init-wave .tmp/waves/wave-{N}.json`. Then show launch instructions:
+- **"go"** → Move the draft to its final name: `mv .tmp/waves/.draft-wave.json .tmp/waves/wave-{N}.json`. Then run `python3 ~/.claude/scripts/multi_agent.py --init-wave .tmp/waves/wave-{N}.json`. Then show launch instructions:
   ```
   Wave launched. To start working:
 
   This terminal:
-    python3 ~/.claude/scripts/multi_agent.py --claim
+    python3 ~/.claude/scripts/multi_agent.py --claim --parent-pid $PPID
+    cd <worktree-path-from-claim-output>
 
   New terminal (click + in VS Code terminal, type "claude"):
-    python3 ~/.claude/scripts/multi_agent.py --claim
+    python3 ~/.claude/scripts/multi_agent.py --claim --parent-pid $PPID
+    cd <worktree-path-from-claim-output>
 
   Monitor: /hq
   ```
+  IMPORTANT: `--parent-pid $PPID` passes the Claude Code PID so hooks can find this terminal's session. After claiming, the agent MUST cd into the worktree path printed by the claim output — hooks use `Path.cwd()` and coordination files live in the main project root.
 
 - **"edit"** → Ask what to change (models, ownership, task split), update the wave file, re-run preview.
 
-- **"cancel"** → Delete the wave file and stop.
+- **"cancel"** → Delete the draft file (`rm .tmp/waves/.draft-wave.json`) and stop.
 
 ## Important rules
 

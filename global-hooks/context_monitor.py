@@ -5,6 +5,9 @@ context budget, hard-warns at 80% to trigger graceful handoff.
 
 Budget is model-aware during waves (haiku: 30k, sonnet: 80k, opus: 200k).
 Solo sessions use 200k (full context window).
+
+Per-terminal isolation: uses os.getppid() (Claude Code PID) to find
+this terminal's session-id file, context tracker, and warning marker.
 """
 import json
 import os
@@ -24,14 +27,18 @@ WARN_INTERVAL = 120  # seconds between stderr warnings
 MODEL_BUDGETS = {"haiku": 30_000, "sonnet": 80_000, "opus": 200_000}
 DEFAULT_BUDGET = 200_000
 
+RESERVED_FILES = {"claims.json", "sessions.json", "stats.json"}
+
 
 def main():
     hook_input = json.load(sys.stdin)
 
-    tracker_file = TMP_DIR / ".context-usage.json"
+    # Per-terminal files using Claude Code PID
+    ppid = os.getppid()
+    tracker_file = TMP_DIR / f".context-usage-{ppid}.json"
 
     # Load or initialise tracker
-    tracker = _load_tracker(tracker_file)
+    tracker = _load_tracker(tracker_file, ppid)
 
     # Estimate tokens from this tool use
     input_str = json.dumps(hook_input.get("tool_input", {}))
@@ -54,20 +61,20 @@ def main():
             f"Context at ~{pct:.0%} ({tracker['tokens']:,}/{budget:,} est. tokens) "
             f"— wrap up current work and commit NOW"
         )
-        _maybe_warn(f"\U0001f6d1 {msg}")
+        _maybe_warn(f"\U0001f6d1 {msg}", ppid)
         print(json.dumps({"warning": msg}))
     elif pct >= WARN_PCT:
         msg = (
             f"Context at ~{pct:.0%} ({tracker['tokens']:,}/{budget:,} est. tokens) "
             f"— consider committing soon"
         )
-        _maybe_warn(f"\u26a0\ufe0f {msg}")
+        _maybe_warn(f"\u26a0\ufe0f {msg}", ppid)
         print(json.dumps({"warning": msg}))
     else:
         print(json.dumps({}))
 
 
-def _load_tracker(tracker_file):
+def _load_tracker(tracker_file, ppid):
     """Load existing tracker or initialise with budget detection."""
     if tracker_file.exists():
         try:
@@ -76,19 +83,19 @@ def _load_tracker(tracker_file):
             pass
 
     # Initialise new tracker with budget detection
-    budget = _detect_budget()
+    budget = _detect_budget(ppid)
     return {"tokens": 0, "budget": budget}
 
 
-def _detect_budget():
+def _detect_budget(ppid):
     """Check active wave for model-specific budget, else use default."""
     sessions_file = WAVES_DIR / "sessions.json"
     if not sessions_file.exists():
         return DEFAULT_BUDGET
 
     try:
-        # Read session ID from the file written by --claim
-        session_id_file = TMP_DIR / ".session-id"
+        # Read session ID from per-terminal file (written by --claim --parent-pid)
+        session_id_file = TMP_DIR / f".session-id-{ppid}"
         if not session_id_file.exists():
             return DEFAULT_BUDGET
         sid = session_id_file.read_text().strip()
@@ -107,9 +114,6 @@ def _detect_budget():
     return DEFAULT_BUDGET
 
 
-RESERVED_FILES = {"claims.json", "sessions.json", "stats.json"}
-
-
 def _budget_for_task(task_id):
     """Look up model budget from the active wave file."""
     try:
@@ -126,9 +130,9 @@ def _budget_for_task(task_id):
     return DEFAULT_BUDGET
 
 
-def _maybe_warn(msg):
+def _maybe_warn(msg, ppid):
     """Write to stderr at most once per WARN_INTERVAL seconds."""
-    marker = TMP_DIR / ".context-warned"
+    marker = TMP_DIR / f".context-warned-{ppid}"
     now = time.time()
 
     if marker.exists():

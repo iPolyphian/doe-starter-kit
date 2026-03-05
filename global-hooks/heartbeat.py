@@ -3,6 +3,10 @@
 Runs after every tool use. Uses a temp file to track last heartbeat time
 so we only shell out to multi_agent.py when >2 minutes have elapsed.
 Only active when a wave is running and this session is registered.
+
+Per-terminal isolation: uses os.getppid() (Claude Code PID) to find
+this terminal's session-id file and heartbeat marker. In Bash tool calls,
+$PPID resolves to the same Claude Code PID.
 """
 import json
 import os
@@ -25,9 +29,9 @@ def main():
         print(json.dumps({}))
         return
 
-    # Check elapsed time via temp file (avoids reading sessions.json on every call)
-    # Use fixed filename — PID changes per subprocess invocation
-    marker = PROJECT_ROOT / ".tmp" / ".last-heartbeat"
+    # Per-terminal marker using Claude Code PID (stable across hook invocations)
+    ppid = os.getppid()
+    marker = PROJECT_ROOT / ".tmp" / f".last-heartbeat-{ppid}"
 
     now = time.time()
     if marker.exists():
@@ -43,8 +47,8 @@ def main():
     marker.parent.mkdir(parents=True, exist_ok=True)
     marker.write_text(str(now))
 
-    # Read session ID from the session file written by --claim
-    session_id_file = PROJECT_ROOT / ".tmp" / ".session-id"
+    # Read session ID from per-terminal file (written by --claim --parent-pid $PPID)
+    session_id_file = PROJECT_ROOT / ".tmp" / f".session-id-{ppid}"
     cmd = ["python3", str(Path.home() / ".claude" / "scripts" / "multi_agent.py"), "--heartbeat"]
     if session_id_file.exists():
         try:
