@@ -9,13 +9,53 @@ Look at `## Queue` in todo.md. Identify features that can run simultaneously:
 
 If only one feature is in the queue, create a single-task wave (still useful for worktree isolation and tracking).
 
-## Step 2: Build the wave file
+## Step 2: Check for plans
+
+For each feature identified in Step 1, check if a plan exists:
+
+1. Check if the todo.md entry references a plan file (e.g. "Plan: `.claude/plans/...`")
+2. If referenced, read it and confirm it has enough detail (file ownership, acceptance criteria, implementation approach)
+3. If NOT referenced, search for a matching plan:
+   - Check `.claude/plans/` in the project (local plans)
+   - Check `~/.claude/plans/` (global plans)
+   - Match by feature name (fuzzy — e.g. "Comparison" matches `comparison-and-filter.md`)
+4. If a plan is found but not linked, use it and note the link for the user
+
+**If no plan exists for a feature:**
+
+Create one. Read the relevant codebase files (existing patterns, data structures, UI conventions from `learnings.md`) to understand what the feature needs. Write a plan to `.claude/plans/<feature-name>.md` covering:
+
+- **What:** One-paragraph summary of the feature
+- **File ownership:** Which files/sections this task will create or modify (critical for wave safety)
+- **Implementation approach:** Key technical decisions, patterns to follow, data sources to use
+- **Acceptance criteria:** Testable conditions for "done"
+- **Edge cases:** Known gotchas or things to watch for
+
+Present the plan to the user:
+```
+No plan found for [Feature Name]. Here's a proposed plan:
+
+[plan summary — key points only, not the whole file]
+
+Written to: .claude/plans/<feature-name>.md
+OK to proceed? (yes / edit / cancel)
+```
+
+- **"yes"** → Continue to Step 3
+- **"edit"** → Ask what to change, update the plan, re-present
+- **"cancel"** → Stop
+
+If multiple features need plans, present them together so the user can approve in one go.
+
+Do NOT proceed to wave creation until every feature has an approved plan.
+
+## Step 3: Build the wave file
 
 For each task, determine:
 - **taskId**: kebab-case identifier from the feature name (e.g. `comparison-overlay`)
 - **description**: from the step description in todo.md
-- **acceptanceCriteria**: from the task contract if one exists, otherwise derive from the step description
-- **owns**: files/patterns this task will MODIFY (critical — no overlap allowed between tasks)
+- **acceptanceCriteria**: from the task contract if one exists, otherwise from the plan's acceptance criteria
+- **owns**: files/patterns this task will MODIFY — pull from the plan's file ownership section (critical — no overlap allowed between tasks)
 - **reads**: files/patterns this task will READ but not modify (overlaps OK)
 - **model**: recommend based on task complexity — `opus` for architectural/judgment tasks, `sonnet` for implementation, `haiku` for mechanical
 - **thinking**: `high` for design decisions, `medium` for implementation, `low` for mechanical
@@ -52,7 +92,7 @@ Use this schema:
 }
 ```
 
-## Step 3: Preview
+## Step 4: Preview
 
 Run `python3 ~/.claude/scripts/multi_agent.py --preview .tmp/waves/.draft-wave.json --json` and parse the output.
 
@@ -86,17 +126,17 @@ Generate this box programmatically — compute W from content, use `line()` help
 
 Wait for the user's response.
 
-## Step 4: Launch or adjust
+## Step 5: Launch or adjust
 
-- **"go"** → Move the draft to its final name: `mv .tmp/waves/.draft-wave.json .tmp/waves/wave-{N}.json`. Then run `python3 ~/.claude/scripts/multi_agent.py --init-wave .tmp/waves/wave-{N}.json`. Then show launch instructions:
+- **"go"** → Move the draft to its final name: `mv .tmp/waves/.draft-wave.json .tmp/waves/wave-{N}.json`. Then run `python3 ~/.claude/scripts/multi_agent.py --init-wave .tmp/waves/wave-{N}.json`. Then ask:
   ```
-  Wave launched. To start working:
+  Wave launched. What should this terminal do?
 
-  This terminal:  /agent-start
-  New terminal:   click + in VS Code terminal, type "claude", then /agent-start
-  Monitor:        /hq (any terminal)
+  - "work"  → Claim a task and start building (/agent-start)
+  - "monitor" → Stay as HQ and watch progress (/hq)
   ```
-  Then immediately run `/agent-start` in this terminal to claim the first task.
+  - **"work"** → Run `/agent-start` in this terminal to claim the first task.
+  - **"monitor"** → Run `/hq` to show the dashboard. Remind the user: `Open new terminal tabs, type "claude", then /agent-start in each.`
 
 - **"edit"** → Ask what to change (models, ownership, task split), update the wave file, re-run preview.
 
