@@ -7,6 +7,29 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.20.0] — 2026-03-05
+
+Wave-1 post-mortem: fixed all multi-agent coordination bugs discovered during first parallel wave run. Hardened path resolution, log safety, todo update reliability, and added new monitoring tools.
+
+### Added
+- **`global-scripts/doe_utils.py`** — shared utility for worktree detection (`resolve_project_root()`), used by multi_agent.py, heartbeat.py, context_monitor.py
+- **`--watch` flag** — auto-refreshing dashboard every 30 seconds, exits when all tasks complete
+- **Wave agent guardrail** in CLAUDE.md — agents must not edit shared files on master during active waves
+- **Post-merge auto-rebuild** — runs `buildCommand` from `tests/config.json` after each merge step
+
+### Changed
+- **CLAUDE.md Rule 1** — clearer solo vs wave verification distinction (wave mode defers to `--complete` and `--merge`)
+- **`_update_todo_after_merge`** — searches entire todo.md file (not just `## Current`) and runs incrementally after each merge instead of once at the end
+- **Stale threshold** — bumped from 120s to 300s to avoid false positives during long builds
+
+### Fixed
+- **Worktree path resolution** — `Path.cwd()` broke in worktrees; all scripts now use `doe_utils.resolve_project_root()` to find main repo root
+- **Log race condition** — log file initialization moved inside `atomic_modify` lock to prevent two processes from clobbering each other
+- **`--complete` verification** — passes worktree path to verify.py so file checks resolve correctly
+- **`_analyze_wave`** — no longer rejects `manual:` prefixed criteria as invalid auto patterns
+
+---
+
 ## [v1.19.0] — 2026-03-05
 
 Combined `/agent-launch` and `/agent-start` into a single dual-mode command.
