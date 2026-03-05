@@ -169,7 +169,9 @@ Always include the header row and separator. Adapt column widths to fit content.
 
 ### Part 9: System Checks & Footer
 
-Show audit results and DOE Kit sync status in a bordered block. **Generate this box programmatically** — collect all content lines, compute `W = max(len(l) for l in lines) + 4`, define `line(c)` as `f"│  {c}".ljust(W + 1) + "│"`, then pass ALL rows through `line()` — never construct `f"│{...}│"` manually. Never hand-pad this box.
+Print the section heading first: `  🔍 SYSTEM CHECKS`
+
+Then show audit results and DOE Kit sync status in a bordered block. **Generate this box programmatically** — collect all content lines, compute `W = max(len(l) for l in lines) + 4`, define `line(c)` as `f"│  {c}".ljust(W + 1) + "│"`, then pass ALL rows through `line()` — never construct `f"│{...}│"` manually. Never hand-pad this box.
 
 Rules:
 - Always show both Audit and DOE Kit lines inside the border.

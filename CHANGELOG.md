@@ -7,6 +7,16 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.14.5] — 2026-03-05
+
+Docs update: command count and wrap system checks heading.
+
+### Fixed
+- **Command count** — README claimed 15/22 commands; actual count is 27. Updated both READMEs with missing commands: `/agent-launch`, `/codemap`, `/doe-health`, `/review`, `/pull-doe`
+- **Wrap system checks heading** — Added `🔍 SYSTEM CHECKS` section heading before the bordered audit/DOE Kit box
+
+---
+
 ## [v1.14.4] — 2026-03-05
 
 Round 4 fix: session ID resolution for all commands.
