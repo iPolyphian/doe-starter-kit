@@ -7,6 +7,15 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.13.10] — 2026-03-05
+
+Visual-explainer Progressive Disclosure triggers.
+
+### Added
+- 3 new triggers in CLAUDE.md: suggest `/diff-review` before commits, `/project-recap` after absence, `/plan-review` for alignment checks
+
+---
+
 ## [v1.13.9] — 2026-03-05
 
 Hook templates and pre-commit audit sweep.

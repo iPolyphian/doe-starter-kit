@@ -84,6 +84,9 @@ When a task matches a trigger below, load the linked doc before starting:
 - Pulling DOE kit updates into the project → read `directives/starter-kit-pull.md`
 - Before writing code, identify the primary language(s) → read the relevant best practices directive(s) in `directives/best-practices/` if they exist
 - Refactoring, restructuring, or proposing architectural changes → read `directives/architectural-invariants.md` first
+- Reviewing changes before commit → suggest `/diff-review` for a visual before/after comparison
+- Returning to a project after absence or context loss → suggest `/project-recap` for a visual state rebuild
+- Checking whether implementation matches the plan → suggest `/plan-review` for visual alignment check
 - Something went seriously wrong (bad commit, corrupted file, data damage) → read `directives/break-glass.md` and follow it
 
 <!-- Add project-specific triggers as the system grows -->
