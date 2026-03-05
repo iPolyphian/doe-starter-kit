@@ -7,6 +7,15 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.13.3] — 2026-03-05
+
+/review command — adversarial code review via subagent.
+
+### Added
+- `/review` command — reads git diff, checks security/correctness/dead code/breaking changes/contract compliance, outputs PASS/PASS WITH NOTES/FAIL with structured findings. Advisory only, never modifies files.
+
+---
+
 ## [v1.13.2] — 2026-03-05
 
 Task contracts — testable completion criteria for non-trivial todo.md steps.
