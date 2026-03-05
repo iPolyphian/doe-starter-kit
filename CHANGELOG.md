@@ -7,6 +7,15 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.17.3] — 2026-03-05
+
+Complete verification coverage — solo, wave, and ad-hoc work.
+
+### Changed
+- **CLAUDE.md Rule 1** — added solo verification discipline (contract pre-flight + post-completion gate) and ad-hoc work verification (state criteria in conversation, verify before committing)
+
+---
+
 ## [v1.17.2] — 2026-03-05
 
 Pre-commit contract verification hook — hard gate for solo mode.
