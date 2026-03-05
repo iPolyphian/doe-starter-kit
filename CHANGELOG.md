@@ -7,6 +7,15 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.13.8] — 2026-03-05
+
+/doe-health diagnostic command.
+
+### Added
+- `/doe-health` command — 8-point integrity check (required files, CLAUDE.md line count, Progressive Disclosure targets, commands, hooks, git hooks, STATE.md freshness, kit version). Report only, never modifies.
+
+---
+
 ## [v1.13.7] — 2026-03-05
 
 /codemap command and /wrap structural change detection.
