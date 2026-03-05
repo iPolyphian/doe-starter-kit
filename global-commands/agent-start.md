@@ -40,4 +40,27 @@ If the task fails or you get stuck, run:
 python3 ~/.claude/scripts/multi_agent.py --fail <taskId> --parent-pid $PPID
 ```
 
+## Step 5: Check if wave is complete — auto-merge offer
+
+After marking the task complete (or failed), run:
+```
+python3 ~/.claude/scripts/multi_agent.py --dashboard --json
+```
+
+Parse the JSON output. If `tasksCompleted + tasksFailed == totalTasks` (i.e. no tasks are pending or in progress), all work is done.
+
+Show:
+```
+All [N] tasks complete. Merge to master now? (yes/no)
+```
+
+- **"yes"** → Run `python3 ~/.claude/scripts/multi_agent.py --merge --parent-pid $PPID` to merge all completed worktrees back to master in the defined merge order. Show the merge output.
+- **"no"** → Show: `OK — run /hq --merge whenever you're ready.`
+
+If tasks are still in progress, show a brief status instead:
+```
+Task [taskId] done. Wave still running — [N] task(s) remaining.
+Run /hq to check progress.
+```
+
 IMPORTANT: ALL multi_agent.py commands MUST include `--parent-pid $PPID`.
