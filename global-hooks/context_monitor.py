@@ -8,6 +8,9 @@ Solo sessions use 200k (full context window).
 
 Per-terminal isolation: uses os.getppid() (Claude Code PID) to find
 this terminal's session-id file, context tracker, and warning marker.
+
+Worktree-aware: resolves main project root via .git file detection so
+context monitoring works correctly from worktree contexts.
 """
 import json
 import os
@@ -15,9 +18,12 @@ import sys
 import time
 from pathlib import Path
 
-PROJECT_ROOT = Path.cwd()
-WAVES_DIR = PROJECT_ROOT / ".tmp" / "waves"
-TMP_DIR = PROJECT_ROOT / ".tmp"
+sys.path.insert(0, str(Path.home() / ".claude" / "scripts"))
+from doe_utils import resolve_project_root
+
+MAIN_ROOT, _ = resolve_project_root()
+WAVES_DIR = MAIN_ROOT / ".tmp" / "waves"
+TMP_DIR = MAIN_ROOT / ".tmp"
 
 CHARS_PER_TOKEN = 4
 WARN_PCT = 0.60

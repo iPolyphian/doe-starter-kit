@@ -80,26 +80,30 @@ def parse_verify_pattern(text):
     return {"type": "invalid", "raw": text}
 
 
-def resolve_path(p):
-    """Resolve a path relative to project root, expanding ~."""
+def resolve_path(p, base=None):
+    """Resolve a path relative to a base directory (default: project root), expanding ~."""
     expanded = os.path.expanduser(p)
     path = Path(expanded)
     if path.is_absolute():
         return path
-    return ROOT / path
+    return (base or ROOT) / path
 
 
-def run_criterion(criterion):
+def run_criterion(criterion, working_dir=None):
     """Execute a single verification criterion.
 
     Args:
         criterion: either a string (Verify: pattern) or a dict with 'verify' key.
+        working_dir: optional path (str or Path) for resolving relative file paths
+                     and running commands. Defaults to project root. Used by wave
+                     agents to verify files in worktree context.
 
     Returns:
         {"status": "PASS"|"FAIL"|"SKIP", "detail": str}
     """
     config = load_config()
     timeout = config.get("testTimeout", 30)
+    base = Path(working_dir) if working_dir else ROOT
 
     # Accept both string and dict forms
     if isinstance(criterion, dict):
@@ -113,16 +117,16 @@ def run_criterion(criterion):
         return {"status": "FAIL", "detail": f"Invalid pattern: {verify_text}"}
 
     if parsed["type"] == "run":
-        return _run_command(parsed["command"], timeout)
+        return _run_command(parsed["command"], timeout, cwd=base)
 
     if parsed["type"] == "file_exists":
-        path = resolve_path(parsed["path"])
+        path = resolve_path(parsed["path"], base=base)
         if path.exists():
             return {"status": "PASS", "detail": f"{parsed['path']} exists"}
         return {"status": "FAIL", "detail": f"{parsed['path']} not found"}
 
     if parsed["type"] == "file_contains":
-        path = resolve_path(parsed["path"])
+        path = resolve_path(parsed["path"], base=base)
         if not path.exists():
             return {"status": "FAIL", "detail": f"{parsed['path']} not found"}
         try:
@@ -134,18 +138,18 @@ def run_criterion(criterion):
             return {"status": "FAIL", "detail": f"Cannot read {parsed['path']}: {e}"}
 
     if parsed["type"] == "html_has":
-        return _check_html(parsed["path"], parsed["selector"])
+        return _check_html(parsed["path"], parsed["selector"], base=base)
 
     return {"status": "FAIL", "detail": f"Unknown pattern type: {parsed['type']}"}
 
 
-def _run_command(command, timeout):
+def _run_command(command, timeout, cwd=None):
     """Execute a shell command and check exit code."""
     try:
         result = subprocess.run(
             command,
             shell=True,
-            cwd=str(ROOT),
+            cwd=str(cwd or ROOT),
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -160,14 +164,14 @@ def _run_command(command, timeout):
         return {"status": "FAIL", "detail": f"Cannot execute: {e}"}
 
 
-def _check_html(path_str, selector):
+def _check_html(path_str, selector, base=None):
     """Parse HTML and check for a CSS selector."""
     try:
         from bs4 import BeautifulSoup
     except ImportError:
         return {"status": "SKIP", "detail": "beautifulsoup4 not installed -- skipping html: check"}
 
-    path = resolve_path(path_str)
+    path = resolve_path(path_str, base=base)
     if not path.exists():
         return {"status": "FAIL", "detail": f"{path_str} not found"}
 
@@ -182,31 +186,33 @@ def _check_html(path_str, selector):
         return {"status": "FAIL", "detail": f"HTML parse error: {e}"}
 
 
-def run_all_criteria(criteria):
+def run_all_criteria(criteria, working_dir=None):
     """Execute a list of criteria and return results.
 
     Args:
         criteria: list of strings or dicts with 'verify' key.
+        working_dir: optional path for resolving relative paths (worktree context).
 
     Returns:
         list of {"status", "detail", "criterion"} dicts.
     """
     results = []
     for c in criteria:
-        result = run_criterion(c)
+        result = run_criterion(c, working_dir=working_dir)
         result["criterion"] = c if isinstance(c, str) else c.get("verify", c.get("text", str(c)))
         results.append(result)
     return results
 
 
-def run_build_step():
+def run_build_step(working_dir=None):
     """Run the build command from tests/config.json if configured."""
     config = load_config()
     build_cmd = config.get("buildCommand", "")
     if not build_cmd:
         return None
     timeout = config.get("testTimeout", 30) * 2  # Build gets double timeout
-    result = _run_command(build_cmd, timeout)
+    base = Path(working_dir) if working_dir else ROOT
+    result = _run_command(build_cmd, timeout, cwd=base)
     return result
 
 
