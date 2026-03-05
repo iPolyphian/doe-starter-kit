@@ -154,14 +154,22 @@ def atomic_modify(filepath, modify_func):
 
 
 def append_log(wave_id, event):
-    """Append an event to the wave log (append-only)."""
+    """Append an event to the wave log (atomic read-modify-write under exclusive lock).
+
+    The initialization and append are both inside the lock to prevent a race
+    where two processes both see the file as missing and both try to create it.
+    """
     log_path = WAVES_DIR / f"{wave_id}-log.json"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Create empty file if needed (atomic_modify requires it to exist)
     if not log_path.exists():
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-        log_path.write_text(json.dumps({"waveId": wave_id, "events": []}, indent=2),
-                            encoding="utf-8")
+        log_path.write_text("{}", encoding="utf-8")
 
     def _append(data):
+        # Initialize structure if file was empty or freshly created
+        if "waveId" not in data:
+            data["waveId"] = wave_id
         data.setdefault("events", []).append(event)
         return data
 
@@ -335,12 +343,9 @@ def cmd_init_wave(wave_file_arg):
     atomic_write(CLAIMS_FILE, {"waveId": wave_id, "claims": {}})
     atomic_write(SESSIONS_FILE, {"sessions": []})
 
+    # Initialize log file (always overwrite on init — fresh wave, fresh log)
     log_path = WAVES_DIR / f"{wave_id}-log.json"
-    if not log_path.exists():
-        log_path.write_text(
-            json.dumps({"waveId": wave_id, "events": []}, indent=2),
-            encoding="utf-8",
-        )
+    atomic_write(log_path, {"waveId": wave_id, "events": []})
 
     n = len(wave_data["tasks"])
     print(f"Wave '{wave_id}' initialized with {n} tasks")
@@ -959,7 +964,7 @@ def _update_todo_after_merge(wave_data, merged_task_ids):
         return
 
     lines = todo_path.read_text(encoding="utf-8").splitlines()
-    in_current = False
+    in_active_section = False
     updated_steps = []
     current_step_version = None
     timestamp = datetime.now(timezone.utc).strftime("%H:%M %d/%m/%y")
@@ -967,15 +972,17 @@ def _update_todo_after_merge(wave_data, merged_task_ids):
     for i, line in enumerate(lines):
         stripped = line.strip()
 
-        if stripped.startswith("## Current"):
-            in_current = True
+        # Search both ## Current and ## Queue — wave tasks can be in either
+        if stripped.startswith("## Current") or stripped.startswith("## Queue"):
+            in_active_section = True
+            current_step_version = None
             continue
-        if in_current and stripped.startswith("## "):
-            in_current = False
+        if in_active_section and stripped.startswith("## "):
+            in_active_section = False
             current_step_version = None
             continue
 
-        if not in_current:
+        if not in_active_section:
             continue
 
         # Match step lines like: 1. [ ] Description -> v0.17.0
@@ -1195,6 +1202,40 @@ def cmd_merge(as_json=False):
                 print(f"  AUDIT WARN after merging {tid}:")
                 for line in audit_result.stdout.strip().split("\n"):
                     print(f"    {line}")
+
+        # Post-merge rebuild: if tests/config.json has a buildCommand, run it
+        # This resolves conflicts in built output (e.g. monolith HTML) automatically
+        config_path = PROJECT_ROOT / "tests" / "config.json"
+        if config_path.exists():
+            try:
+                config = json.loads(config_path.read_text(encoding="utf-8"))
+                build_cmd = config.get("buildCommand", "")
+                if build_cmd:
+                    build_result = subprocess.run(
+                        build_cmd, shell=True, cwd=PROJECT_ROOT,
+                        capture_output=True, text=True, timeout=60,
+                    )
+                    if build_result.returncode == 0:
+                        # Stage and amend the merge commit with rebuilt output
+                        subprocess.run(
+                            ["git", "add", "-A"], cwd=PROJECT_ROOT,
+                            capture_output=True, text=True,
+                        )
+                        # Check if there are actually changes to commit
+                        diff_result = subprocess.run(
+                            ["git", "diff", "--cached", "--quiet"],
+                            cwd=PROJECT_ROOT, capture_output=True, text=True,
+                        )
+                        if diff_result.returncode != 0:
+                            subprocess.run(
+                                ["git", "commit", "--amend", "--no-edit"],
+                                cwd=PROJECT_ROOT, capture_output=True, text=True,
+                            )
+                            print(f"  Rebuilt: {build_cmd}")
+                    else:
+                        print(f"  WARN: Post-merge build failed: {build_result.stderr.strip()[:200]}")
+            except (json.JSONDecodeError, OSError, subprocess.TimeoutExpired):
+                pass
 
         # Delete the merged branch
         subprocess.run(
@@ -2223,6 +2264,43 @@ def cmd_dashboard(as_json=False):
     print(f"Merge order: {' → '.join(merge_order)}")
 
 
+def cmd_dashboard_watch():
+    """Auto-refresh dashboard every 30 seconds. Exits on wave completion or Ctrl+C."""
+    import time as _time
+
+    WATCH_INTERVAL = 30  # seconds
+
+    try:
+        while True:
+            # Clear terminal
+            print("\033[2J\033[H", end="", flush=True)
+
+            # Run dashboard (human-readable mode)
+            cmd_dashboard(as_json=False)
+
+            # Check if wave is complete
+            _, wave_data = find_active_wave()
+            if not wave_data:
+                print("\nWave completed or no active wave. Exiting watch mode.")
+                break
+
+            claims = atomic_read(CLAIMS_FILE)
+            all_done = all(
+                claims.get("claims", {}).get(t["taskId"], {}).get("status") == "completed"
+                for t in wave_data.get("tasks", [])
+            )
+            if all_done:
+                print("\nAll tasks complete. Run /hq --merge to finish.")
+                break
+
+            ts = datetime.now().strftime("%H:%M:%S")
+            print(f"\n  Refreshing every {WATCH_INTERVAL}s (Ctrl+C to stop) — last update {ts}")
+            _time.sleep(WATCH_INTERVAL)
+
+    except KeyboardInterrupt:
+        print("\nWatch mode stopped.")
+
+
 # ══════════════════════════════════════════════════════════════
 # CLI
 # ══════════════════════════════════════════════════════════════
@@ -2279,6 +2357,8 @@ def main():
                         help="Skip verification gate on --complete (for docs-only changes)")
     parser.add_argument("--project-root", dest="project_root", metavar="DIR",
                         help="Override project root (default: current directory)")
+    parser.add_argument("--watch", action="store_true",
+                        help="Auto-refresh dashboard every 30s (use with --dashboard)")
 
     args = parser.parse_args()
 
@@ -2317,7 +2397,10 @@ def main():
     elif args.status:
         cmd_status(as_json=args.json)
     elif args.dashboard:
-        cmd_dashboard(as_json=args.json)
+        if args.watch and not args.json:
+            cmd_dashboard_watch()
+        else:
+            cmd_dashboard(as_json=args.json)
     elif args.abandon_id:
         cmd_abandon(args.abandon_id)
     elif args.fail_id:

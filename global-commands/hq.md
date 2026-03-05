@@ -15,6 +15,7 @@ Run `python3 ~/.claude/scripts/multi_agent.py --dashboard --json` and parse the 
 │  /hq --merge     Merge completed tasks to master             │
 │  /hq --reclaim   Reclaim tasks from stale terminals          │
 │  /hq --abort     Cancel the active wave                      │
+│  /hq --watch     Auto-refresh dashboard every 30s            │
 │                                                              │
 │  QUICK START                                                 │
 │  1. /hq --plan     ← Claude proposes task breakdown          │
