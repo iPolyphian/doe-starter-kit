@@ -1585,7 +1585,7 @@ def _analyze_wave(wave_data):
         if model == "opus" and size == "S":
             findings.append(("WARN", f"Task '{tid}': opus on S task — consider sonnet"))
 
-    # 5. Missing fields
+    # 5. Missing fields + contract validation
     for task in tasks:
         tid = task["taskId"]
         if not task.get("description"):
@@ -1594,6 +1594,38 @@ def _analyze_wave(wave_data):
             findings.append(("WARN", f"Task '{tid}' has no file ownership declared"))
         if not task.get("acceptanceCriteria"):
             findings.append(("WARN", f"Task '{tid}' has no acceptance criteria"))
+        else:
+            # Validate and auto-promote acceptance criteria
+            promoted = []
+            for i, ac in enumerate(task["acceptanceCriteria"]):
+                if isinstance(ac, str):
+                    # Auto-promote flat string to structured object
+                    promoted.append({"text": ac, "type": "auto", "verify": ac})
+                elif isinstance(ac, dict):
+                    promoted.append(ac)
+                else:
+                    findings.append(("WARN", f"Task '{tid}' criterion {i}: unexpected format"))
+                    continue
+
+                # Validate executable patterns for auto criteria
+                entry = promoted[-1]
+                if entry.get("type", "auto") == "auto":
+                    verify_str = entry.get("verify", "")
+                    if not verify_str:
+                        findings.append(("BLOCK", f"Task '{tid}' [auto] criterion {i}: missing Verify: pattern"))
+                    else:
+                        import re as _re
+                        valid_patterns = [
+                            r"^run:\s+.+$",
+                            r"^file:\s+.+\s+exists$",
+                            r"^file:\s+.+\s+contains\s+.+$",
+                            r"^html:\s+.+\s+has\s+.+$",
+                        ]
+                        if not any(_re.match(p, verify_str.strip()) for p in valid_patterns):
+                            findings.append(("BLOCK", f"Task '{tid}' [auto] criterion {i}: invalid Verify: pattern '{verify_str}'"))
+
+            # Write promoted criteria back
+            task["acceptanceCriteria"] = promoted
 
     # 6. Cost estimate
     total_cost = 0.0
