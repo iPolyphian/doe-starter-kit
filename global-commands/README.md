@@ -95,7 +95,7 @@ Multi-agent dashboard. Shows wave status, task claims, session health, and coord
 *Added 03/03/26*
 
 ### `/agent-launch`
-Automated wave builder. Reads todo.md queue, identifies parallelisable features, builds wave JSON, previews conflicts and cost estimate, then launches on approval. After launch, prompts to run `/agent-start`.
+Automated wave builder. Scans Queue and Current for missing contracts, auto-generates them with user approval, then identifies parallelisable features, builds wave JSON, previews conflicts and cost estimate, and launches. After launch, prompts to run `/agent-start`.
 *Added 04/03/26 · Updated 05/03/26*
 
 ### `/agent-start`
