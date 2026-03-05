@@ -1,4 +1,33 @@
-Read `tasks/todo.md` (Queue section) and `STATE.md` to understand what features are ready to run.
+Read `tasks/todo.md` (Queue section and Current section) and `STATE.md` to understand what features are ready to run.
+
+## Step 0: Ensure queue items have contracts
+
+Before anything else, check each feature in `## Queue` and `## Current` for contract blocks.
+
+For each feature's uncompleted steps (lines starting with `- [ ]` or `N. [ ]`), check if a `Contract:` block exists (lines indented under the step with `- [ ] [auto]` or `- [ ] [manual]` criteria). A step without a Contract block — or with a Contract block missing executable `Verify:` patterns — is **not launchable**. Skip steps already marked `[x]`.
+
+**If any steps are missing contracts:**
+
+1. Read the feature's plan file (referenced in todo.md as "Plan: `.claude/plans/...`"). If no plan exists, stop and create one first (Step 2 handles this).
+2. For each step missing a contract, generate one based on the plan's design, file ownership, and acceptance criteria:
+   - `[auto]` criteria use executable `Verify:` patterns: `run:`, `file: <path> exists`, `file: <path> contains <string>`, `html: <path> has <selector>`
+   - `[APP]` features require at least one `[manual]` criterion per step (visual/behavioural checks)
+   - `[INFRA]` features can be fully `[auto]`
+3. Write the contracts directly into `tasks/todo.md` under each step
+4. Present the contracts to the user for approval:
+   ```
+   Generated contracts for [N] steps across [M] features.
+
+   [Feature Name] Step 1:
+     Contract:
+     - [ ] [auto] description. Verify: pattern
+     - [ ] [manual] description
+
+   Approve contracts? (yes / edit / cancel)
+   ```
+5. Wait for approval before proceeding. On "edit", ask what to change. On "cancel", stop.
+
+**If all steps already have valid contracts**, skip to Step 1.
 
 ## Step 1: Identify parallelisable features
 
