@@ -964,25 +964,19 @@ def _update_todo_after_merge(wave_data, merged_task_ids):
         return
 
     lines = todo_path.read_text(encoding="utf-8").splitlines()
-    in_active_section = False
     updated_steps = []
     current_step_version = None
     timestamp = datetime.now(timezone.utc).strftime("%H:%M %d/%m/%y")
 
+    # Search the entire file — wave tasks can be in Current, Queue, or Done
+    # (housekeeping tasks may move features between sections before this runs).
+    # versionTag matching is specific enough to avoid false positives.
     for i, line in enumerate(lines):
         stripped = line.strip()
 
-        # Search both ## Current and ## Queue — wave tasks can be in either
-        if stripped.startswith("## Current") or stripped.startswith("## Queue"):
-            in_active_section = True
+        # Reset step tracking at section boundaries
+        if stripped.startswith("## "):
             current_step_version = None
-            continue
-        if in_active_section and stripped.startswith("## "):
-            in_active_section = False
-            current_step_version = None
-            continue
-
-        if not in_active_section:
             continue
 
         # Match step lines like: 1. [ ] Description -> v0.17.0
@@ -1258,6 +1252,11 @@ def cmd_merge(as_json=False):
 
         merged.append(tid)
 
+        # Incrementally update todo.md after EACH merge — marks steps [x] and
+        # contract criteria [x] before later tasks (e.g. housekeeping) can
+        # rewrite todo.md and strip contracts.
+        _update_todo_after_merge(wave_data, [tid])
+
     print()
 
     # Summary
@@ -1295,9 +1294,6 @@ def cmd_merge(as_json=False):
         "totalCommits": total_commits,
         "totalConflicts": total_conflicts,
     })
-
-    # Auto-update todo.md — mark merged steps [x] and their contract criteria [x]
-    _update_todo_after_merge(wave_data, merged)
 
     # Clean up wave state files and per-terminal session/heartbeat markers
     for f in (CLAIMS_FILE, SESSIONS_FILE):
