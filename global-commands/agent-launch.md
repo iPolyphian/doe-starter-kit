@@ -92,25 +92,11 @@ Wait for the user's response.
   ```
   Wave launched. To start working:
 
-  This terminal:
-    python3 ~/.claude/scripts/multi_agent.py --claim --parent-pid $PPID
-    cd <worktree-path-from-claim-output>
-
-  New terminal (click + in VS Code terminal, type "claude"):
-    python3 ~/.claude/scripts/multi_agent.py --claim --parent-pid $PPID
-    cd <worktree-path-from-claim-output>
-
-  Monitor: /hq
+  This terminal:  /agent-start
+  New terminal:   click + in VS Code terminal, type "claude", then /agent-start
+  Monitor:        /hq (any terminal)
   ```
-  IMPORTANT: `--parent-pid $PPID` passes the Claude Code PID so hooks and commands can find this terminal's session. After claiming, the agent MUST cd into the worktree path printed by the claim output.
-
-  ALL subsequent multi_agent.py commands in this terminal MUST include `--parent-pid $PPID`:
-  ```
-  python3 ~/.claude/scripts/multi_agent.py --complete <taskId> --parent-pid $PPID
-  python3 ~/.claude/scripts/multi_agent.py --fail <taskId> --parent-pid $PPID
-  python3 ~/.claude/scripts/multi_agent.py --abandon <taskId> --parent-pid $PPID
-  ```
-  Without `--parent-pid`, session ownership checks will fail because each CLI invocation gets a new PID.
+  Then immediately run `/agent-start` in this terminal to claim the first task.
 
 - **"edit"** → Ask what to change (models, ownership, task split), update the wave file, re-run preview.
 

@@ -104,6 +104,7 @@ All slash commands install to `~/.claude/commands/` so they work across every DO
 | sitrep.md | `~/.claude/commands/` | Type `/sitrep` — mid-session situation report with progress, commits, elapsed time |
 | sync-doe.md | `~/.claude/commands/` | Type `/sync-doe` — sync DOE improvements back to the starter kit repo |
 | hq.md | `~/.claude/commands/` | Type `/hq` — multi-agent dashboard for wave status, terminal liveness, task progress, merge order |
+| agent-start.md | `~/.claude/commands/` | Type `/agent-start` — claim a wave task, cd into worktree, start working |
 | README.md | `~/.claude/commands/` | Quick reference for all 15 slash commands |
 
 ### 🔀 Multi-Agent Coordination (global — install once, available in every project)
@@ -189,6 +190,7 @@ SESSION END (or /wrap)
 | `/vitals` | Workspace health check — git, audit, DOE sync, STATE alignment, temp files |
 | `/sitrep` | Mid-session situation report — progress bar, commits, elapsed time, blockers, context usage |
 | `/hq` | Multi-agent dashboard — wave status, terminal liveness, task progress, merge order |
+| `/agent-start` | Claim a wave task, cd into worktree, start working automatically |
 | `/sync-doe` | Sync universal DOE improvements from current project to the starter kit repo |
 
 ## What's project-level vs machine-level

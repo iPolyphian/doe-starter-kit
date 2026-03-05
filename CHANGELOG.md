@@ -7,6 +7,18 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.14.6] — 2026-03-05
+
+New `/agent-start` command and simplified `/agent-launch` instructions.
+
+### Added
+- **`/agent-start` command** — claims a wave task, cd's into the worktree, shows the assignment, and starts working. Replaces manual `python3 multi_agent.py --claim` + `cd` workflow.
+
+### Changed
+- **`/agent-launch` instructions** — "go" output now shows `/agent-start` instead of manual python3 commands. Cleaner onboarding for new terminals.
+
+---
+
 ## [v1.14.5] — 2026-03-05
 
 Docs update: command count and wrap system checks heading.
