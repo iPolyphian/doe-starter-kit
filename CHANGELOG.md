@@ -7,6 +7,21 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.13.1] — 2026-03-05
+
+CLAUDE.md enrichments — identity reframe, research separation, sycophancy-aware verification, subagent context savings, and best practices trigger.
+
+### Changed
+- **Who We Are** — reframed from role-specific ("non-technical founder") to generic ("human defines intent, Claude builds")
+- **Rule 2** — added research/implementation separation guidance for significant research tasks (3+ approaches)
+- **Rule 4** — added sycophancy-aware evaluation: use neutral verification prompts, not leading questions
+- **Rule 7** — added concrete context savings numbers (15k tokens → 500-token summary = 30x saving)
+
+### Added
+- Progressive Disclosure trigger: read language best practices directives before writing code
+
+---
+
 ## [v1.13.0] — 2026-03-05
 
 Added /pull-doe — the reverse of /sync-doe. Pulls kit updates into a project with version-aware diffing, file categorization, and safe merging.
