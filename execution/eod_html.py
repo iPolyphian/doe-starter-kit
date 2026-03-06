@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Generate a session wrap-up HTML page from JSON data.
+"""Generate an end-of-day HTML report from JSON data.
+
+Aggregates all sessions from a single day into one report.
 
 Usage:
-    python3 execution/wrap_html.py --json '{"title": "...", ...}' --output .tmp/wrap.html
-    echo '{"title": "..."}' | python3 execution/wrap_html.py
+    python3 execution/eod_html.py --json '{"projectName": "...", ...}' --output .tmp/eod.html
+    echo '{"projectName": "..."}' | python3 execution/eod_html.py
 """
 
 import argparse
 import html
 import json
 import os
-import re
 import sys
 
 
@@ -21,16 +22,15 @@ def esc(text):
 
 def render_title_card(data):
     project = esc(data.get("projectName", ""))
-    episode = data.get("episode", "")
-    title = esc(data.get("title", ""))
+    date = esc(data.get("date", ""))
     return f"""  <div class="title-card">
     <div class="project-name">{project}</div>
-    <div class="episode">Session {esc(episode)} &mdash; {title}</div>
+    <div class="episode">End of Day &mdash; {date}</div>
   </div>"""
 
 
-def render_narrative(data):
-    lines = data.get("narrative", [])
+def render_summary(data):
+    lines = data.get("summary", [])
     if not lines:
         return ""
     paras = "\n".join(f"    <p>{esc(line)}</p>" for line in lines)
@@ -41,7 +41,7 @@ def render_narrative(data):
         emoji = vibe.get("emoji", "")
         text = esc(vibe.get("text", ""))
         vibe_html = (
-            f'\n    <div class="vibe-label">Session Vibe</div>'
+            f'\n    <div class="vibe-label">Day Vibe</div>'
             f'\n    <div class="vibe"><span class="vibe-emoji">{emoji}</span> {text}</div>'
         )
     return f"""  <div class="section">
@@ -55,107 +55,35 @@ def render_narrative(data):
   </div>"""
 
 
-def render_stats(data):
-    m = data.get("metrics", {})
-    if not m:
-        return ""
-    commits = m.get("commits", 0)
-    added = m.get("linesAdded", 0)
-    removed = m.get("linesRemoved", 0)
-    files = m.get("filesTouched", 0)
-    steps = m.get("stepsCompleted", 0)
-    duration = esc(m.get("sessionDuration", ""))
-    agents = m.get("agentsSpawned", 0)
-
-    return f"""  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">&#x1F4CA;</span>
-      <span class="section-title">Metrics</span>
-    </div>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value">{esc(commits)}</div>
-        <div class="stat-label">Commits</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{esc(added)}</div>
-        <div class="stat-label">Lines Added</div>
-        <div class="stat-sub">-{esc(removed)}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{esc(files)}</div>
-        <div class="stat-label">Files Touched</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{esc(steps)}</div>
-        <div class="stat-label">Steps Done</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{duration}</div>
-        <div class="stat-label">Duration</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{esc(agents)}</div>
-        <div class="stat-label">Agents Spawned</div>
-      </div>
-    </div>
-  </div>"""
-
-
-def _parse_dur_mins(dur_str):
-    """Parse a duration string like '15m' or '1h 30m' into total minutes."""
-    mins = 0
-    h_match = re.search(r'(\d+)h', dur_str)
-    m_match = re.search(r'(\d+)m', dur_str)
-    if h_match:
-        mins += int(h_match.group(1)) * 60
-    if m_match:
-        mins += int(m_match.group(1))
-    return mins
-
-
-def render_timeline(data):
-    items = data.get("timeline", [])
+def render_session_timeline(data):
+    items = data.get("sessionTimeline", [])
     if not items:
         return ""
 
-    # Calculate total duration in minutes for percentage
-    total_mins = 0
-    for item in items:
-        dur_str = item.get("dur", "")
-        if dur_str:
-            total_mins += _parse_dur_mins(dur_str)
-
     rows = []
     for item in items:
-        t = esc(item.get("time", ""))
-        desc = esc(item.get("desc", ""))
-        dur = item.get("dur", "")
-        item_type = item.get("type", "")
-        css_class = item_type if item_type in ("start", "major", "fix") else ""
+        num = esc(item.get("number", ""))
+        start = esc(item.get("start", ""))
+        summary = esc(item.get("summary", ""))
+        duration = esc(item.get("duration", ""))
+        pct = item.get("pct", 0)
 
-        # Calculate percentage
-        dur_display = esc(dur)
-        if dur and total_mins > 0:
-            mins = _parse_dur_mins(dur)
-            pct = round(mins / total_mins * 100)
-            if pct > 0:
-                dur_display = f"{esc(dur)} ({pct}%)"
+        dur_display = f"{duration} ({pct}%)" if pct else duration
 
         rows.append(
-            f'    <div class="timeline-item {css_class}">'
-            f'<span class="timeline-time">{t}</span>'
-            f'<span class="timeline-desc">{desc}</span>'
+            f'    <div class="timeline-item major">'
+            f'<span class="timeline-time">{start}</span>'
+            f'<span class="timeline-desc">#{num} &mdash; {summary}</span>'
             f'<span class="timeline-dur">{dur_display}</span>'
-            f"</div>"
+            f'</div>'
         )
 
-    # Total session duration
-    session_dur = data.get("metrics", {}).get("sessionDuration", "")
-    if session_dur:
+    # Total line
+    total_dur = data.get("metrics", {}).get("totalDuration", "")
+    if total_dur:
         rows.append(
             f'    <div class="timeline-total">'
-            f'Total: {esc(session_dur)}'
+            f'Total: {esc(total_dur)}'
             f'</div>'
         )
 
@@ -163,106 +91,103 @@ def render_timeline(data):
     return f"""  <div class="section">
     <div class="section-header">
       <span class="section-icon">&#x23F1;&#xFE0F;</span>
-      <span class="section-title">Timeline</span>
+      <span class="section-title">Daily Timeline</span>
     </div>
     <div class="timeline">
 {inner}
     <div class="timeline-legend">
-      <span class="legend-item"><span class="legend-dot start"></span> Session start</span>
-      <span class="legend-item"><span class="legend-dot major"></span> Major change</span>
-      <span class="legend-item"><span class="legend-dot fix"></span> Fix</span>
-      <span class="legend-item"><span class="legend-dot normal"></span> Normal</span>
+      <span class="legend-item"><span class="legend-dot major"></span> Each dot represents one session</span>
     </div>
     </div>
   </div>"""
 
 
-def render_commits(data):
+def render_metrics(data):
     m = data.get("metrics", {})
-    commit_log = m.get("commitLog", [])
-    if not commit_log:
+    if not m:
         return ""
+    sessions = m.get("sessions", 0)
+    total_dur = esc(m.get("totalDuration", ""))
+    commits = m.get("commits", 0)
+    added = m.get("linesAdded", 0)
+    removed = m.get("linesRemoved", 0)
+    files = m.get("filesTouched", 0)
+    steps = m.get("stepsCompleted", 0)
+    features = m.get("featuresCompleted", 0)
 
-    groups = data.get("commitGroups")
+    cards = [
+        f"""      <div class="stat-card">
+        <div class="stat-value">{esc(sessions)}</div>
+        <div class="stat-label">Sessions</div>
+      </div>""",
+        f"""      <div class="stat-card">
+        <div class="stat-value">{total_dur}</div>
+        <div class="stat-label">Total Time</div>
+      </div>""",
+        f"""      <div class="stat-card">
+        <div class="stat-value">{esc(commits)}</div>
+        <div class="stat-label">Commits</div>
+      </div>""",
+        f"""      <div class="stat-card">
+        <div class="stat-value">{esc(added)}</div>
+        <div class="stat-label">Lines Added</div>
+        <div class="stat-sub">-{esc(removed)}</div>
+      </div>""",
+        f"""      <div class="stat-card">
+        <div class="stat-value">{esc(files)}</div>
+        <div class="stat-label">Files Touched</div>
+      </div>""",
+        f"""      <div class="stat-card">
+        <div class="stat-value">{esc(steps)}</div>
+        <div class="stat-label">Steps Done</div>
+      </div>""",
+    ]
 
-    if groups:
-        # Build a lookup from hash to commit
-        commit_map = {c.get("hash", ""): c for c in commit_log}
+    if features > 0:
+        cards.append(
+            f"""      <div class="stat-card">
+        <div class="stat-value">{esc(features)}</div>
+        <div class="stat-label">Features Shipped</div>
+      </div>"""
+        )
 
-        sections = []
-        for group in groups:
-            name = esc(group.get("name", "Other"))
-            hashes = group.get("commits", [])
-            count = len(hashes)
-
-            rows = []
-            for h in hashes:
-                c = commit_map.get(h, {})
-                msg = esc(c.get("message", ""))
-                ctype = c.get("type", "normal")
-                css = "commit-test" if ctype in ("test", "fix") else "commit-msg"
-                rows.append(
-                    f'      <li class="commit-item">'
-                    f'<span class="commit-hash">{esc(h)}</span>'
-                    f'<span class="{css}">{msg}</span>'
-                    f'</li>'
-                )
-            inner_rows = "\n".join(rows)
-            sections.append(
-                f'    <div class="commit-group">'
-                f'<div class="commit-group-header">{name} <span class="commit-group-count">({count})</span></div>'
-                f'<ul class="commit-list">\n{inner_rows}\n</ul>'
-                f'</div>'
-            )
-        inner = "\n".join(sections)
-    else:
-        # Flat list fallback
-        rows = []
-        for c in commit_log:
-            h = esc(c.get("hash", ""))
-            msg = esc(c.get("message", ""))
-            ctype = c.get("type", "normal")
-            css = "commit-test" if ctype in ("test", "fix") else "commit-msg"
-            rows.append(
-                f'    <li class="commit-item">'
-                f'<span class="commit-hash">{h}</span>'
-                f'<span class="{css}">{msg}</span>'
-                f'</li>'
-            )
-        inner = f'<ul class="commit-list">\n' + "\n".join(rows) + '\n</ul>'
-
+    inner = "\n".join(cards)
     return f"""  <div class="section">
     <div class="section-header">
-      <span class="section-icon">&#x1F4DD;</span>
-      <span class="section-title">Commits</span>
+      <span class="section-icon">&#x1F4CA;</span>
+      <span class="section-title">Metrics</span>
     </div>
+    <div class="stats-grid">
 {inner}
+    </div>
   </div>"""
 
 
-def render_today_sessions(data):
-    sessions = data.get("todaySessions", [])
-    if not sessions:
+def render_commit_breakdown(data):
+    items = data.get("commitBreakdown", [])
+    if not items:
         return ""
+
     rows = []
-    for s in sessions:
-        num = esc(s.get("number", ""))
-        dur = esc(s.get("duration", ""))
-        summary = esc(s.get("summary", ""))
+    for item in items:
+        name = esc(item.get("name", ""))
+        count = item.get("count", 0)
+        pct = item.get("pct", 0)
         rows.append(
-            f'    <div class="today-session-item">'
-            f'<span class="today-session-num">#{num}</span>'
-            f'<span class="today-session-dur">{dur}</span>'
-            f'<span class="today-session-summary">{summary}</span>'
+            f'    <div class="breakdown-item">'
+            f'<span class="breakdown-name">{name}</span>'
+            f'<span class="breakdown-bar" style="width: {pct}%"></span>'
+            f'<span class="breakdown-stat">{count} commits ({pct}%)</span>'
             f'</div>'
         )
+
     inner = "\n".join(rows)
     return f"""  <div class="section">
     <div class="section-header">
-      <span class="section-icon">&#x1F4C5;</span>
-      <span class="section-title">Today&#39;s Sessions</span>
+      <span class="section-icon">&#x1F4DD;</span>
+      <span class="section-title">Commit Breakdown</span>
     </div>
-    <div class="today-sessions">
+    <div class="breakdown">
 {inner}
     </div>
   </div>"""
@@ -278,7 +203,6 @@ def _render_insight_item(item, dot_class, item_kind="decision"):
         title = esc(item.get("title", ""))
         problem = esc(item.get("problem", ""))
         solution = esc(item.get("solution", ""))
-        # Fallback: old "context" field renders as-is
         context = esc(item.get("context", ""))
         detail_html = ""
         if problem and solution:
@@ -368,7 +292,6 @@ def render_checks(data):
         if f > 0:
             badge += f' <span class="check-fail">FAIL {f}</span>'
         rows.append(f'    <div class="check-row">{badge} <span class="check-label">Claim Audit</span></div>')
-        # Detail rows for warnings/failures
         for detail in audit.get("details", []):
             detail_text = esc(detail)
             if w > 0 and f == 0:
@@ -405,23 +328,6 @@ def render_checks(data):
   </div>"""
 
 
-def render_footer(data):
-    footer = data.get("footer", {})
-    if not footer:
-        return ""
-    session = esc(footer.get("session", ""))
-    streak = esc(footer.get("streak", ""))
-    lifetime = esc(footer.get("lifetimeCommits", ""))
-    return f"""  <div class="footer">
-    <div class="footer-checks">
-      <span>Session #{session}</span>
-      <span>Streak: {streak} days</span>
-      <span>Lifetime: {lifetime} commits</span>
-    </div>
-    <div class="footer-meta">Built with <strong>DOE</strong> &mdash; Directive, Orchestration, Execution</div>
-  </div>"""
-
-
 def render_next_up(data):
     text = data.get("nextUp", "")
     if not text:
@@ -429,6 +335,18 @@ def render_next_up(data):
     return f"""  <div class="next-up">
     <div class="next-up-title">Next Up</div>
     <div class="next-up-desc">{esc(text)}</div>
+  </div>"""
+
+
+def render_footer(data):
+    streak = data.get("streak", 0)
+    date = esc(data.get("date", ""))
+    return f"""  <div class="footer">
+    <div class="footer-checks">
+      <span>Day {esc(streak)} streak</span>
+      <span>{date}</span>
+    </div>
+    <div class="footer-meta">Built with <strong>DOE</strong> &mdash; Directive, Orchestration, Execution</div>
   </div>"""
 
 
@@ -510,13 +428,6 @@ CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono
   .vibe { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 1.2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
   .vibe-emoji { font-size: 1.2rem; }
 
-  .commit-list { list-style: none; }
-  .commit-item { display: flex; align-items: baseline; gap: 0.8rem; padding: 0.4rem 0; font-size: 0.85rem; border-bottom: 1px solid rgba(42, 42, 58, 0.5); }
-  .commit-item:last-child { border-bottom: none; }
-  .commit-hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.75rem; flex-shrink: 0; }
-  .commit-msg { color: var(--text); }
-  .commit-test { color: var(--text-dim); font-style: italic; }
-
   .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 0.5rem; }
   .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center; }
   .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.8rem; font-weight: 700; color: var(--text); }
@@ -533,6 +444,19 @@ CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono
   .timeline-time { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); flex-shrink: 0; width: 3rem; }
   .timeline-desc { font-size: 0.85rem; color: var(--text); flex: 1; }
   .timeline-dur { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-dim); flex-shrink: 0; text-align: right; min-width: 5rem; }
+
+  .timeline-total { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); text-align: right; padding-top: 0.5rem; margin-top: 0.5rem; border-top: 1px solid var(--border); }
+  .timeline-legend { display: flex; gap: 1.2rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--border); }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .legend-dot.major { background: var(--green); }
+
+  .breakdown { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; }
+  .breakdown-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.5rem 0; border-bottom: 1px solid rgba(42, 42, 58, 0.5); }
+  .breakdown-item:last-child { border-bottom: none; }
+  .breakdown-name { font-size: 0.85rem; color: var(--text); flex-shrink: 0; min-width: 10rem; }
+  .breakdown-bar { height: 4px; background: var(--accent); border-radius: 2px; flex-shrink: 0; }
+  .breakdown-stat { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-dim); flex-shrink: 0; white-space: nowrap; margin-left: auto; }
 
   .insight-item { display: flex; align-items: flex-start; gap: 0.8rem; padding: 0.6rem 0; border-bottom: 1px solid rgba(42, 42, 58, 0.5); }
   .insight-item:last-child { border-bottom: none; }
@@ -564,44 +488,22 @@ CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono
 
   .next-up { background: var(--accent-glow); border: 1px solid rgba(108, 99, 255, 0.3); border-radius: 8px; padding: 1rem 1.5rem; margin-top: 1.5rem; }
   .next-up-title { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.4rem; }
-  .next-up-desc { font-size: 0.9rem; color: var(--text); line-height: 1.6; }
-
-  .timeline-total { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); text-align: right; padding-top: 0.5rem; margin-top: 0.5rem; border-top: 1px solid var(--border); }
-  .timeline-legend { display: flex; gap: 1.2rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--border); }
-  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
-  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .legend-dot.start { background: var(--accent); }
-  .legend-dot.major { background: var(--green); }
-  .legend-dot.fix { background: var(--amber); }
-  .legend-dot.normal { background: var(--border); }
-
-  .commit-group { margin-bottom: 1rem; }
-  .commit-group:last-child { margin-bottom: 0; }
-  .commit-group-header { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; color: var(--accent); margin-bottom: 0.4rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--border); }
-  .commit-group-count { font-weight: 400; color: var(--text-dim); }
-
-  .today-sessions { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 1.2rem; }
-  .today-session-item { display: flex; align-items: baseline; gap: 0.8rem; padding: 0.4rem 0; font-size: 0.85rem; border-bottom: 1px solid rgba(42, 42, 58, 0.5); }
-  .today-session-item:last-child { border-bottom: none; }
-  .today-session-num { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.75rem; flex-shrink: 0; width: 2.5rem; }
-  .today-session-dur { font-family: 'JetBrains Mono', monospace; color: var(--text-dim); font-size: 0.75rem; flex-shrink: 0; width: 4rem; }
-  .today-session-summary { color: var(--text); flex: 1; }"""
+  .next-up-desc { font-size: 0.9rem; color: var(--text); line-height: 1.6; }"""
 
 
 def build_html(data):
     """Build the complete HTML string from the data dict."""
-    episode = esc(data.get("episode", ""))
-    title = esc(data.get("title", ""))
+    project = esc(data.get("projectName", ""))
+    date = esc(data.get("date", ""))
 
     sections = [
         render_title_card(data),
-        render_narrative(data),       # includes vibe at bottom
-        render_timeline(data),
-        render_stats(data),
-        render_commits(data),
+        render_summary(data),
+        render_session_timeline(data),
+        render_metrics(data),
+        render_commit_breakdown(data),
         render_decisions_learnings(data),
         render_checks(data),
-        render_today_sessions(data),
         render_next_up(data),
         render_footer(data),
     ]
@@ -612,7 +514,7 @@ def build_html(data):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Session {episode} — {title}</title>
+<title>{project} &mdash; EOD Report {date}</title>
 <style>
 {CSS}
 </style>
@@ -627,9 +529,9 @@ def build_html(data):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate session wrap-up HTML")
+    parser = argparse.ArgumentParser(description="Generate end-of-day HTML report")
     parser.add_argument("--json", dest="json_str", help="JSON data as a string argument")
-    parser.add_argument("--output", default=".tmp/wrap.html", help="Output HTML file path (default: .tmp/wrap.html)")
+    parser.add_argument("--output", default=".tmp/eod.html", help="Output HTML file path (default: .tmp/eod.html)")
     args = parser.parse_args()
 
     if args.json_str:
