@@ -250,7 +250,7 @@ def update_stats(stats: dict, metrics: dict, streak: int, steps: int, duration: 
     sk["lastSessionDate"] = today_str
 
     record = {
-        "date": today_str, "title": None,
+        "date": today_str, "title": None, "summary": None,
         "commits": metrics["commits"], "linesAdded": metrics["linesAdded"],
         "linesRemoved": metrics["linesRemoved"], "filesTouched": metrics["filesTouched"],
         "stepsCompleted": steps, "sessionDuration": duration, "streak": streak,

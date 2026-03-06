@@ -7,6 +7,20 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.24.0] — 2026-03-06
+
+Wrap and EOD report layout improvements — session stats promoted to below title card, report type label divider added above title card.
+
+### Added
+- Report label divider above title card in both wrap and eod HTML reports ("Session Report" / "End of Day Report")
+- Session stats bar below title card (session number, streak, lifetime commits) — moved from footer
+
+### Changed
+- `wrap_html.py`: title card no longer includes "Session N —" prefix (session number now in stats bar)
+- `eod_html.py`: title card no longer includes date (date now in stats bar)
+- Footer simplified to DOE attribution only in both reports
+- `wrap_stats.py`: session stats template includes `summary` field
+
 ## [v1.23.0] — 2026-03-06
 
 Stand-up gains pipeline sync detection. Sync directive upgraded to 3-layer diffing with README consistency checks.

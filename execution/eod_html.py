@@ -22,10 +22,18 @@ def esc(text):
 
 def render_title_card(data):
     project = esc(data.get("projectName", ""))
-    date = esc(data.get("date", ""))
-    return f"""  <div class="title-card">
+    return f"""  <div class="report-label">End of Day Report</div>
+  <div class="title-card">
     <div class="project-name">{project}</div>
-    <div class="episode">End of Day &mdash; {date}</div>
+  </div>"""
+
+
+def render_session_stats_bar(data):
+    streak = data.get("streak", 0)
+    date = esc(data.get("date", ""))
+    return f"""  <div class="session-stats-bar">
+    <span>Day {esc(streak)} streak</span>
+    <span>{date}</span>
   </div>"""
 
 
@@ -369,13 +377,7 @@ def render_next_up(data):
 
 
 def render_footer(data):
-    streak = data.get("streak", 0)
-    date = esc(data.get("date", ""))
-    return f"""  <div class="footer">
-    <div class="footer-checks">
-      <span>Day {esc(streak)} streak</span>
-      <span>{date}</span>
-    </div>
+    return """  <div class="footer">
     <div class="footer-meta">Built with <strong>DOE</strong> &mdash; Directive, Orchestration, Execution</div>
   </div>"""
 
@@ -412,6 +414,27 @@ CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono
 
   .container { max-width: 800px; margin: 0 auto; }
 
+  .report-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: center;
+    margin: 0 0 1.5rem;
+    position: relative;
+  }
+  .report-label::before, .report-label::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 30%;
+    height: 1px;
+    background: var(--border);
+  }
+  .report-label::before { left: 0; }
+  .report-label::after { right: 0; }
+
   .title-card {
     text-align: center;
     padding: 3rem 2rem;
@@ -420,7 +443,18 @@ CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono
     background: linear-gradient(135deg, var(--surface) 0%, var(--bg) 100%);
     position: relative;
     overflow: hidden;
-    margin-bottom: 2rem;
+  }
+
+  .session-stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--green);
+    padding: 1rem 0 1.2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 5px;
   }
 
   .title-card::before {
@@ -533,6 +567,7 @@ def build_html(data):
 
     sections = [
         render_title_card(data),
+        render_session_stats_bar(data),
         render_summary(data),
         render_session_timeline(data),
         render_metrics(data),
