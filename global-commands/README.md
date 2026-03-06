@@ -25,18 +25,22 @@ Mid-session situation report. Shows current feature progress, completed/active/p
 *Added 28/02/26 · Updated 28/02/26*
 
 ### `/wrap`
-End-of-session routine. Updates STATE.md, todo.md, learnings.md. Computes session stats, prints a themed wrap-up card with title card, numbers, timeline, system checks, and agents-spawned count.
-*Added 27/02/26 · Updated 04/03/26*
+End-of-session routine. Updates STATE.md, todo.md, learnings.md. Computes session stats via `wrap_stats.py`, generates a visual HTML wrap-up via `wrap_html.py` with summary + breakdowns, commit groups with timeline percentages, decision/learning pills, system checks, and session vibe. Opens in browser.
+*Added 27/02/26 · Updated 06/03/26*
 
 ### `/eod`
-End-of-day report aggregating all sessions, commits, features, and position. Answers "what did I do today?" Read-only — no files modified.
-*Added 03/03/26*
+End-of-day report aggregating all sessions into a visual HTML page via `eod_html.py`. Daily timeline, commit breakdown bars, 9-metric grid, features completed, and position summary. Answers "what did I do today?" Read-only — no files modified. Opens in browser.
+*Added 03/03/26 · Updated 06/03/26*
 
 ## Quality
 
 ### `/audit`
 Comprehensive project audit — claims (governed docs, task format, roadmap consistency, staleness), workspace health (git status, stale temp files, STATE.md alignment), and DOE framework integrity (required files, hooks, commands, kit sync). Single bordered output with all findings.
-*Added 28/02/26 · Updated 06/03/26*
+*Added 28/02/26 · Updated 06/03/26 (merged /quick-audit, /vitals, /doe-health)*
+
+### `/agent-verify`
+Verifies contract criteria for the current task. Runs all `[auto]` criteria with auto-fix loop (up to 3 attempts), presents `[manual]` criteria as a checklist. Works in solo and wave mode.
+*Added 05/03/26*
 
 ### `/fact-check`
 Verifies the factual accuracy of a document against the actual codebase and corrects inaccuracies in place.
@@ -45,6 +49,10 @@ Verifies the factual accuracy of a document against the actual codebase and corr
 ### `/review`
 Adversarial code reviewer. Reviews staged changes (or specified files) for bugs, security issues, performance problems, and code quality. Direct, specific, and neutral — finds problems, not praise.
 *Added 04/03/26*
+
+### `/test-suite`
+Runs the project's accumulated test suite from `tests/suite.json`. Updates metadata, handles --prune/--add options.
+*Added 05/03/26*
 
 ### `/codemap`
 Generates a structured project index at `.claude/codemap.md`. Scans file tree, maps key modules, functions, and entry points. Helps agents navigate without re-exploring each session.
@@ -79,8 +87,8 @@ Generates a stunning magazine-quality slide deck as a self-contained HTML page. 
 ## Multi-Agent
 
 ### `/agent-status`
-Multi-agent dashboard. Shows wave status, task claims, session health, and coordination info. When no wave is active, shows help card with setup instructions.
-*Added 03/03/26 · Renamed from /hq 06/03/26*
+Multi-agent dashboard. Shows wave status, task claims, session health, and coordination info. Modes: `--plan`, `--preview`, `--launch`, `--merge`, `--reclaim`, `--abort`, `--watch`.
+*Added 03/03/26 · Updated 06/03/26 (renamed from /hq)*
 
 ### `/agent-launch`
 Dual-mode command. **Launch mode** (no active wave): scans Queue and Current for missing contracts, auto-generates them with user approval, identifies parallelisable features, builds wave JSON, previews conflicts and cost, launches, then auto-claims the first task and starts working. **Join mode** (active wave exists): claims the next unclaimed task and starts working immediately. One command for both — run `/agent-launch` in every terminal.
@@ -108,4 +116,4 @@ Reverse sync — pulls DOE Kit updates into the current project. Reads the pull 
 
 ### `/commands`
 Shows installation health check and the full command reference. Checks DOE Kit version, installed command count, and available updates.
-*Added 01/03/26*
+*Added 01/03/26 · Updated 06/03/26*
