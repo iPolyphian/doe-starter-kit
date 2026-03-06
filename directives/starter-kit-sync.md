@@ -23,19 +23,31 @@ cd ~/doe-starter-kit && git pull
 ```
 If there are local uncommitted changes, stop and ask the user how to handle them before proceeding.
 
-### Step 3: Check if anything changed
-Compare files that exist in both the current project and the starter kit. If all syncable files are identical, say "Starter kit is up to date — nothing to sync" and stop.
+### Step 3: Check all layers
+Compare files across ALL layers — not just two. Every sync must check:
+
+**Layer A — DOE Kit** (`~/doe-starter-kit/global-commands/`, `~/doe-starter-kit/.githooks/`, etc.)
+**Layer B — Installed Global** (`~/.claude/commands/`)
+**Layer C — Local Project** (`.claude/commands/`, `.githooks/`, `.claude/hooks/`, etc.)
+
+For each syncable file, diff A↔B and A↔C. Report which layers are ahead, behind, or in sync. This catches edits made at any layer (e.g. editing an installed command without syncing back to kit).
 
 Files to compare:
 - CLAUDE.md (rules, triggers, directory structure)
 - tasks/todo.md (format rules only — not task content)
 - directives/*.md (universal ones only)
 - execution/audit_claims.py (universal checks only)
-- ~/.claude/commands/*.md (global commands)
+- ~/.claude/commands/*.md (global commands — Layer B)
+- ~/doe-starter-kit/global-commands/*.md (global commands — Layer A)
+- .claude/commands/*.md (local commands — Layer C, if any exist beyond README)
 - .githooks/* (hook scripts)
 - .claude/hooks/*.py (guardrail hooks)
 - SYSTEM-MAP.md (structure documentation)
 - .claude/claude-chat-sync-prompt.md
+
+**Commands README check:** Both `~/doe-starter-kit/global-commands/README.md` and the local `.claude/commands/README.md` must be checked. For every command file that differs across layers, re-read its content and compare against the README description. If the command's behaviour or features changed meaningfully (new card rows, new modes, renamed sections), update the README description. If the change is purely internal (wording tweaks, border fixes, reordering), leave the README as-is. Present README updates alongside other diffs for approval.
+
+If all syncable files are identical across all layers, say "Starter kit is up to date — nothing to sync" and stop.
 
 ### Step 4: Three-way comparison
 For each file that differs, show THREE things:
@@ -103,6 +115,13 @@ grep 'yourproject' ~/doe-starter-kit/execution/audit_claims.py
 
 # Commands are project-agnostic
 grep -ri "monty\|broker" ~/.claude/commands/
+
+# README consistency: every command file in kit has a matching README entry
+for f in ~/doe-starter-kit/global-commands/*.md; do
+  base=$(basename "$f" .md)
+  [ "$base" = "README" ] && continue
+  grep -q "/$base" ~/doe-starter-kit/global-commands/README.md || echo "MISSING README ENTRY: $base"
+done
 ```
 
 ### Step 9: Update CHANGELOG.md and version

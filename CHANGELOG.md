@@ -7,6 +7,20 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.23.0] — 2026-03-06
+
+Stand-up gains pipeline sync detection. Sync directive upgraded to 3-layer diffing with README consistency checks.
+
+### Added
+- `/stand-up` kick-off: PIPELINE row comparing ROADMAP.md Up Next count vs todo.md Queue count — nudges user to scope and promote features
+- `sync-doe` directive: 3-layer comparison (DOE kit, installed global, local project) catches edits at any layer
+- `sync-doe` directive: README consistency verification step ensures every command has a README entry
+
+### Changed
+- `/stand-up`: reads ROADMAP.md in kick-off mode
+- `/agent-status`: card header renamed from "AGENT STATUS" to "HQ"
+- `global-commands/README.md`: `/stand-up` description updated to mention pipeline sync
+
 ## [v1.22.6] — 2026-03-06
 
 Fix summary-to-breakdown spacing in wrap and eod HTML reports.

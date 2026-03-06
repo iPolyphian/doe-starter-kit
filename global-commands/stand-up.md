@@ -10,7 +10,7 @@ This command has two modes. Check which mode to use **before doing anything else
 
 Start the session clock: run `mkdir -p .tmp && date -u +%Y-%m-%dT%H:%M:%S+00:00 > .tmp/.session-start`
 
-Read CLAUDE.md, tasks/todo.md, STATE.md, and learnings.md.
+Read CLAUDE.md, tasks/todo.md, STATE.md, learnings.md, and ROADMAP.md.
 
 **DOE Kit check:** If `~/doe-starter-kit` exists, run `cd ~/doe-starter-kit && git describe --tags --abbrev=0 2>/dev/null` to get the current kit version, and `git log -1 --format="%ai" $(git describe --tags --abbrev=0)` to get the last release date. Then check two things: (1) Is the kit tag newer than STATE.md's "DOE Starter Kit" version? (inbound). (2) Do any key syncable files differ? (outbound). Diff key files (~/.claude/commands/*.md, .githooks/*, .claude/hooks/*.py) and count how many have changes. **For CLAUDE.md**, do a smart diff: only flag if universal sections (Who We Are, Operating Rules, Guardrails, Code Hygiene, Self-Annealing) differ between kit and project. Ignore project-specific sections (Directory Structure, Progressive Disclosure triggers, project-specific additions). If only project-specific sections differ, do not count as a change. If either condition is true, show `*` (meaning `/sync-doe` or `/pull-doe` needed). If the directory doesn't exist, skip the DOE Kit line entirely.
 
@@ -23,6 +23,7 @@ Show a bordered kick-off card, then present a plan and wait for sign-off:
 │  FEATURE    [active feature] [APP/INFRA] vX.Y.x   │
 │  PROGRESS   ██████░░░░ N/M steps                  │
 │  DOE KIT    vX.Y.Z [synced / * if pending]        │
+│  PIPELINE   N in Up Next, M in Queue              │
 │  WARNINGS   [audit WARN/FAIL items]               │
 │    ⚠️ [detail line for each WARN/FAIL item]        │
 ├──────────────────────────────────────────────────┤
@@ -45,6 +46,7 @@ Card rules:
 - FEATURE: from STATE.md "Active feature" line. If no active feature, show "No active feature".
 - PROGRESS: count [x] and [ ] steps for the current feature in todo.md ## Current. Bar uses █ for done, ░ for remaining, scaled to 10 characters. If no current feature, omit this line.
 - DOE KIT: `vX.Y.Z` if synced, `vX.Y.Z *` if either the kit tag is newer than STATE.md's version or any syncable files differ (the `*` means `/sync-doe` or `/pull-doe` needed). Omit entirely if `~/doe-starter-kit` doesn't exist.
+- PIPELINE: Compare ROADMAP.md `## Up Next` item count against todo.md `## Queue` item count. Count feature headings (lines starting with `###`) in each section. If Up Next has more items than Queue, show `PIPELINE   N in Up Next, M in Queue -- scope to promote`. If counts match (including both being 0), show `PIPELINE   Synced (N items)`. This nudges the user to scope and promote features without auto-syncing. Omit if ROADMAP.md doesn't exist.
 - WARNINGS: Run `python3 execution/audit_claims.py --hook --json` and parse the JSON output. If any findings have severity "WARN" or "FAIL", show a WARNINGS row with a summary count (e.g. "2 audit WARNs") followed by indented detail lines for each non-PASS item — use `⚠️` prefix for WARN and `❌` for FAIL. Each detail line shows the file name and message from the finding. If the first WARN/FAIL item is actionable in this session (e.g. a stale doc or missing version tag), add an indented `→ Fix now?` suggestion. **If all findings are PASS, omit the WARNINGS section entirely** — it only appears when there are problems. If the audit script doesn't exist or fails, also omit.
 - SUMMARY: After the `├──┤` separator, show 1-2 lines summarising the last session from STATE.md ## Last Session. Keep it brief — what happened, where we left off. Then a blank line before PLAN.
 - CONTRACT: After the PROGRESS line, check the contract block of the next step to be worked on. Show `CONTRACT   Valid (N auto, M manual)` if the next step has a well-formed contract with executable Verify: patterns, `CONTRACT   Needs fix -- invalid Verify: patterns` if patterns don't match executable forms, or `CONTRACT   Missing` if no contract block exists. This is informational only -- it surfaces problems early so the plan can account for them (e.g. "First fix the missing contract, then start Step 2"). If no current feature or all steps complete, omit this line.

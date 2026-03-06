@@ -4,7 +4,7 @@ Run `python3 ~/.claude/scripts/multi_agent.py --dashboard --json` and parse the 
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  AGENT STATUS · DD/MM/YY                                               │
+│  HQ · DD/MM/YY                                               │
 ├──────────────────────────────────────────────────────────────┤
 │  STATUS  No active wave                                      │
 │                                                              │
@@ -34,7 +34,7 @@ This is read-only. Do not execute anything else.
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  AGENT STATUS · HH:MM - DD/MM/YY                                        │
+│  HQ · HH:MM - DD/MM/YY                                        │
 ├────────────────────────────────────────────────────────────────┤
 │  WAVE    [waveId] · [feature]                                  │
 │  MODE    [terminalMode] ([activeSessions] active)              │
