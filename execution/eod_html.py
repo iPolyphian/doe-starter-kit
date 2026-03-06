@@ -30,10 +30,23 @@ def render_title_card(data):
 
 def render_session_stats_bar(data):
     streak = data.get("streak", 0)
-    date = esc(data.get("date", ""))
+    date_str = data.get("date", "")
+    # Parse DD/MM/YY and format as "Friday 6th March"
+    from datetime import datetime
+    now = datetime.now()
+    pretty_date = date_str
+    try:
+        dt = datetime.strptime(date_str, "%d/%m/%y")
+        day = dt.day
+        suffix = "th" if 11 <= day <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+        pretty_date = f"{dt.strftime('%A')} {day}{suffix} {dt.strftime('%B')}"
+    except (ValueError, TypeError):
+        pass
+    time_now = now.strftime("%H:%M")
     return f"""  <div class="session-stats-bar">
-    <span>Day {esc(streak)} streak</span>
-    <span>{date}</span>
+    <span>{esc(pretty_date)}</span>
+    <span>{time_now}</span>
+    <span>{esc(streak)} Day streak</span>
   </div>"""
 
 

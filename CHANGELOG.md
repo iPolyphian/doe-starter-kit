@@ -7,6 +7,11 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.24.1] — 2026-03-06
+
+### Changed
+- EOD report stats bar format: "Friday 6th March | HH:MM | X Day streak" (human-readable date with ordinal suffix, current time, streak count)
+
 ## [v1.24.0] — 2026-03-06
 
 Wrap and EOD report layout improvements — session stats promoted to below title card, report type label divider added above title card.
