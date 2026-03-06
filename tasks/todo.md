@@ -27,7 +27,7 @@ FORMAT RULES (Claude: follow these when updating this file)
     - `Verify: file: <path> contains <string>` -- check file content for substring
     - `Verify: html: <path> has <selector>` -- parse HTML, check CSS selector (requires BeautifulSoup)
     Anything not matching a pattern is flagged invalid during /agent-launch pre-flight.
-  **`[manual]` criteria** describe what the human should check visually/behaviourally. No Verify: method.
+  **`[manual]` criteria** describe what the human should check visually/behaviourally. No Verify: method. Prefer converting to `[auto]` where possible — only keep `[manual]` for things that genuinely need human eyes (visual layout, interaction feel, print rendering). `[manual]` criteria are batched and presented to the user at feature completion (or mid-feature for 5+ step features), not per-step.
   **Rules:** Every task must have at least one `[auto]` criterion. `[APP]` tasks must also have at least one `[manual]` criterion. `[INFRA]` tasks can be fully `[auto]`.
   System-generated side effects (stats.json, learnings, wave infrastructure) are NOT tasks and don't get contracts.
 - This format can be changed — just update these rules and Claude will follow the new convention.
