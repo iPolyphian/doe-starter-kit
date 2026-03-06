@@ -37,6 +37,20 @@ result.streak       → current streak day count
 result.stats        → the full updated stats.json
 ```
 
+After composing your session summary (a plain English sentence of what was done), update stats.json to add it to the most recent session entry before committing:
+
+```bash
+python3 -c "
+import json
+with open('.claude/stats.json') as f: data = json.load(f)
+if data.get('recentSessions'):
+    data['recentSessions'][0]['summary'] = '<YOUR_SUMMARY_HERE>'
+    with open('.claude/stats.json', 'w') as f: json.dump(data, f, indent=2)
+"
+```
+
+Do this BEFORE committing stats.json.
+
 Commit stats.json with message: "Update session stats".
 
 ## Step 3: Generate HTML Wrap-Up
@@ -45,21 +59,17 @@ Build the wrap-up as an HTML page using `execution/wrap_html.py`. This renders b
 
 ### 3a: Compose the wrap-up data
 
-Using the stats JSON from Step 2, compose a JSON object with this schema. You must write the creative content (title, narrative, journey, vibe) yourself based on what happened this session:
+Using the stats JSON from Step 2, compose a JSON object with this schema. You must write the content (title, narrative, vibe) yourself based on what happened this session:
 
 ```json
 {
   "projectName": "PROJECT_DIR_NAME_UPPERCASED",
   "episode": result.stats.lifetime.totalSessions,
-  "title": "Short Dramatic Title",
+  "title": "Short Descriptive Title",
   "narrative": [
-    "Dramatic opening line about the state of the codebase.",
-    "Line referencing what was actually built this session.",
-    "Line referencing specific challenges or data wrangled.",
-    "Line about what lies ahead, trailing off..."
+    "2-3 sentences. Name the features, tools, or systems touched and what changed. Include enough detail that someone who wasn't there gets it -- but keep it tight. No drama, no filler."
   ],
   "vibe": {"emoji": "EMOJI", "text": "Vibe description"},
-  "journey": "2-4 sentences. Reference real files, real problems, real solutions. Be genuine.",
   "metrics": {
     "commits": N,
     "linesAdded": N,
@@ -72,12 +82,23 @@ Using the stats JSON from Step 2, compose a JSON object with this schema. You mu
       {"hash": "abc1234", "time": "HH:MM", "message": "Commit message", "type": "normal|fix|test"}
     ]
   },
+  "commitGroups": [
+    {"name": "Feature/task name", "commits": ["hash1", "hash2"]},
+    {"name": "Housekeeping", "commits": ["hash3"]}
+  ],
+  "todaySessions": [
+    {"number": 76, "duration": "1h 9m", "summary": "Plain English what was done"}
+  ],
   "timeline": [
     {"time": "HH:MM", "desc": "Session started", "dur": "", "type": "start"},
     {"time": "HH:MM", "desc": "What happened", "dur": "Nm", "type": "normal|major|fix"}
   ],
-  "decisions": ["Decision 1", "Decision 2"],
-  "learnings": ["Learning 1", "Learning 2"],
+  "decisions": [
+    {"title": "Short decision title", "problem": "What the problem was", "solution": "What was decided and why"}
+  ],
+  "learnings": [
+    {"title": "Short learning title", "problem": "What went wrong or was discovered", "solution": "What changed as a result"}
+  ],
   "checks": {
     "audit": {"pass": N, "warn": N, "fail": N, "details": ["detail string if warn/fail"]},
     "doeKit": {"version": "vX.Y.Z", "synced": true|false}
@@ -90,6 +111,14 @@ Using the stats JSON from Step 2, compose a JSON object with this schema. You mu
   "nextUp": "What to do next session -- pull from todo.md"
 }
 ```
+
+**commitGroups**: Group commits by feature or task. Use feature names from todo.md where possible. Commits that don't belong to a feature go in "Housekeeping" or "Other". Every commit in commitLog must appear in exactly one group.
+
+**todaySessions**: Pull from stats.json recentSessions, filtering to today's date. Each entry needs a `number`, `duration`, and `summary` field. For the CURRENT session, write the summary yourself based on what you did. For previous sessions today that lack a summary, derive one from their commit messages in git log.
+
+**decisions**: Each decision uses `title` (short label), `problem` (what was going wrong), and `solution` (what was decided and why). Renders as Problem:/Solution: under the title. Example: `{"title": "Batch manual verification at feature end", "problem": "Per-step manual approval was blocking autonomous building and killing throughput", "solution": "Accumulate manual checks and present as a single checklist at feature completion. Auto-verified steps proceed without waiting."}`
+
+**learnings**: Each learning uses `title` (short label), `problem` (what went wrong or was discovered), and `solution` (what changed as a result). Renders as Discovery:/Change: under the title. Example: `{"title": "Contract patterns are planning-time guesses", "problem": "Wrote contains pcon= in the contract but actual code used pcon: with a colon — the = only appeared at runtime via buildHash()", "solution": "Now verify contract Verify: patterns match actual code before marking done. Quick fix, not a process problem."}`
 
 ### 3b: Vibe selection
 
@@ -111,6 +140,7 @@ Build the timeline from `result.metrics.commitLog`:
   - "fix" for bug fixes, corrections
   - "normal" for everything else (housekeeping, docs, state updates)
 - Group rapid commits (< 1 min apart) into a single timeline entry
+- For each timeline entry with a duration, the renderer will automatically calculate and display what percentage of total session time it represents. Include the total session duration in metrics.sessionDuration.
 
 ### 3d: Commit classification
 
@@ -136,7 +166,7 @@ Print a one-line summary to the terminal: `Session [N] wrap-up opened in browser
 ## Important Rules
 
 - Pull ALL numbers from the wrap_stats.py JSON output. Never estimate or make up stats.
-- The Journey section must be genuine -- reference specific things that happened.
+- The narrative must be plain English, 2-3 sentences. Name specific features and systems. Enough detail to understand what changed -- but no implementation details. Tight and scannable.
 - Title and narrative MUST reference actual features, real files, and real problems from this session.
 - If stats.json doesn't exist yet, this is session 1.
 - Commit stats.json BEFORE generating the wrap-up so the push includes it.
