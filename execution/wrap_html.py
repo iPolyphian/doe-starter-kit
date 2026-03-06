@@ -58,24 +58,23 @@ def render_narrative(data):
             )
         breakdown_html = "\n".join(parts)
 
-    # Merge vibe into summary section
+    # Vibe sits inline on the header
     vibe = data.get("vibe")
     vibe_html = ""
     if vibe:
         emoji = vibe.get("emoji", "")
         text = esc(vibe.get("text", ""))
-        vibe_html = (
-            f'\n    <div class="vibe-label">Session Vibe</div>'
-            f'\n    <div class="vibe"><span class="vibe-emoji">{emoji}</span> {text}</div>'
-        )
+        vibe_html = f'<span class="vibe-inline">Vibe: {emoji} {text}</span>'
+
     return f"""  <div class="section">
     <div class="section-header">
       <span class="section-icon">&#x1F4CB;</span>
       <span class="section-title">Summary</span>
+      {vibe_html}
     </div>
     <div class="summary">
 {summary_html}
-{breakdown_html}{vibe_html}
+{breakdown_html}
     </div>
   </div>"""
 
@@ -542,9 +541,7 @@ CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono
   .section-icon { font-size: 1.1rem; }
   .section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); }
 
-  .vibe-label { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-top: 1.2rem; margin-bottom: 0.4rem; }
-  .vibe { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 1.2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
-  .vibe-emoji { font-size: 1.2rem; }
+  .vibe-inline { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.05em; }
 
   .commit-list { list-style: none; }
   .commit-item { display: flex; align-items: baseline; gap: 0.8rem; padding: 0.4rem 0; font-size: 0.85rem; border-bottom: 1px solid rgba(42, 42, 58, 0.5); }

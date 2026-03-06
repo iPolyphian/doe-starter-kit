@@ -71,7 +71,7 @@ Build a JSON object with this schema:
 
 **summary**: One plain English sentence addressing the user -- "Today you did X and achieved Y." No jargon.
 
-**breakdowns**: Group the day's work into 2-4 subheadings, each with 1-3 short bullet points. Name specific features, files, and outcomes.
+**breakdowns**: Group the day's work into 2-4 subheadings, each with 1-3 bullet points. Keep bullets top-level and plain English -- what was achieved, not implementation details. Think "Built the EOD report" not "Created eod_html.py with render_summary function".
 
 **vibe**: Pick the best match for the day:
 - All planning, no code → `{"emoji": "📐", "text": "Architect mode"}`
