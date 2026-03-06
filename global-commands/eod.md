@@ -1,14 +1,14 @@
-End-of-day report aggregating all sessions, commits, features, and position. Answers "what did I do today?"
+End-of-day report aggregating all sessions into a single visual HTML page. Answers "what did I do today?"
 
 This is a read-only summary command. Do NOT modify any files or start/stop sessions.
 
-## Data Gathering
+## Step 1: Data Gathering
 
-Collect all of the following before building the card:
+Collect all of the following before building the report:
 
-1. **Today's sessions** — Read `.claude/stats.json` and filter `recentSessions` where `date` matches today (YYYY-MM-DD). Count wrapped sessions. Check if `.tmp/.session-start` exists — if it does, there is one active unwrapped session.
+1. **Today's sessions** — Read `.claude/stats.json` and filter `recentSessions` where `date` matches today (YYYY-MM-DD). For each session, pull `sessionDuration`, `commits`, `stepsCompleted`, `linesAdded`, `linesRemoved`, `filesTouched`, and `summary` (if present). Check if `.tmp/.session-start` exists — if it does, there is one active unwrapped session (compute its duration from the timestamp to now).
 
-2. **Today's commits** — Run `git log --oneline --since="$(date +%Y-%m-%d)T00:00:00"` to get all commits from today. Also run `git diff --shortstat $(git log --reverse --since="$(date +%Y-%m-%d)T00:00:00" --format="%H" | head -1)^..HEAD` for total lines/files (handle edge case where there's only one commit today — use the commit itself, not commit^).
+2. **Today's commits** — Run `git log --oneline --since="$(date +%Y-%m-%d)T00:00:00"` to get all commits from today. Also run `git diff --shortstat` for the range to get total lines/files.
 
 3. **Steps completed today** — Read `tasks/todo.md` and count `[x]` items with timestamps containing today's date (DD/MM/YY format).
 
@@ -16,74 +16,95 @@ Collect all of the following before building the card:
 
 5. **Current position** — Read `STATE.md` for active feature, blockers, current version.
 
-6. **Queue** — Read `tasks/todo.md` ## Queue for upcoming features.
+6. **Checks** — Run `python3 execution/audit_claims.py --hook --json` and parse the results. Check DOE kit sync status.
 
-7. **Plan files created today** — Run `find .claude/plans/ -name "*.md" -newer .tmp/.session-start 2>/dev/null | wc -l` or check git log for plan file commits today.
+7. **Streak** — From stats.json `streak.current`.
 
-8. **Learnings logged today** — Check if `learnings.md` appears in today's commits via `git log --since="$(date +%Y-%m-%d)T00:00:00" --name-only --format="" | grep learnings.md | wc -l`.
+## Step 2: Compose the EOD JSON
 
-## Output Format
+Build a JSON object with this schema:
 
-Show a single bordered card:
-
+```json
+{
+  "projectName": "PROJECT_DIR_NAME_UPPERCASED",
+  "date": "DD/MM/YY",
+  "streak": N,
+  "summary": [
+    "2-3 sentences summarising what happened today across all sessions. Name features, systems, and outcomes. Plain English, no drama."
+  ],
+  "vibe": {"emoji": "EMOJI", "text": "Day vibe description"},
+  "metrics": {
+    "sessions": N,
+    "totalDuration": "Xh Ym",
+    "commits": N,
+    "linesAdded": N,
+    "linesRemoved": N,
+    "filesTouched": N,
+    "stepsCompleted": N,
+    "featuresCompleted": N
+  },
+  "sessionTimeline": [
+    {"number": 76, "start": "HH:MM", "duration": "Xh Ym", "summary": "What this session did", "pct": N}
+  ],
+  "commitBreakdown": [
+    {"name": "Feature/task name", "count": N, "pct": N}
+  ],
+  "decisions": [
+    {"title": "Short title", "problem": "What the problem was", "solution": "What was decided"}
+  ],
+  "learnings": [
+    {"title": "Short title", "problem": "What was discovered", "solution": "What changed"}
+  ],
+  "checks": {
+    "audit": {"pass": N, "warn": N, "fail": N, "details": ["detail if warn/fail"]},
+    "doeKit": {"version": "vX.Y.Z", "synced": true|false}
+  },
+  "nextUp": "What to do next -- pull from todo.md"
+}
 ```
-┌────────────────────────────────────────────────────────────┐
-│  EOD · DD/MM/YY                                             │
-├────────────────────────────────────────────────────────────┤
-│  SESSIONS  N today (X wrapped, Y active)                    │
-│  STREAK    Day N                                            │
-│                                                             │
-│  DAY STATS                                                  │
-│  N commits · N files · +X / -Y lines                        │
-│  N features completed · N steps completed                   │
-│  N plan files created · N learnings logged                  │
-│                                                             │
-│  SESSIONS                                                   │
-│  1. TITLE                                   duration        │
-│  2. TITLE                                   duration        │
-│  3. (active)                                duration        │
-│                                                             │
-│  WHAT GOT DONE                                              │
-│  [INFRA] Summary of shipped/completed work                  │
-│  [APP]   Summary of planned/built work                      │
-│                                                             │
-│  POSITION AT EOD                                            │
-│  Active: [current feature] — N/M steps done                 │
-│  Queue:  [next features in order]                           │
-│                                                             │
-│  DAY VIBE: [mood + one-liner summary]                       │
-└────────────────────────────────────────────────────────────┘
+
+### Field guidance:
+
+**summary**: Aggregate across all sessions. 2-3 sentences covering the day's work. Name specific features and outcomes.
+
+**vibe**: Pick the best match for the day:
+- All planning, no code → `{"emoji": "📐", "text": "Architect mode"}`
+- Lots of code shipped (500+ lines) → `{"emoji": "🏭", "text": "Factory floor"}`
+- Multiple features completed → `{"emoji": "🏃", "text": "Sprint day"}`
+- Mostly config/docs changes → `{"emoji": "🧹", "text": "Housekeeping day"}`
+- Mixed planning + building → `{"emoji": "🔨", "text": "Builder's day"}`
+- Single focused feature all day → `{"emoji": "🎯", "text": "Deep work"}`
+- Lots of failures + fixes → `{"emoji": "⚔️", "text": "Trench warfare"}`
+
+**sessionTimeline**: One entry per session today. `start` is the session start time (from stats or git log). `pct` is what percentage of total day time this session represents. For sessions without a summary in stats.json, derive one from their commit messages.
+
+**commitBreakdown**: Group all today's commits by feature/task (match against todo.md feature names). Each entry shows the feature name, commit count, and what percentage of today's total commits it represents. Ungrouped commits go in "Housekeeping" or "Other".
+
+**decisions**: Aggregate from today's sessions. Pull from learnings.md commits today, or from what you know happened. Use Problem/Solution format.
+
+**learnings**: Same — aggregate from today. Use Discovery/Change format.
+
+**checks**: Run the audit and capture results. Same format as /wrap.
+
+## Step 3: Generate and open
+
+Run:
+```bash
+python3 execution/eod_html.py --json '<the JSON string>' --output .tmp/eod.html
 ```
 
-## Card Rules
+Then open in the browser:
+```bash
+open .tmp/eod.html
+```
 
-- **SESSIONS:** Count from stats.json `recentSessions` for today + check for active sessions by checking if `.tmp/.session-start` exists. Show "N today (X wrapped)" if no active session, or "N today (X wrapped, 1 active)" if the file exists.
-- **STREAK:** From stats.json `streak.current`. Show "Day N".
-- **DAY STATS:** Aggregate from git commands. Count commits, files touched, insertions/deletions. Count features completed and steps completed from todo.md. Count plan files from git log. Count learnings from git log.
-- **SESSIONS list:** Show each wrapped session from stats.json: title, sessionDuration. If `.tmp/.session-start` exists, show one active session as "(active)" with duration computed from that file's timestamp to now. Newest first.
-- **WHAT GOT DONE:** This is the key section. Read all commit messages from today. Group them by feature/task using the headings in todo.md (both ## Current and ## Done). Classify each group as [APP] or [INFRA] using the type tags from todo.md headings. Summarise each group in plain English — describe what actually happened, not raw commit messages. Order: shipped features first, then in-progress features, then housekeeping/planning. If only one type exists, skip the other.
-- **POSITION AT EOD:** From STATE.md active feature + todo.md progress (count [x] vs [ ] steps). Queue from todo.md ## Queue (show feature names + type tags).
-- **DAY VIBE:** Pick the best match:
-  - All planning, no code → "Architect mode"
-  - Lots of code shipped (500+ lines) → "Factory floor"
-  - Multiple features completed → "Sprint day"
-  - Mostly config/docs changes → "Housekeeping day"
-  - Mixed planning + building → "Builder's day"
-  - Single focused feature all day → "Deep work"
-  - Lots of failures + fixes → "Trench warfare"
-  Add a one-liner summary after the vibe label (e.g. "Builder's day — planned INFRA overhaul and shipped 5 command upgrades").
-- **BORDER:** Size the box to fit the longest content line. **Generate programmatically** — define a `line(content)` helper: `f"│  {content}".ljust(W + 1) + "│"` where W is the inner width. ALL rows including the header MUST use this helper — never construct `f"│{...}│"` manually. For headers with right-aligned text: build the inner content string first (e.g. `f"{left}{right:>{W - 2 - len(left)}}"`) then pass through `line()`.
-
-## Edge Cases
-
-- **No wrapped sessions today:** Show "0 wrapped" in SESSIONS. DAY STATS still works from git log. SESSIONS list shows only the active session (if any) or "No sessions today".
-- **No commits today:** Show "0 commits · 0 files · +0 / -0 lines" in DAY STATS. WHAT GOT DONE says "No commits today."
-- **No stats.json:** Show "No stats file — run /wrap to start tracking" for SESSIONS and SCORE. Other sections still work from git.
-- **1 session only:** Show the session in the list. No "(+N more)" needed.
+Print a one-line summary to the terminal: `EOD report opened in browser. [N] sessions, [X] commits, [duration] total.`
 
 ## Important Rules
 
 - This is READ-ONLY. Do not modify any files. Do not wrap the current session. Do not update stats.json.
 - Pull all numbers from git commands and stats.json. Never estimate.
-- WHAT GOT DONE must be semantic — describe what happened in plain English, not raw commit messages.
+- The summary must be plain English, 2-3 sentences. Name specific features and systems.
+- Decisions and learnings use Problem/Solution and Discovery/Change format — same as /wrap.
 - Works correctly with 1 session or 10 sessions in a day.
+- If no sessions exist today, still show the report with data from git log.
