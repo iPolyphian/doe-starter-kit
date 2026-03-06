@@ -1020,6 +1020,48 @@ def _update_todo_after_merge(wave_data, merged_task_ids):
 
 
 # ══════════════════════════════════════════════════════════════
+# Post-merge governed doc staleness check
+# ══════════════════════════════════════════════════════════════
+
+def _check_governed_docs_staleness():
+    """Check governed docs for staleness after merge and print warnings."""
+    # Read current app version from STATE.md
+    state_path = PROJECT_ROOT / "STATE.md"
+    if not state_path.exists():
+        return
+    state_text = state_path.read_text(encoding="utf-8")
+    version_m = re.search(r"Current app version:\s*(v\d+\.\d+\.\d+)", state_text)
+    if not version_m:
+        return
+    current = version_m.group(1)
+    current_minor = int(current.split(".")[1])
+
+    # Governed docs with front-matter
+    governed = ["data-governance.md", "legal-framework.md", "learnings.md"]
+    stale = []
+    for name in governed:
+        doc_path = PROJECT_ROOT / name
+        if not doc_path.exists():
+            continue
+        text = doc_path.read_text(encoding="utf-8")
+        applies_m = re.search(r"Applies to:\s*(v\d+\.\d+\.\d+)", text)
+        if not applies_m:
+            continue
+        doc_version = applies_m.group(1)
+        doc_minor = int(doc_version.split(".")[1])
+        gap = current_minor - doc_minor
+        if gap > 1:
+            stale.append((name, doc_version, gap))
+
+    if stale:
+        print()
+        print("  GOVERNED DOC STALENESS:")
+        for name, ver, gap in stale:
+            print(f"    {name} at {ver} ({gap} minor versions behind {current})")
+        print("    Update front-matter 'Applies to' during housekeeping.")
+
+
+# ══════════════════════════════════════════════════════════════
 # --merge
 # ══════════════════════════════════════════════════════════════
 
@@ -1299,6 +1341,14 @@ def cmd_merge(as_json=False):
     for f in (CLAIMS_FILE, SESSIONS_FILE):
         if f.exists():
             f.unlink()
+    # Clean up the wave JSON and log file (ephemeral — git log has the history)
+    log_path = WAVES_DIR / f"{wave_id}-log.json"
+    for f in (wave_path, log_path):
+        if f.exists():
+            f.unlink(missing_ok=True)
+    # Remove waves dir if empty
+    if WAVES_DIR.exists() and not any(WAVES_DIR.iterdir()):
+        WAVES_DIR.rmdir()
     # Clean up PID-specific marker files (pattern: .session-id-*, .last-heartbeat-*, etc.)
     tmp_dir = PROJECT_ROOT / ".tmp"
     if tmp_dir.exists():
@@ -1316,7 +1366,9 @@ def cmd_merge(as_json=False):
     if summary:
         _print_summary(summary)
         _aggregate_to_stats(summary)
-    print(f"  Next: version bump, changelog, and housekeeping commit.")
+    # Check governed docs for staleness and surface warnings
+    _check_governed_docs_staleness()
+    print(f"  Next: version bump, changelog, governed doc updates, and housekeeping commit.")
 
     if as_json:
         result = {"status": "complete", "merged": merged, "waveId": wave_id}
