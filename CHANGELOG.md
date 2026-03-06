@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.20.2] — 2026-03-06
+
+Retro rule improvement: completed features now get full roadmap cleanup, not just a status tag update.
+
+### Changed
+- **Retro step 3** — expanded from "update status tags" to also move feature from Up Next to Complete and refresh Suggested Next if it references the completed feature. Prevents stale roadmap entries accumulating.
+
 ## [v1.20.1] — 2026-03-06
 
 Post-wave housekeeping fixes: audit regex, wave cleanup, and governed doc staleness surfacing.
