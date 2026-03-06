@@ -7,6 +7,14 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.22.6] — 2026-03-06
+
+Fix summary-to-breakdown spacing in wrap and eod HTML reports.
+
+### Fixed
+- `.summary-lead` CSS: replaced `margin-bottom` with `padding-bottom` to prevent margin collapsing between summary paragraph and first breakdown heading
+- `.breakdown-group` CSS: added `margin-top: 0.6rem` for consistent spacing between groups
+
 ## [v1.22.5] — 2026-03-06
 
 Updated command reference (global-commands/README.md) to reflect recent changes.

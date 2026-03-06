@@ -528,8 +528,8 @@ CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono
   .summary { padding: 0; }
   .summary p { color: var(--text); font-size: 0.95rem; line-height: 1.8; margin-bottom: 0.5rem; }
   .summary p:last-child { margin-bottom: 0; }
-  .summary-lead { font-size: 0.95rem; color: var(--text); line-height: 1.8; margin-bottom: 0.8rem; }
-  .breakdown-group { margin-bottom: 0.6rem; }
+  .summary-lead { font-size: 0.95rem; color: var(--text); line-height: 1.8; padding-bottom: 1rem; }
+  .breakdown-group { margin-bottom: 0.6rem; margin-top: 0.6rem; }
   .breakdown-group:last-child { margin-bottom: 0; }
   .breakdown-heading { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.3rem; }
   .breakdown-bullets { list-style: none; padding: 0; margin: 0; }
