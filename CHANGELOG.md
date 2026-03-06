@@ -7,6 +7,19 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.20.1] — 2026-03-06
+
+Post-wave housekeeping fixes: audit regex, wave cleanup, and governed doc staleness surfacing.
+
+### Fixed
+- **Audit version tag regex** — now accepts both `→` (unicode) and `->` (ASCII), fixing false WARNs on wave-generated todo.md steps
+- **Audit name extraction** — split pattern updated to handle `->` arrow format in task names
+- **Wave file cleanup** — `--merge` now deletes completed wave JSON and log files instead of leaving them on disk (caused stale `active_wave` audit warnings)
+
+### Added
+- **Post-merge governed doc staleness check** — after merge completes, scans front-matter `Applies to` versions and warns if any governed doc is >1 minor version behind current app version
+- **Updated post-merge message** — now explicitly mentions governed doc updates in the housekeeping checklist
+
 ## [v1.20.0] — 2026-03-05
 
 Wave-1 post-mortem: fixed all multi-agent coordination bugs discovered during first parallel wave run. Hardened path resolution, log safety, todo update reliability, and added new monitoring tools.

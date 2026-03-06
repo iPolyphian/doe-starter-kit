@@ -280,7 +280,7 @@ _TASK_DONE_RE = re.compile(
     r"^[\s]*(?:\d+\.\s*)?\[x\]\s*(.+)",
     re.IGNORECASE,
 )
-_VERSION_TAG_RE = re.compile(r"→\s*(v\d+\.\d+\.\d+)")
+_VERSION_TAG_RE = re.compile(r"(?:→|->)\s*(v\d+\.\d+\.\d+)")
 _TIMESTAMP_RE = re.compile(r"\*\(completed\s+(\d{2}:\d{2}\s+\d{2}/\d{2}/\d{2})\)\*")
 _TIMESTAMP_DATE_ONLY_RE = re.compile(r"\*\(completed\s+(\d{2}/\d{2}/\d{2})\)\*")
 
@@ -301,8 +301,8 @@ def parse_completed_tasks(path: Path) -> list[dict]:
         version_m = _VERSION_TAG_RE.search(task_text)
         ts_m = _TIMESTAMP_RE.search(task_text) or _TIMESTAMP_DATE_ONLY_RE.search(task_text)
 
-        # Extract a short name (everything before → or *( )
-        name = re.split(r"[→*]", task_text)[0].strip().rstrip("—").strip()
+        # Extract a short name (everything before → / -> or *( )
+        name = re.split(r"(?:→|->|\*)", task_text)[0].strip().rstrip("—").strip()
 
         tasks.append({
             "line": i,
