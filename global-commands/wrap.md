@@ -59,15 +59,17 @@ Build the wrap-up as an HTML page using `execution/wrap_html.py`. This renders b
 
 ### 3a: Compose the wrap-up data
 
-Using the stats JSON from Step 2, compose a JSON object with this schema. You must write the content (title, narrative, vibe) yourself based on what happened this session:
+Using the stats JSON from Step 2, compose a JSON object with this schema. You must write the content (title, summary, breakdowns, vibe) yourself based on what happened this session:
 
 ```json
 {
   "projectName": "PROJECT_DIR_NAME_UPPERCASED",
   "episode": result.stats.lifetime.totalSessions,
   "title": "Short Descriptive Title",
-  "narrative": [
-    "2-3 sentences. Name the features, tools, or systems touched and what changed. Include enough detail that someone who wasn't there gets it -- but keep it tight. No drama, no filler."
+  "summary": "One plain English sentence summarising the session. What happened, in a way anyone would understand.",
+  "breakdowns": [
+    {"heading": "Area of work", "bullets": ["What was done", "Another thing done"]},
+    {"heading": "Another area", "bullets": ["What changed"]}
   ],
   "vibe": {"emoji": "EMOJI", "text": "Vibe description"},
   "metrics": {
@@ -166,8 +168,9 @@ Print a one-line summary to the terminal: `Session [N] wrap-up opened in browser
 ## Important Rules
 
 - Pull ALL numbers from the wrap_stats.py JSON output. Never estimate or make up stats.
-- The narrative must be plain English, 2-3 sentences. Name specific features and systems. Enough detail to understand what changed -- but no implementation details. Tight and scannable.
-- Title and narrative MUST reference actual features, real files, and real problems from this session.
+- The `summary` is one plain English sentence -- what happened this session in a way anyone would understand. No jargon, no drama.
+- The `breakdowns` array groups the session's work into small subheadings (2-4 groups), each with 1-3 bullet points. Name specific features, files, and outcomes. Keep bullets short and scannable.
+- Title, summary, and breakdowns MUST reference actual features, real files, and real problems from this session.
 - If stats.json doesn't exist yet, this is session 1.
 - Commit stats.json BEFORE generating the wrap-up so the push includes it.
 - The `decisions` array should list decisions written to STATE.md this session, or `["None this session"]`.

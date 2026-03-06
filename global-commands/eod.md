@@ -29,8 +29,10 @@ Build a JSON object with this schema:
   "projectName": "PROJECT_DIR_NAME_UPPERCASED",
   "date": "DD/MM/YY",
   "streak": N,
-  "summary": [
-    "Address the user: 'Today you achieved X and did Y.' 2-3 sentences. Name features and outcomes."
+  "summary": "One plain English sentence addressing the user: 'Today you did X and achieved Y.'",
+  "breakdowns": [
+    {"heading": "Area of work", "bullets": ["What was done", "Another thing done"]},
+    {"heading": "Another area", "bullets": ["What changed"]}
   ],
   "vibe": {"emoji": "EMOJI", "text": "Day vibe description"},
   "metrics": {
@@ -67,7 +69,9 @@ Build a JSON object with this schema:
 
 ### Field guidance:
 
-**summary**: Address the user directly — "Today you achieved X and did Y." 2-3 sentences max. Name specific features and outcomes. Plain English, conversational, no drama.
+**summary**: One plain English sentence addressing the user -- "Today you did X and achieved Y." No jargon.
+
+**breakdowns**: Group the day's work into 2-4 subheadings, each with 1-3 short bullet points. Name specific features, files, and outcomes.
 
 **vibe**: Pick the best match for the day:
 - All planning, no code → `{"emoji": "📐", "text": "Architect mode"}`
@@ -106,7 +110,7 @@ Print a one-line summary to the terminal: `EOD report opened in browser. [N] ses
 
 - This is READ-ONLY. Do not modify any files. Do not wrap the current session. Do not update stats.json.
 - Pull all numbers from git commands and stats.json. Never estimate.
-- The summary must be plain English, 2-3 sentences. Name specific features and systems.
+- The `summary` is one plain English sentence addressing the user. The `breakdowns` array groups work into subheadings with bullets.
 - Decisions and learnings use Problem/Solution and Discovery/Change format — same as /wrap.
 - Works correctly with 1 session or 10 sessions in a day.
 - If no sessions exist today, still show the report with data from git log.
