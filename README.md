@@ -33,8 +33,8 @@ A template repository containing everything you need to run Claude Code with gua
 - **STATE.md** — Session memory (blockers, current position)
 - **Directives** — SOPs for documentation governance, claim auditing, starter kit sync
 - **Audit system** — Automated false-positive detection with pre-commit hook
-- **Multi-agent coordination** — Wave management, task claiming, heartbeats, merge protocol for parallel Claude Code sessions (`/hq` dashboard). Installs globally to `~/.claude/scripts/` and `~/.claude/hooks/`.
-- **27 slash commands** — session lifecycle, quality checks, visual tools, multi-agent, utilities, and infrastructure (see below)
+- **Multi-agent coordination** — Wave management, task claiming, heartbeats, merge protocol for parallel Claude Code sessions (`/agent-status` dashboard). Installs globally to `~/.claude/scripts/` and `~/.claude/hooks/`.
+- **24 slash commands** — session lifecycle, quality checks, visual tools, multi-agent, utilities, and infrastructure (see below)
 - **Session timer** — `/stand-up` (in kick-off mode) and `/crack-on` start a clock, `/sitrep` and `/wrap` report elapsed time
 - **Gamification** — Session scoring, badges, streaks, leaderboard, themed wrap-up cards
 - **Git hooks** — Pre-commit claim audit, commit message cleanup
@@ -48,15 +48,15 @@ A template repository containing everything you need to run Claude Code with gua
 
 ## Slash Commands
 
-28 commands in `global-commands/`. Install with `./setup.sh` or copy manually. Run `/commands` inside Claude Code for the full reference and installation health check.
+24 commands in `global-commands/`. Install with `./setup.sh` or copy manually. Run `/commands` inside Claude Code for the full reference and installation health check.
 
 | Category | Commands | Purpose |
 |----------|----------|---------|
 | **Session Lifecycle** | `/stand-up`, `/crack-on`, `/sitrep`, `/wrap`, `/eod` | Dual-mode stand-up, track progress, gamified wrap-up, end-of-day report |
-| **Quality** | `/audit`, `/quick-audit`, `/vitals`, `/fact-check`, `/review`, `/doe-health`, `/codemap` | Claim auditing, workspace health, adversarial review, diagnostics, project index |
+| **Quality** | `/audit`, `/fact-check`, `/review`, `/codemap` | Comprehensive audit, accuracy checking, adversarial review, project index |
 | **Visual** | `/project-recap`, `/diff-review`, `/plan-review`, `/generate-visual-plan`, `/generate-web-diagram`, `/generate-slides` | HTML visual explainers, diagrams, slide decks |
-| **Multi-Agent** | `/hq`, `/agent-launch` | Wave dashboard, automated wave builder + task claiming |
-| **Utility** | `/pitch`, `/roast`, `/eli5`, `/shower-thought` | Feature ideas, code roasts, ELI5, programming observations |
+| **Multi-Agent** | `/agent-status`, `/agent-launch` | Wave dashboard, automated wave builder + task claiming |
+| **Utility** | `/pitch`, `/roast` | Feature ideas, code roasts |
 | **Infrastructure** | `/sync-doe`, `/pull-doe`, `/commands` | Sync DOE improvements, pull kit updates, installation health check |
 
 **Smart filter:** The lifecycle commands check for DOE Kit sync opportunities. When comparing CLAUDE.md, they distinguish universal changes (Operating Rules, Guardrails, etc.) from project-specific additions (Directory Structure, triggers) — so you only get nudged when there's something genuinely worth syncing.

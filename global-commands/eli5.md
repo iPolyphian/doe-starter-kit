@@ -1,1 +1,0 @@
-Read STATE.md and tasks/todo.md to understand what we're currently building. Then explain the whole thing — the project, what we're working on right now, and why it matters — as if I'm a very curious 5-year-old. Use analogies involving things like dinosaurs, Lego, biscuits, or whatever fits. Keep it fun and surprisingly accurate.

@@ -9,7 +9,7 @@ python3 ~/.claude/scripts/multi_agent.py --dashboard --json 2>/dev/null
 Parse the JSON output. Two modes:
 
 - **Active wave with unclaimed tasks** → skip to [Join Mode](#join-mode) below
-- **Active wave, all tasks claimed** → show "All tasks claimed — nothing to join. Run /hq to monitor." and stop
+- **Active wave, all tasks claimed** → show "All tasks claimed — nothing to join. Run /agent-status to monitor." and stop
 - **Active wave, all tasks done** → offer to merge: "All tasks complete. Merge now? (yes/no)". On "yes", run `python3 ~/.claude/scripts/multi_agent.py --merge --parent-pid $PPID`. On "no", stop.
 - **Active wave, tasks claimed but no heartbeat** (stale) → show "Task [X] was claimed but appears abandoned. Reclaim it? (yes/no)". On "yes", reclaim and enter Join Mode. On "no", stop.
 - **No active wave** → continue to [Launch Mode](#launch-mode) (Step 0)
@@ -75,12 +75,12 @@ All [N] tasks complete. Merge to master now? (yes/no)
 ```
 
 - **"yes"** → Run `python3 ~/.claude/scripts/multi_agent.py --merge --parent-pid $PPID` to merge all completed worktrees back to master in the defined merge order. Show the merge output.
-- **"no"** → Show: `OK — run /hq whenever you're ready to merge.`
+- **"no"** → Show: `OK — run /agent-status whenever you're ready to merge.`
 
 If tasks are still in progress, show a brief status instead:
 ```
 Task [taskId] done. Wave still running — [N] task(s) remaining.
-Run /hq to check progress.
+Run /agent-status to check progress.
 ```
 
 IMPORTANT: ALL multi_agent.py commands MUST include `--parent-pid $PPID`.

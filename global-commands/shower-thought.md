@@ -1,1 +1,0 @@
-Give me one genuinely interesting programming shower thought or paradox. It should be the kind of thing that makes you go "huh" and stare at the wall for a second. Not a joke, not a tip — a weird observation about code, computers, or building software that hits different. One or two sentences max.

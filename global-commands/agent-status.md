@@ -4,25 +4,25 @@ Run `python3 ~/.claude/scripts/multi_agent.py --dashboard --json` and parse the 
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  HQ · DD/MM/YY                                               │
+│  AGENT STATUS · DD/MM/YY                                               │
 ├──────────────────────────────────────────────────────────────┤
 │  STATUS  No active wave                                      │
 │                                                              │
 │  ACTIONS                                                     │
-│  /hq --plan      Create a wave from todo.md features         │
-│  /hq --preview   Preview an existing wave before launching   │
-│  /hq --launch    Start the wave                              │
-│  /hq --merge     Merge completed tasks to master             │
-│  /hq --reclaim   Reclaim tasks from stale terminals          │
-│  /hq --abort     Cancel the active wave                      │
-│  /hq --watch     Auto-refresh dashboard every 30s            │
+│  /agent-status --plan      Create a wave from todo.md features         │
+│  /agent-status --preview   Preview an existing wave before launching   │
+│  /agent-status --launch    Start the wave                              │
+│  /agent-status --merge     Merge completed tasks to master             │
+│  /agent-status --reclaim   Reclaim tasks from stale terminals          │
+│  /agent-status --abort     Cancel the active wave                      │
+│  /agent-status --watch     Auto-refresh dashboard every 30s            │
 │                                                              │
 │  QUICK START                                                 │
-│  1. /hq --plan     ← Claude proposes task breakdown          │
+│  1. /agent-status --plan     ← Claude proposes task breakdown          │
 │  2. Review + "go"  ← You approve                             │
-│  3. /hq --launch   ← Wave starts                             │
+│  3. /agent-status --launch   ← Wave starts                             │
 │  4. Open 2nd tab   ← Click + in VS Code terminal, type claude│
-│  5. /hq --merge    ← After all tasks complete                │
+│  5. /agent-status --merge    ← After all tasks complete                │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -34,7 +34,7 @@ This is read-only. Do not execute anything else.
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  HQ · HH:MM - DD/MM/YY                                        │
+│  AGENT STATUS · HH:MM - DD/MM/YY                                        │
 ├────────────────────────────────────────────────────────────────┤
 │  WAVE    [waveId] · [feature]                                  │
 │  MODE    [terminalMode] ([activeSessions] active)              │

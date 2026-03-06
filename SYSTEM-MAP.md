@@ -93,17 +93,13 @@ All slash commands install to `~/.claude/commands/` so they work across every DO
 | wrap.md | `~/.claude/commands/` | Type `/wrap` — gamified session summary; calls `execution/wrap_stats.py` for deterministic scoring, badges, streaks, genre title cards |
 | eod.md | `~/.claude/commands/` | Type `/eod` — end-of-day report aggregating all sessions, commits, features, and position |
 | pitch.md | `~/.claude/commands/` | Type `/pitch` — generate 3-5 product improvement ideas based on current state |
-| audit.md | `~/.claude/commands/` | Type `/audit` — full claim audit with explanations |
-| quick-audit.md | `~/.claude/commands/` | Type `/quick-audit` — fast checks only (<1 second) |
-| vitals.md | `~/.claude/commands/` | Type `/vitals` — workspace health check (git, audit, DOE sync, STATE alignment, temp files) |
+| audit.md | `~/.claude/commands/` | Type `/audit` — comprehensive project audit (claims, workspace health, DOE integrity) |
 | stand-up.md | `~/.claude/commands/` | Type `/stand-up` — dual-mode: kick-off (no session) starts clock + plan; status (mid-session) shows daily status card |
 | crack-on.md | `~/.claude/commands/` | Type `/crack-on` — start session clock, pick up next step, commit, push, stop |
 | roast.md | `~/.claude/commands/` | Type `/roast` — comedy roast of the codebase + developer habits from stats.json |
-| eli5.md | `~/.claude/commands/` | Type `/eli5` — explain current work like you're 5 |
-| shower-thought.md | `~/.claude/commands/` | Type `/shower-thought` — one weird programming observation |
 | sitrep.md | `~/.claude/commands/` | Type `/sitrep` — mid-session situation report with progress, commits, elapsed time |
 | sync-doe.md | `~/.claude/commands/` | Type `/sync-doe` — sync DOE improvements back to the starter kit repo |
-| hq.md | `~/.claude/commands/` | Type `/hq` — multi-agent dashboard for wave status, terminal liveness, task progress, merge order |
+| agent-status.md | `~/.claude/commands/` | Type `/agent-status` — multi-agent dashboard for wave status, terminal liveness, task progress, merge order |
 | README.md | `~/.claude/commands/` | Quick reference for all 15 slash commands |
 
 ### 🔀 Multi-Agent Coordination (global — install once, available in every project)
@@ -182,13 +178,9 @@ SESSION END (or /wrap)
 | `/wrap` | End-of-session routine: housekeeping, git metrics, stats.json, gamified summary |
 | `/pitch` | Generate 3-5 product improvement ideas. Approved ideas go to ROADMAP.md |
 | `/roast` | Comedy roast of the codebase. Specific, brutal, funny. |
-| `/eli5` | Explain current work like you're 5. Dinosaurs included. |
-| `/shower-thought` | One weird programming observation. Two sentences max. |
 | `/audit` | Full claim audit — all checks, detailed explanations |
-| `/quick-audit` | Fast checks only (<1 second) — front-matter, staleness, task format |
-| `/vitals` | Workspace health check — git, audit, DOE sync, STATE alignment, temp files |
 | `/sitrep` | Mid-session situation report — progress bar, commits, elapsed time, blockers, context usage |
-| `/hq` | Multi-agent dashboard — wave status, terminal liveness, task progress, merge order |
+| `/agent-status` | Multi-agent dashboard — wave status, terminal liveness, task progress, merge order |
 | `/sync-doe` | Sync universal DOE improvements from current project to the starter kit repo |
 
 ## What's project-level vs machine-level
@@ -240,14 +232,10 @@ MACHINE (lives on your computer, applies to all projects)
 │   ├── stand-up.md
 │   ├── crack-on.md
 │   ├── roast.md
-│   ├── eli5.md
-│   ├── shower-thought.md
 │   ├── audit.md
-│   ├── quick-audit.md
-│   ├── vitals.md
 │   ├── sitrep.md
 │   ├── sync-doe.md
-│   ├── hq.md
+│   ├── agent-status.md
 │   └── eod.md
 ├── ~/.claude/hooks/
 │   ├── heartbeat.py

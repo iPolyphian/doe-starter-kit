@@ -7,6 +7,24 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.21.0] — 2026-03-06
+
+Slash command audit: 29 to 24 commands. Consolidated overlapping commands, removed low-value ones.
+
+### Changed
+- **`/hq` renamed to `/agent-status`** — clearer name for the multi-agent dashboard command. File renamed from `hq.md` to `agent-status.md`. All internal references updated.
+- **`/audit` now comprehensive** — merged `/quick-audit`, `/vitals`, and `/doe-health` into a single `/audit` command covering claims, workspace health, and DOE framework integrity in one bordered output.
+- Updated `/commands` reference card, README, SYSTEM-MAP, CUSTOMIZATION, and global-commands/README to reflect new command set.
+
+### Removed
+- **`/quick-audit`** — absorbed into `/audit`
+- **`/vitals`** — absorbed into `/audit`
+- **`/doe-health`** — absorbed into `/audit`
+- **`/shower-thought`** — low usage, removed
+- **`/eli5`** — low usage, removed
+
+---
+
 ## [v1.20.4] — 2026-03-06
 
 Manual verification approach: batch at feature end, not per-step.

@@ -2,22 +2,22 @@ Before showing the reference below, run a quick health check:
 
 1. **Version:** Read `~/.claude/.doe-kit-version`. If it exists, show the version and install date. If not, show "DOE Kit: not installed — run `./setup.sh` from the starter kit".
 
-2. **Installation check:** List all `.md` files in `~/.claude/commands/` and compare against the 22 expected commands below. Report installed count (e.g. "22/22 commands installed" or "20/22 — missing: /audit, /quick-audit").
+2. **Installation check:** List all `.md` files in `~/.claude/commands/` and compare against the 24 expected commands below. Report installed count (e.g. "24/24 commands installed" or "22/24 — missing: /audit, /review").
 
-3. **Update check:** Run `gh release view --repo iPolyphian/doe-starter-kit --json tagName -q .tagName` to get the latest release version. Compare with the installed version from step 1. If newer, show: "Update available: vX.Y.Z → run `cd ~/doe-starter-kit && git pull && ./setup.sh`". If current, show "✓ up to date". If the command fails (offline, no gh CLI), skip silently and just show "update check: skipped (offline or gh CLI not available)".
+3. **Update check:** Run `gh release view --repo iPolyphian/doe-starter-kit --json tagName -q .tagName` to get the latest release version. Compare with the installed version from step 1. If newer, show: "Update available: vX.Y.Z → run `cd ~/doe-starter-kit && git pull && ./setup.sh`". If current, show "up to date". If the command fails (offline, no gh CLI), skip silently and just show "update check: skipped (offline or gh CLI not available)".
 
 Format the health check as a compact status block:
 
 ```
-DOE Kit v1.3.0 (installed 02/03/26) · ✓ up to date
-22/22 commands installed
+DOE Kit v1.20.4 (installed 06/03/26) · up to date
+24/24 commands installed
 ```
 
 Or if issues are found:
 
 ```
-DOE Kit v1.3.0 (installed 02/03/26) · update available: v1.4.0
-20/22 commands installed — missing: /audit, /quick-audit
+DOE Kit v1.20.4 (installed 06/03/26) · update available: v1.21.0
+22/24 commands installed — missing: /audit, /review
 → Run: cd ~/doe-starter-kit && git pull && ./setup.sh
 ```
 
@@ -27,7 +27,7 @@ Then show the full reference below.
 
 # Slash Commands
 
-Quick reference for all 22 `/commands`. These are global — install once with `./setup.sh`, available in every project. `/stand-up` is context-aware — it detects whether a session is active and adapts its output accordingly.
+Quick reference for all 24 `/commands`. These are global — install once with `./setup.sh`, available in every project. `/stand-up` is context-aware — it detects whether a session is active and adapts its output accordingly.
 
 ---
 
@@ -55,16 +55,19 @@ End-of-day report. Aggregates all sessions, commits, features, and position into
 ## Quality
 
 ### `/audit`
-Full claim audit — checks governed docs, task format, roadmap consistency, orphan claims, staleness, and project-specific checks. Explains all FAIL/WARN items. **Use at:** before releases, periodic validation.
+Comprehensive project audit — claims (governed docs, task format, roadmap consistency, staleness), workspace health (git status, stale temp files, STATE.md alignment), and DOE framework integrity (required files, hooks, commands, kit sync). Single bordered output with all findings. **Use at:** before releases, periodic validation, any time you want a full health check.
 
-### `/quick-audit`
-Fast checks only (<1 second) — front-matter, staleness, task format, version match. Says "All clear" if clean. **Use at:** quick pre-commit sanity check.
-
-### `/vitals`
-Workspace health check — git status, quick audit, DOE Kit sync, STATE.md alignment, stale temp files. Shows a bordered summary with ✓/⚠️ per check. Reports only, doesn't fix. **Use at:** session start (after stand-up), before wrapping, or any time you want a quick sanity check.
+### `/agent-verify`
+Verifies contract criteria for the current task. Runs all `[auto]` criteria with auto-fix loop (up to 3 attempts), presents `[manual]` criteria as a checklist. Works in solo and wave mode. **Use at:** after completing a task step.
 
 ### `/fact-check`
 Verifies the factual accuracy of a document against the actual codebase. Identifies inaccuracies and corrects them in place with a verification summary. **Use at:** after major changes, before releases, or when docs may have drifted from reality.
+
+### `/review`
+Adversarial code review. Checks security, correctness, dead code, breaking changes, and contract compliance. Finds problems, not praise. **Use at:** before committing significant changes.
+
+### `/test-suite`
+Runs the project's accumulated test suite from `tests/suite.json`. Updates metadata, handles --prune/--add options. **Use at:** after changes that might break existing behaviour.
 
 ---
 
@@ -95,16 +98,16 @@ Creates a magazine-quality HTML slide deck with distinctive aesthetics (Midnight
 ## Utility
 
 ### `/pitch`
-Generates 3–5 product ideas with structured pitches (size, type, value, effort). Only adds to ROADMAP.md with explicit approval. **Use when:** you want fresh feature ideas.
+Generates 3-5 product ideas with structured pitches (size, type, value, effort). Only adds to ROADMAP.md with explicit approval. **Use when:** you want fresh feature ideas.
 
 ### `/roast`
 Reads the codebase and roasts it. Specific, brutal, funny — references real files and real decisions, not generic jokes. **Use when:** you need a laugh.
 
-### `/eli5`
-Explains the current project and active work as if to a curious 5-year-old. Dinosaurs and biscuits included. **Use when:** you need to reset perspective or simplify complexity.
+### `/codemap`
+Generates a structured project index at `.claude/codemap.md`. Maps file structure, key files, data flow, and active patterns. **Use when:** onboarding to a project or refreshing the navigation index.
 
-### `/shower-thought`
-One genuinely interesting programming observation or paradox. Two sentences max. **Use when:** you want a break.
+### `/commands`
+This command. Shows installation health check and the full command reference. **Use when:** you want to verify your setup or check for updates.
 
 ---
 
@@ -113,15 +116,18 @@ One genuinely interesting programming observation or paradox. Two sentences max.
 ### `/sync-doe`
 Syncs universal DOE framework improvements from the current project back to the starter kit repo (`~/doe-starter-kit`). Strips project-specific content, shows diffs for approval, commits, tags, pushes, and creates a GitHub release. **Use after:** completing [INFRA] features or discovering universal improvements.
 
-### `/commands`
-This command. Shows installation health check and the full command reference. **Use when:** you want to verify your setup or check for updates.
+### `/pull-doe`
+Syncs improvements from the starter kit into the current project. Compares versions, shows diffs, proposes updates, merges additively. **Use when:** the kit has a newer version than your project.
 
 ---
 
 ## Multi-Agent
 
-### `/hq`
-Multi-agent dashboard for parallel Claude Code sessions. Shows wave status, terminal liveness, task progress, cost estimates, and merge order. Modes: no active wave (help text), active wave (live dashboard). Requires `~/.claude/scripts/multi_agent.py` (installed by `setup.sh`). **Use when:** running parallel Claude Code sessions via wave management.
+### `/agent-launch`
+Launches a multi-agent wave. Checks contracts, identifies parallelisable features, creates plans, builds wave file, previews, and launches. **Use when:** starting parallel Claude Code sessions.
+
+### `/agent-status`
+Multi-agent dashboard for parallel Claude Code sessions. Shows wave status, terminal liveness, task progress, cost estimates, and merge order. Modes: `--plan`, `--preview`, `--launch`, `--merge`, `--reclaim`, `--abort`, `--watch`. **Use when:** monitoring or managing an active wave.
 
 ---
 

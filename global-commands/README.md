@@ -35,16 +35,8 @@ End-of-day report aggregating all sessions, commits, features, and position. Ans
 ## Quality
 
 ### `/audit`
-Runs full claim audit — governed docs, task format, roadmap consistency, orphan claims, version match. Shows bordered result box with PASS/WARN/FAIL counts.
-*Added 28/02/26 · Updated 04/03/26*
-
-### `/quick-audit`
-Fast checks only (<1 second) — front-matter, staleness, task format, version match. Says "All clear" if clean.
-*Added 28/02/26*
-
-### `/vitals`
-Workspace health check — git status, quick audit, DOE Kit sync, STATE.md alignment, stale temp files. Shows a bordered summary. Reports only, doesn't fix.
-*Added 01/03/26*
+Comprehensive project audit — claims (governed docs, task format, roadmap consistency, staleness), workspace health (git status, stale temp files, STATE.md alignment), and DOE framework integrity (required files, hooks, commands, kit sync). Single bordered output with all findings.
+*Added 28/02/26 · Updated 06/03/26*
 
 ### `/fact-check`
 Verifies the factual accuracy of a document against the actual codebase and corrects inaccuracies in place.
@@ -52,10 +44,6 @@ Verifies the factual accuracy of a document against the actual codebase and corr
 
 ### `/review`
 Adversarial code reviewer. Reviews staged changes (or specified files) for bugs, security issues, performance problems, and code quality. Direct, specific, and neutral — finds problems, not praise.
-*Added 04/03/26*
-
-### `/doe-health`
-DOE framework integrity diagnostic. Checks directive structure, execution script health, governed doc front-matter, hook configuration, and CLAUDE.md consistency. Report only — doesn't fix.
 *Added 04/03/26*
 
 ### `/codemap`
@@ -90,9 +78,9 @@ Generates a stunning magazine-quality slide deck as a self-contained HTML page. 
 
 ## Multi-Agent
 
-### `/hq`
+### `/agent-status`
 Multi-agent dashboard. Shows wave status, task claims, session health, and coordination info. When no wave is active, shows help card with setup instructions.
-*Added 03/03/26*
+*Added 03/03/26 · Renamed from /hq 06/03/26*
 
 ### `/agent-launch`
 Dual-mode command. **Launch mode** (no active wave): scans Queue and Current for missing contracts, auto-generates them with user approval, identifies parallelisable features, builds wave JSON, previews conflicts and cost, launches, then auto-claims the first task and starts working. **Join mode** (active wave exists): claims the next unclaimed task and starts working immediately. One command for both — run `/agent-launch` in every terminal.
@@ -106,14 +94,6 @@ Generates 3-5 product ideas with structured pitches (size, type, value, effort).
 
 ### `/roast`
 Reads the codebase and roasts it. Specific, brutal, funny. References real files and real decisions.
-*Added 28/02/26*
-
-### `/eli5`
-Explains the current project and active work as if you're a curious 5-year-old. Dinosaurs and biscuits included.
-*Added 28/02/26*
-
-### `/shower-thought`
-One genuinely interesting programming observation or paradox. Two sentences max.
 *Added 28/02/26*
 
 ## Infrastructure
