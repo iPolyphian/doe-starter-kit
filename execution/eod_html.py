@@ -30,11 +30,31 @@ def render_title_card(data):
 
 
 def render_summary(data):
-    lines = data.get("summary", [])
-    if not lines:
+    summary = data.get("summary", "")
+    breakdowns = data.get("breakdowns", [])
+    # Handle old-style list format
+    if isinstance(summary, list):
+        summary = " ".join(summary)
+    if not summary and not breakdowns:
         return ""
-    paras = "\n".join(f"    <p>{esc(line)}</p>" for line in lines)
-    # Merge vibe into summary section
+
+    summary_html = f'    <p class="summary-lead">{esc(summary)}</p>' if summary else ""
+
+    breakdown_html = ""
+    if breakdowns:
+        parts = []
+        for b in breakdowns:
+            heading = esc(b.get("heading", ""))
+            bullets = b.get("bullets", [])
+            bullet_items = "\n".join(f'        <li>{esc(item)}</li>' for item in bullets)
+            parts.append(
+                f'    <div class="breakdown-group">\n'
+                f'      <div class="breakdown-heading">{heading}</div>\n'
+                f'      <ul class="breakdown-bullets">\n{bullet_items}\n      </ul>\n'
+                f'    </div>'
+            )
+        breakdown_html = "\n".join(parts)
+
     vibe = data.get("vibe")
     vibe_html = ""
     if vibe:
@@ -50,7 +70,8 @@ def render_summary(data):
       <span class="section-title">Summary</span>
     </div>
     <div class="summary">
-{paras}{vibe_html}
+{summary_html}
+{breakdown_html}{vibe_html}
     </div>
   </div>"""
 
@@ -428,6 +449,13 @@ CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono
   .summary { padding: 0; }
   .summary p { color: var(--text); font-size: 0.95rem; line-height: 1.8; margin-bottom: 0.5rem; }
   .summary p:last-child { margin-bottom: 0; }
+  .summary-lead { font-size: 0.95rem; color: var(--text); line-height: 1.8; margin-bottom: 0.8rem; }
+  .breakdown-group { margin-bottom: 0.6rem; }
+  .breakdown-group:last-child { margin-bottom: 0; }
+  .breakdown-heading { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.3rem; }
+  .breakdown-bullets { list-style: none; padding: 0; margin: 0; }
+  .breakdown-bullets li { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; padding-left: 1rem; position: relative; }
+  .breakdown-bullets li::before { content: '\2022'; position: absolute; left: 0; color: var(--border); }
 
   .section { margin-bottom: 2rem; }
   .section-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
