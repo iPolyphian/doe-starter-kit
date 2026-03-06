@@ -256,6 +256,10 @@ def _render_insight_item(item, dot_class, item_kind="decision"):
 def render_decisions_learnings(data):
     decisions = data.get("decisions", [])
     learnings = data.get("learnings", [])
+    if isinstance(decisions, str):
+        decisions = []
+    if isinstance(learnings, str):
+        learnings = []
     if not decisions and not learnings:
         return ""
     parts = []
