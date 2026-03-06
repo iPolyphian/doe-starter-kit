@@ -7,6 +7,21 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.21.1] — 2026-03-06
+
+### /wrap overhaul
+- Summary section: plain English with vibe merged in (no separate section)
+- Timeline: legend for dot colours, % per entry, total session time
+- Commits: grouped by feature with headers and counts
+- Decisions: Problem/Solution format with coloured pill labels
+- Learnings: Discovery/Change format with coloured pill labels
+- Today's Sessions: new section showing all sessions with duration and summary
+- Section reorder: Timeline → Metrics → Commits → Decisions → Checks → Sessions → Next Up
+- Removed Journey section, narrative guidance tightened to 2-3 sentences
+- Session summary stored in stats.json for cross-session recall
+
+---
+
 ## [v1.21.0] — 2026-03-06
 
 Slash command audit: 29 to 24 commands. Consolidated overlapping commands, removed low-value ones.
