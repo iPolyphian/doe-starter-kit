@@ -7,6 +7,14 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.20.4] — 2026-03-06
+
+Manual verification approach: batch at feature end, not per-step.
+
+### Changed
+- **Solo verification discipline** (CLAUDE.md Rule 1) — `[auto]` criteria gate each step autonomously. `[manual]` criteria batched and presented at feature completion as a single test checklist. Mid-feature visual checkpoint for 5+ step features. Prefer converting `[manual]` to `[auto]` where possible.
+- **todo.md format rules** — `[manual]` criteria description updated to match: batch at feature end, prefer auto conversion.
+
 ## [v1.20.3] — 2026-03-06
 
 Visual docs must be saved to project `docs/` directory, not ephemeral global paths.
