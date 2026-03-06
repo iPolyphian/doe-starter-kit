@@ -7,6 +7,11 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.24.2] — 2026-03-06
+
+### Changed
+- `/sync-doe` and `/pull-doe` now update STATE.md's DOE kit version as a final step, preventing false "inbound update pending" signals in `/stand-up`
+
 ## [v1.24.1] — 2026-03-06
 
 ### Changed

@@ -16,7 +16,8 @@ Then read directives/starter-kit-pull.md and follow it precisely. The directive 
 12. Show full summary — get approval before applying
 13. Apply approved changes
 14. Update `.doe-kit-version` in the project root
-15. Commit: "Pull DOE kit v[X.Y.Z] — [summary]"
+15. Update STATE.md's "DOE Starter Kit" line to the new version (e.g. `v1.24.1 · ~/doe-starter-kit · synced`)
+16. Commit: "Pull DOE kit v[X.Y.Z] — [summary]"
 
 To push DOE improvements FROM this project to the starter kit (reverse direction), use `/sync-doe`.
 
