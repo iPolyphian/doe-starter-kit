@@ -45,6 +45,7 @@ IMPORTANT: Never do execution inline when a script exists. Check `execution/` fi
 - **Refactor is not rewrite.** When asked to refactor, change structure only. Do not change behaviour. If behaviour must change, say so explicitly and get approval.
 - **No orphan files.** If you replace a file, delete the old one. Never leave unused files behind.
 - **Plans go in the project, not global.** Always write plans to `.claude/plans/` in the project root with a descriptive filename. Never write to `~/.claude/plans/`. If plan mode suggests a global path, override it.
+- **Visual docs go in `docs/`, not global.** Generated HTML documents (brainstorms, diagrams, guides, visual explainers) go to `docs/` in the project root. Never write to `~/.agent/diagrams/` or other global paths — those are ephemeral and not version-controlled.
 - **YOU MUST place files in designated directories.** Follow the directory structure below exactly. Do not create files in the project root or invent new directories without approval.
 
 ## Directory Structure
@@ -58,6 +59,7 @@ STATE.md        # Session memory — blockers, current position (check at sessio
 .env            # API keys and credentials (NEVER commit)
 .claude/        # Hooks, settings, plans, and commands (deterministic guardrails + feature designs)
 .githooks/      # Git hooks — strips AI co-author trailers + pre-commit audit (activate: git config core.hooksPath .githooks)
+docs/           # Generated visual documents (brainstorms, diagrams, guides) — version-controlled
 ```
 
 ## Self-Annealing

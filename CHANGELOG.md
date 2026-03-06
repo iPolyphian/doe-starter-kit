@@ -7,6 +7,14 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.20.3] — 2026-03-06
+
+Visual docs must be saved to project `docs/` directory, not ephemeral global paths.
+
+### Added
+- **Code Hygiene rule** — visual docs (brainstorms, diagrams, guides) go to `docs/` in the project root, never to `~/.agent/diagrams/` or other global paths
+- **Directory Structure** — `docs/` entry added for generated visual documents
+
 ## [v1.20.2] — 2026-03-06
 
 Retro rule improvement: completed features now get full roadmap cleanup, not just a status tag update.
