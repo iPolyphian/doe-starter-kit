@@ -30,18 +30,20 @@ Build a JSON object with this schema:
   "date": "DD/MM/YY",
   "streak": N,
   "summary": [
-    "2-3 sentences summarising what happened today across all sessions. Name features, systems, and outcomes. Plain English, no drama."
+    "Address the user: 'Today you achieved X and did Y.' 2-3 sentences. Name features and outcomes."
   ],
   "vibe": {"emoji": "EMOJI", "text": "Day vibe description"},
   "metrics": {
     "sessions": N,
     "totalDuration": "Xh Ym",
+    "avgSession": "Xh Ym",
     "commits": N,
     "linesAdded": N,
     "linesRemoved": N,
     "filesTouched": N,
     "stepsCompleted": N,
-    "featuresCompleted": N
+    "featuresCompleted": N,
+    "agentsSpawned": N
   },
   "sessionTimeline": [
     {"number": 76, "start": "HH:MM", "duration": "Xh Ym", "summary": "What this session did", "pct": N}
@@ -65,7 +67,7 @@ Build a JSON object with this schema:
 
 ### Field guidance:
 
-**summary**: Aggregate across all sessions. 2-3 sentences covering the day's work. Name specific features and outcomes.
+**summary**: Address the user directly — "Today you achieved X and did Y." 2-3 sentences max. Name specific features and outcomes. Plain English, conversational, no drama.
 
 **vibe**: Pick the best match for the day:
 - All planning, no code → `{"emoji": "📐", "text": "Architect mode"}`
