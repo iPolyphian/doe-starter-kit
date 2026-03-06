@@ -7,6 +7,23 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.22.5] — 2026-03-06
+
+Updated command reference (global-commands/README.md) to reflect recent changes.
+
+### Added
+- `/agent-verify` entry -- contract verification command (solo + wave mode)
+- `/test-suite` entry -- persistent test suite runner
+
+### Changed
+- `/wrap` description updated to reflect HTML output (wrap_html.py, commit groups, decision/learning pills, timeline percentages, vibe)
+- `/eod` description updated to reflect HTML output (eod_html.py, daily timeline, commit breakdown bars, 9-metric grid)
+- `/audit` note added about merged commands (/quick-audit, /vitals, /doe-health)
+- `/agent-status` description updated with full mode list (--plan, --preview, --launch, --merge, --reclaim, --abort, --watch)
+- `/commands` date updated
+
+---
+
 ## [v1.21.1] — 2026-03-06
 
 ### /wrap overhaul
