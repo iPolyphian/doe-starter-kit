@@ -114,6 +114,8 @@ def render_metrics(data):
     files = m.get("filesTouched", 0)
     steps = m.get("stepsCompleted", 0)
     features = m.get("featuresCompleted", 0)
+    agents = m.get("agentsSpawned", 0)
+    avg_session = esc(m.get("avgSession", ""))
 
     cards = [
         f"""      <div class="stat-card">
@@ -123,6 +125,10 @@ def render_metrics(data):
         f"""      <div class="stat-card">
         <div class="stat-value">{total_dur}</div>
         <div class="stat-label">Total Time</div>
+      </div>""",
+        f"""      <div class="stat-card">
+        <div class="stat-value">{avg_session}</div>
+        <div class="stat-label">Avg Session</div>
       </div>""",
         f"""      <div class="stat-card">
         <div class="stat-value">{esc(commits)}</div>
@@ -141,15 +147,15 @@ def render_metrics(data):
         <div class="stat-value">{esc(steps)}</div>
         <div class="stat-label">Steps Done</div>
       </div>""",
-    ]
-
-    if features > 0:
-        cards.append(
-            f"""      <div class="stat-card">
+        f"""      <div class="stat-card">
         <div class="stat-value">{esc(features)}</div>
         <div class="stat-label">Features Shipped</div>
-      </div>"""
-        )
+      </div>""",
+        f"""      <div class="stat-card">
+        <div class="stat-value">{esc(agents)}</div>
+        <div class="stat-label">Agents Spawned</div>
+      </div>""",
+    ]
 
     inner = "\n".join(cards)
     return f"""  <div class="section">
