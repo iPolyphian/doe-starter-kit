@@ -14,6 +14,7 @@ Then read directives/starter-kit-sync.md and follow it precisely. The directive 
 10. Update CHANGELOG.md with what changed, bump the version (patch/minor/major)
 11. Commit to the starter kit repo with message: "v[X.Y.Z]: Sync from [project] — [summary]"
 12. Tag the version, push, push tags, create GitHub release
+13. Update STATE.md's "DOE Starter Kit" line to the new version (e.g. `v1.24.1 · ~/doe-starter-kit · synced`)
 
 To pull kit updates INTO this project (reverse direction), use `/pull-doe`.
 
