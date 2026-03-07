@@ -13,8 +13,8 @@ Quick reference for all custom `/commands`. These are global — available in ev
 ## Session Lifecycle
 
 ### `/stand-up`
-Context-aware dual-mode command. **Kick-off mode** (no active session): starts the clock, reads project state, shows a bordered kick-off card with project name (right-aligned), feature, progress, DOE Kit status, pipeline sync (Up Next vs Queue mismatch detection), contract health, last session summary, plan, and coaching focus. Waits for sign-off. **Status mode** (session already running): shows a bordered status card with progress, momentum, recent activity, and queue.
-*Added 28/02/26 · Updated 05/03/26*
+Context-aware dual-mode command. **Kick-off mode** (no active session): starts the clock, reads project state, shows a bordered kick-off card with project name (right-aligned), feature, progress, blockers (from STATE.md), DOE Kit status, pipeline sync (Up Next vs Queue mismatch detection), contract health, last session summary, plan, and coaching focus. Waits for sign-off. **Status mode** (session already running): shows a bordered status card with progress, blockers, momentum, recent activity, and queue.
+*Added 28/02/26 · Updated 07/03/26*
 
 ### `/crack-on`
 Same context read as stand-up kick-off mode, but picks up the next incomplete step immediately. Validates task contracts before starting (pre-flight) and runs all Verify: patterns before marking steps done (post-completion). One step at a time — commit, push, stop, report. Starts the session timer.

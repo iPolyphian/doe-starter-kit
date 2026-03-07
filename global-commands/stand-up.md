@@ -22,6 +22,8 @@ Show a bordered kick-off card, then present a plan and wait for sign-off:
 ├──────────────────────────────────────────────────┤
 │  FEATURE    [active feature] [APP/INFRA] vX.Y.x   │
 │  PROGRESS   ██████░░░░ N/M steps                  │
+│  BLOCKERS   [from STATE.md blockers section]       │
+│    !! [each blocker on its own line]               │
 │  DOE KIT    vX.Y.Z [synced / * if pending]        │
 │  PIPELINE   N in Up Next, M in Queue              │
 │  WARNINGS   [audit WARN/FAIL items]               │
@@ -50,6 +52,7 @@ Card rules:
 - WARNINGS: Run `python3 execution/audit_claims.py --hook --json` and parse the JSON output. If any findings have severity "WARN" or "FAIL", show a WARNINGS row with a summary count (e.g. "2 audit WARNs") followed by indented detail lines for each non-PASS item — use `⚠️` prefix for WARN and `❌` for FAIL. Each detail line shows the file name and message from the finding. If the first WARN/FAIL item is actionable in this session (e.g. a stale doc or missing version tag), add an indented `→ Fix now?` suggestion. **If all findings are PASS, omit the WARNINGS section entirely** — it only appears when there are problems. If the audit script doesn't exist or fails, also omit.
 - SUMMARY: After the `├──┤` separator, show 1-2 lines summarising the last session from STATE.md ## Last Session. Keep it brief — what happened, where we left off. Then a blank line before PLAN.
 - CONTRACT: After the PROGRESS line, check the contract block of the next step to be worked on. Show `CONTRACT   Valid (N auto, M manual)` if the next step has a well-formed contract with executable Verify: patterns, `CONTRACT   Needs fix -- invalid Verify: patterns` if patterns don't match executable forms, or `CONTRACT   Missing` if no contract block exists. This is informational only -- it surfaces problems early so the plan can account for them (e.g. "First fix the missing contract, then start Step 2"). If no current feature or all steps complete, omit this line.
+- BLOCKERS: Read STATE.md `## Blockers & Edge Cases`. If the section has any bullet points, show a `BLOCKERS` row after CONTRACT with the count (e.g. "2 active"), followed by indented detail lines with `!!` prefix for each blocker. Truncate long blockers to fit the 56-char content width. **If the section is empty or has no bullets, omit the BLOCKERS section entirely** -- it only appears when there are problems. This row appears in both kick-off and status mode cards, positioned between CONTRACT and DOE KIT.
 - PLAN: the proposed next steps — what you recommend doing this session. This is the "present a plan" part.
 - FOCUS: After PLAN, analyse `.claude/stats.json` (if it exists) to surface 2-3 coaching bullets based on `recentSessions` (last 5-10 entries). Look for these patterns and show whichever are most relevant:
   - **Infrastructure vs product ratio:** Count sessions where the commit messages or todo.md steps were [INFRA] vs [APP]. If heavily skewed, note it (e.g. "4/5 recent sessions were [INFRA] — consider shipping product").
@@ -80,6 +83,8 @@ Show a bordered status card:
 │  PHASE GOAL   [what done looks like]              │
 │  PROGRESS     ██████░░░░ N/M steps (X%)           │
 │  NEXT STEP    [next uncompleted step from todo]   │
+│  BLOCKERS     [from STATE.md blockers section]    │
+│    !! [each blocker on its own line]              │
 │                                                   │
 │  SINCE LAST MILESTONE (vX.Y.Z)                    │
 │  · [commit/shipped item]                          │

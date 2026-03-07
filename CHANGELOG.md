@@ -7,6 +7,11 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.24.3] — 2026-03-07
+
+### Added
+- `/stand-up` BLOCKERS row: reads STATE.md `## Blockers & Edge Cases` and surfaces them with `!!` prefix in both kick-off and status mode cards. Positioned between CONTRACT and DOE KIT. Omitted when no blockers exist.
+
 ## [v1.24.2] — 2026-03-06
 
 ### Changed
