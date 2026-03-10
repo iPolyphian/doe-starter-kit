@@ -7,6 +7,16 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.25.0] — 2026-03-10
+
+### Added
+- `/scope` command: conversational feature scoping through 3 phases (Explore, Define, Bound). Produces structured brief in `.claude/plans/` and updates ROADMAP.md with SCOPED status tag.
+- New "Product" section in README grouping `/scope` and `/pitch`.
+
+### Changed
+- `/stand-up` DOE Kit indicator: directional sync labels (`* push`, `* pull`, `* push+pull`) replace generic `*`. Users now know which direction needs syncing.
+- `/stand-up` kick-off: 100-session milestone celebration card for lifetime session milestones.
+
 ## [v1.24.5] — 2026-03-09
 
 ### Added

@@ -13,8 +13,8 @@ Quick reference for all custom `/commands`. These are global — available in ev
 ## Session Lifecycle
 
 ### `/stand-up`
-Context-aware dual-mode command. **Kick-off mode** (no active session): starts the clock, reads project state, shows a bordered kick-off card with project name (right-aligned), feature, progress, blockers (from STATE.md), DOE Kit status, pipeline sync (Up Next vs Queue mismatch detection), contract health, last session summary, plan, and coaching focus. Waits for sign-off. **Status mode** (session already running): shows a bordered status card with progress, blockers, momentum, recent activity, and queue.
-*Added 28/02/26 · Updated 07/03/26*
+Context-aware dual-mode command. **Kick-off mode** (no active session): starts the clock, reads project state, shows a bordered kick-off card with project name (right-aligned), feature, progress, blockers (from STATE.md), DOE Kit status with directional sync indicators (push/pull/push+pull), pipeline sync (Up Next vs Queue mismatch detection), contract health, last session summary, plan, and coaching focus. 100-session milestone celebration card. Waits for sign-off. **Status mode** (session already running): shows a bordered status card with progress, blockers, momentum, recent activity, and queue.
+*Added 28/02/26 · Updated 10/03/26*
 
 ### `/crack-on`
 Same context read as stand-up kick-off mode, but picks up the next incomplete step immediately. Validates task contracts before starting (pre-flight) and runs all Verify: patterns before marking steps done (post-completion). One step at a time — commit, push, stop, report. Starts the session timer.
@@ -94,11 +94,17 @@ Multi-agent dashboard. Shows wave status, task claims, session health, and coord
 Dual-mode command. **Launch mode** (no active wave): scans Queue and Current for missing contracts, auto-generates them with user approval, identifies parallelisable features, builds wave JSON, previews conflicts and cost, launches, then auto-claims the first task and starts working. **Join mode** (active wave exists): claims the next unclaimed task and starts working immediately. One command for both — run `/agent-launch` in every terminal.
 *Added 04/03/26 · Updated 05/03/26*
 
-## Utility
+## Product
+
+### `/scope`
+Conversational feature scoping command. Guides a fuzzy idea through three phases (Explore, Define, Bound) to produce a structured brief. Phase 0 reflects the idea back until aligned. Phase 1 nails down problem, users, and success criteria. Phase 2 draws scope boundaries. Outputs a brief to `.claude/plans/{feature}-brief.md` and updates ROADMAP.md with a SCOPED status tag.
+*Added 10/03/26*
 
 ### `/pitch`
 Generates 3-5 product ideas with structured pitches (size, type, value, effort). Only adds to ROADMAP.md with explicit approval.
 *Added 28/02/26*
+
+## Utility
 
 ### `/roast`
 Reads the codebase and roasts it. Specific, brutal, funny. References real files and real decisions.
