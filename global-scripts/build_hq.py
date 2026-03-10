@@ -609,6 +609,7 @@ CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono
   .pm-green { color: var(--green); }
   .pm-red { color: var(--red); }
   .wsm-red { color: var(--red); }
+  .wsm-dim { color: var(--text-dim); font-size: 0.9em; }
   .project-feature-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.4rem; }
   .project-feature-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
   .project-feature-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text); font-weight: 500; }
@@ -800,10 +801,9 @@ def render_portfolio_week_summary(ws, week):
             cls = "up" if dv > 0 else "down"; sign = "+" if dv > 0 else ""
             s += f' <span class="wsm-delta {cls}">{sign}{dv}</span>'
         metrics.append(f"<span>{s}</span>")
-    ls = f'<span class="wsm-green">+{format_number(ws["total_lines_added"])}</span> / <span class="wsm-red">-{format_number(ws["total_lines_removed"])}</span> lines'
-    if ws["delta_lines"] and ws["delta_lines"] != 0:
-        cls = "up" if ws["delta_lines"] > 0 else "down"; sign = "+" if ws["delta_lines"] > 0 else ""
-        ls += f' <span class="wsm-delta {cls}">{sign}{format_number(ws["delta_lines"])}</span>'
+    net = ws["total_lines_added"] - ws["total_lines_removed"]
+    net_sign = "+" if net >= 0 else ""
+    ls = f'<span class="wsm-green">+{format_number(ws["total_lines_added"])}</span> / <span class="wsm-red">-{format_number(ws["total_lines_removed"])}</span> lines <span class="wsm-dim">(net {net_sign}{format_number(net)})</span>'
     metrics.append(f'<span>{ls}</span>')
     best_parts = []
     if ws["most_active"]:
@@ -972,12 +972,14 @@ def render_project_week_summary(ws, prev_stats, week_sessions, days_dict, week_i
     if prev_stats:
         metrics.append(f'<span><span class="wsm-val">{ws["sessions"]}</span> sessions {delta_badge(ws["sessions"], prev_stats["sessions"])}</span>')
         metrics.append(f'<span><span class="wsm-val">{ws["commits"]}</span> commits {delta_badge(ws["commits"], prev_stats["commits"])}</span>')
-        metrics.append(f'<span><span class="wsm-green">+{format_lines(ws["added"])}</span> / <span class="wsm-red">-{format_lines(ws["removed"])}</span> lines {delta_badge(ws["added"], prev_stats["added"])}</span>')
+        wnet = ws["added"] - ws["removed"]; wns = "+" if wnet >= 0 else ""
+        metrics.append(f'<span><span class="wsm-green">+{format_lines(ws["added"])}</span> / <span class="wsm-red">-{format_lines(ws["removed"])}</span> lines <span class="wsm-dim">(net {wns}{format_lines(wnet)})</span></span>')
         metrics.append(f'<span><span class="wsm-val">{ws["steps"]}</span> steps {delta_badge(ws["steps"], prev_stats["steps"])}</span>')
     else:
         metrics.append(f'<span><span class="wsm-val">{ws["sessions"]}</span> sessions</span>')
         metrics.append(f'<span><span class="wsm-val">{ws["commits"]}</span> commits</span>')
-        metrics.append(f'<span><span class="wsm-green">+{format_lines(ws["added"])}</span> / <span class="wsm-red">-{format_lines(ws["removed"])}</span> lines</span>')
+        wnet = ws["added"] - ws["removed"]; wns = "+" if wnet >= 0 else ""
+        metrics.append(f'<span><span class="wsm-green">+{format_lines(ws["added"])}</span> / <span class="wsm-red">-{format_lines(ws["removed"])}</span> lines <span class="wsm-dim">(net {wns}{format_lines(wnet)})</span></span>')
         metrics.append(f'<span><span class="wsm-val">{ws["steps"]}</span> steps</span>')
     comparison = ""
     if prev_stats and prev_stats["sessions"] > 0:
