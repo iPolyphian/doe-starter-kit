@@ -177,10 +177,14 @@ Run:
 python3 execution/wrap_html.py --json '<the JSON string>' --theme <light|dark> --output .tmp/wrap.html
 ```
 
-Then open in the browser:
+Then save a permanent copy for HQ and open in the browser:
 ```bash
+mkdir -p docs/wraps
+cp .tmp/wrap.html docs/wraps/session-<SESSION_NUMBER>.html
 open .tmp/wrap.html
 ```
+
+The `docs/wraps/` copy is what `/hq` uses to link "View Wrap" on session cards. The `.tmp/` copy is disposable.
 
 Print a one-line summary to the terminal: `Session [N] wrap-up opened in browser. [X] commits, [Y] steps, [duration].`
 

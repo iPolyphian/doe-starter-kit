@@ -248,11 +248,12 @@ def compute_weeks_global(day_map, earliest, latest):
     return weeks
 
 def compute_week_stats_global(week, prev_week=None):
-    ts = tc = tl = 0
+    ts = tc = tl = tr = 0
     active = set()
     for day in week["days"]:
         for e in day["sessions"]:
             ts += 1; tc += e["session"].get("commits", 0); tl += e["session"].get("linesAdded", 0)
+            tr += e["session"].get("linesRemoved", 0)
             active.add(e["project_name"])
     ds = dc = dl = None
     if prev_week:
@@ -271,7 +272,8 @@ def compute_week_stats_global(week, prev_week=None):
         if len(day["sessions"]) > bds:
             bds = len(day["sessions"]); bd = day["date"]; bdp = set(e["project_name"] for e in day["sessions"])
     return {"total_sessions": ts, "total_commits": tc, "total_lines_added": tl,
-            "active_projects": sorted(active), "delta_sessions": ds, "delta_commits": dc,
+            "total_lines_removed": tr, "active_projects": sorted(active),
+            "delta_sessions": ds, "delta_commits": dc,
             "delta_lines": dl, "most_active": most_active, "most_active_count": max_c,
             "biggest_day": bd, "biggest_day_sessions": bds, "biggest_day_projects": bdp}
 
@@ -422,7 +424,14 @@ def extract_version_milestones(grouped):
     return [(v, milestones[v]) for v in sorted_vers]
 
 def check_wrap_exists(session_num, project_root):
-    return Path(project_root) / "docs" / "wraps" / f"session-{session_num}.html"
+    permanent = Path(project_root) / "docs" / "wraps" / f"session-{session_num}.html"
+    if permanent.exists():
+        return permanent
+    # Fallback: check .tmp/wrap.html for current session
+    tmp = Path(project_root) / ".tmp" / "wrap.html"
+    if tmp.exists():
+        return tmp
+    return permanent  # return the expected path (won't exist, but keeps the logic working)
 
 
 # ── CSS ───────────────────────────────────────────────────────────────────────
@@ -598,6 +607,8 @@ CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono
   .project-metrics { display: flex; gap: 1.2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-dim); margin-bottom: 0.6rem; flex-wrap: wrap; }
   .pm-val { color: var(--text); font-weight: 500; }
   .pm-green { color: var(--green); }
+  .pm-red { color: var(--red); }
+  .wsm-red { color: var(--red); }
   .project-feature-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.4rem; }
   .project-feature-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
   .project-feature-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text); font-weight: 500; }
@@ -789,11 +800,11 @@ def render_portfolio_week_summary(ws, week):
             cls = "up" if dv > 0 else "down"; sign = "+" if dv > 0 else ""
             s += f' <span class="wsm-delta {cls}">{sign}{dv}</span>'
         metrics.append(f"<span>{s}</span>")
-    ls = f'+{format_number(ws["total_lines_added"])} lines'
+    ls = f'<span class="wsm-green">+{format_number(ws["total_lines_added"])}</span> / <span class="wsm-red">-{format_number(ws["total_lines_removed"])}</span> lines'
     if ws["delta_lines"] and ws["delta_lines"] != 0:
         cls = "up" if ws["delta_lines"] > 0 else "down"; sign = "+" if ws["delta_lines"] > 0 else ""
         ls += f' <span class="wsm-delta {cls}">{sign}{format_number(ws["delta_lines"])}</span>'
-    metrics.append(f'<span class="wsm-green">{ls}</span>')
+    metrics.append(f'<span>{ls}</span>')
     best_parts = []
     if ws["most_active"]:
         best_parts.append(f'<span class="best-item"><span class="best-label">Most active</span> <span class="best-val">{esc(ws["most_active"])} ({ws["most_active_count"]})</span></span>')
@@ -866,6 +877,7 @@ def render_project_card(project, idx, today):
     sessions = (s.get("lifetime", {}).get("totalSessions", 0)) if s else 0
     commits = (s.get("lifetime", {}).get("totalCommits", 0)) if s else 0
     lines_added = (s.get("lifetime", {}).get("totalLinesAdded", 0)) if s else 0
+    lines_removed = (s.get("lifetime", {}).get("totalLinesRemoved", 0)) if s else 0
     streak = (s.get("streak", {}).get("current", 0)) if s else 0
     recent = (s.get("recentSessions", [])) if s else []
     active_days = count_active_days(recent)
@@ -897,7 +909,7 @@ def render_project_card(project, idx, today):
       <div class="project-metrics">
         <span><span class="pm-val">{sessions}</span> sessions</span>
         <span><span class="pm-val">{commits}</span> commits</span>
-        <span class="pm-green">+{format_number(lines_added)} lines</span>
+        <span class="pm-green">+{format_number(lines_added)}</span> / <span class="pm-red">-{format_number(lines_removed)}</span> lines
         <span><span class="pm-val">{active_days}</span> days active</span>
         <span>Streak: <span class="pm-val">{streak}</span></span>
       </div>
@@ -960,12 +972,12 @@ def render_project_week_summary(ws, prev_stats, week_sessions, days_dict, week_i
     if prev_stats:
         metrics.append(f'<span><span class="wsm-val">{ws["sessions"]}</span> sessions {delta_badge(ws["sessions"], prev_stats["sessions"])}</span>')
         metrics.append(f'<span><span class="wsm-val">{ws["commits"]}</span> commits {delta_badge(ws["commits"], prev_stats["commits"])}</span>')
-        metrics.append(f'<span class="wsm-green">+{format_lines(ws["added"])} lines {delta_badge(ws["added"], prev_stats["added"])}</span>')
+        metrics.append(f'<span><span class="wsm-green">+{format_lines(ws["added"])}</span> / <span class="wsm-red">-{format_lines(ws["removed"])}</span> lines {delta_badge(ws["added"], prev_stats["added"])}</span>')
         metrics.append(f'<span><span class="wsm-val">{ws["steps"]}</span> steps {delta_badge(ws["steps"], prev_stats["steps"])}</span>')
     else:
         metrics.append(f'<span><span class="wsm-val">{ws["sessions"]}</span> sessions</span>')
         metrics.append(f'<span><span class="wsm-val">{ws["commits"]}</span> commits</span>')
-        metrics.append(f'<span class="wsm-green">+{format_lines(ws["added"])} lines</span>')
+        metrics.append(f'<span><span class="wsm-green">+{format_lines(ws["added"])}</span> / <span class="wsm-red">-{format_lines(ws["removed"])}</span> lines</span>')
         metrics.append(f'<span><span class="wsm-val">{ws["steps"]}</span> steps</span>')
     comparison = ""
     if prev_stats and prev_stats["sessions"] > 0:
@@ -996,6 +1008,7 @@ def render_project_day_strip(monday, days_dict, today_str, slug=""):
         else:
             cls = f"week-day has-sessions{' today' if is_today else ''}"
             n = len(sessions); tc = sum(s.get("commits", 0) for s in sessions); ta = sum(s.get("linesAdded", 0) for s in sessions)
+            tr = sum(s.get("linesRemoved", 0) for s in sessions)
             summ = sessions[0].get("summary", "") or ""; summ = summ[:120] + "..." if len(summ) > 120 else summ
             feat = next((s.get("_feature", "") for s in sessions if s.get("_feature")), "")
             ts = sum(s.get("stepsCompleted", 0) for s in sessions)
@@ -1005,7 +1018,7 @@ def render_project_day_strip(monday, days_dict, today_str, slug=""):
                 step_html = f'<div class="wd-steps">{blocks}</div>'
             badge = f"{n} session" if n == 1 else f"{n} sessions"
             feat_div = f'<div class="wd-feature">{esc(feat)}</div>' if feat else ""
-            cells.append(f'      <div class="{cls}" data-date="{ds}" onclick="scrollToDay_{slug}(\'{ds}\')"><div class="wd-header"><span class="wd-dow">{dow}</span><span class="wd-date">{dl}</span></div><div class="wd-badge">{badge}</div><div class="wd-metrics"><span class="wdm-c">{tc}c</span><span class="wdm-a">+{format_lines(ta)}</span></div><div class="wd-summary">{esc(summ)}</div>{feat_div}{step_html}</div>')
+            cells.append(f'      <div class="{cls}" data-date="{ds}" onclick="scrollToDay_{slug}(\'{ds}\')"><div class="wd-header"><span class="wd-dow">{dow}</span><span class="wd-date">{dl}</span></div><div class="wd-badge">{badge}</div><div class="wd-metrics"><span class="wdm-c">{tc}c</span><span class="wdm-a">+{format_lines(ta)}</span><span style="color:var(--red)">-{format_lines(tr)}</span></div><div class="wd-summary">{esc(summ)}</div>{feat_div}{step_html}</div>')
     return f'    <div class="week-strip">\n{chr(10).join(cells)}\n    </div>'
 
 def render_project_swimlane(swimlane_data, monday):
@@ -1077,6 +1090,7 @@ def render_session_card(session, project_path):
 def render_day_group(date_str, sessions, collapsed, project_path):
     d = parse_date(date_str); day_label = d.strftime("%A, %-d %B %Y")
     n = len(sessions); tc = sum(s.get("commits", 0) for s in sessions); tl = sum(s.get("linesAdded", 0) for s in sessions)
+    tr = sum(s.get("linesRemoved", 0) for s in sessions)
     streak_val = sessions[0].get("streak", 0) if sessions else 0
     cards = "\n".join(render_session_card(s, project_path) for s in sessions)
     streak_html = f'      <span class="day-streak">Streak: {streak_val}</span>' if streak_val > 0 else ""
@@ -1085,7 +1099,7 @@ def render_day_group(date_str, sessions, collapsed, project_path):
     <div class="day-header" onclick="toggleDayGroup(this.parentElement)">
       <span class="day-collapse-icon">&#9660;</span>
       <span class="day-date">{esc(day_label)}</span>
-      <span class="day-stats">{n} sessions -- {tc} commits -- {tl:,} lines</span>
+      <span class="day-stats">{n} sessions -- {tc} commits -- +{tl:,} / -{tr:,} lines</span>
 {streak_html}
     </div>
     <div class="day-group-content">
