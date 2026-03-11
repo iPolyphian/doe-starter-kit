@@ -1079,7 +1079,7 @@ def render_project_day_strip(monday, days_dict, today_str, slug=""):
                 step_html = f'<div class="wd-steps">{blocks}</div>'
             badge = f"{n} session" if n == 1 else f"{n} sessions"
             feat_div = f'<div class="wd-feature">{esc(feat)}</div>' if feat else ""
-            cells.append(f'      <div class="{cls}" data-date="{ds}" onclick="scrollToDay_{slug}(\'{ds}\')"><div class="wd-header"><span class="wd-dow">{dow}</span><span class="wd-date">{dl}</span></div><div class="wd-badge">{badge}</div><div class="wd-metrics"><span class="wdm-c">{tc}c</span><span class="wdm-a">+{format_lines(ta)}</span><span style="color:var(--red)">-{format_lines(tr)}</span></div><div class="wd-summary">{esc(summ)}</div>{feat_div}{step_html}</div>')
+            cells.append(f'      <div class="{cls}" data-date="{ds}" onclick="window[\'scrollToDay_{slug}\'](\'{ds}\')"><div class="wd-header"><span class="wd-dow">{dow}</span><span class="wd-date">{dl}</span></div><div class="wd-badge">{badge}</div><div class="wd-metrics"><span class="wdm-c">{tc}c</span><span class="wdm-a">+{format_lines(ta)}</span><span style="color:var(--red)">-{format_lines(tr)}</span></div><div class="wd-summary">{esc(summ)}</div>{feat_div}{step_html}</div>')
     return f'    <div class="week-strip">\n{chr(10).join(cells)}\n    </div>'
 
 def render_project_swimlane(swimlane_data, monday):
@@ -1258,8 +1258,10 @@ function renderPortfolioWeek(idx) {
   if (vp) { var pct = 100 / pWeekData.length; vp.style.left = (idx * pct) + '%'; vp.style.width = pct + '%'; }
 }
 
-document.getElementById('p-prev-week').addEventListener('click', function() { renderPortfolioWeek(pWeekIdx - 1); });
-document.getElementById('p-next-week').addEventListener('click', function() { renderPortfolioWeek(pWeekIdx + 1); });
+var pPrev = document.getElementById('p-prev-week');
+var pNext = document.getElementById('p-next-week');
+if (pPrev) pPrev.addEventListener('click', function() { renderPortfolioWeek(pWeekIdx - 1); });
+if (pNext) pNext.addEventListener('click', function() { renderPortfolioWeek(pWeekIdx + 1); });
 var pst = document.getElementById('p-scrubber-track');
 if (pst) pst.addEventListener('click', function(e) {
   var pct = (e.clientX - this.getBoundingClientRect().left) / this.offsetWidth;
@@ -1522,10 +1524,12 @@ def build_html(projects, registry_path, theme):
     var vp = view.querySelector('.scrubber-viewport');
     if (vp) {{ vp.style.left = data[i].vpLeft + '%'; vp.style.width = data[i].vpWidth + '%'; }}
   }}
-  document.getElementById('prev-{slug}').addEventListener('click', function() {{ show(idx + 1); }});
-  document.getElementById('next-{slug}').addEventListener('click', function() {{ show(idx - 1); }});
+  var prevEl = document.getElementById('prev-{slug}');
+  var nextEl = document.getElementById('next-{slug}');
+  if (prevEl) prevEl.addEventListener('click', function() {{ show(idx + 1); }});
+  if (nextEl) nextEl.addEventListener('click', function() {{ show(idx - 1); }});
 }})();
-window.scrollToDay_{slug} = function(date) {{
+window['scrollToDay_{slug}'] = function(date) {{
   var view = document.getElementById('view-{slug}');
   view.querySelectorAll('.week-day.selected').forEach(function(d) {{ d.classList.remove('selected'); }});
   var clicked = view.querySelector('.week-day[data-date="' + date + '"]');
