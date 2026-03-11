@@ -7,6 +7,11 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.27.2] — 2026-03-11
+
+### Fixed
+- `build_hq.py`: HQ project cards now read version from git tags (most reliable) with fallback to session summary text. Previously only checked summaries, so projects with tags but no version in summaries showed no version.
+
 ## [v1.27.1] — 2026-03-11
 
 ### Added

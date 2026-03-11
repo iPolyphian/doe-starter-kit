@@ -168,7 +168,22 @@ def extract_step_info(summary):
     m = re.search(r'[Ss]teps?\s+(\d+[\-\u2013]\d+/\d+|\d+/\d+)', summary)
     return m.group(0) if m else ""
 
-def extract_version(sessions):
+def extract_version(sessions, project_path=None):
+    # Try git tag first (most reliable)
+    if project_path:
+        try:
+            result = subprocess.run(
+                ["git", "tag", "--sort=-v:refname"],
+                capture_output=True, text=True, cwd=project_path, timeout=5,
+            )
+            if result.returncode == 0:
+                for line in result.stdout.strip().split("\n"):
+                    line = line.strip()
+                    if re.match(r'v\d+\.\d+', line):
+                        return line
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+            pass
+    # Fall back to session summaries
     for s in sessions[:5]:
         match = re.search(r'v(\d+\.\d+(?:\.\d+)?)', s.get("summary", ""))
         if match:
@@ -940,7 +955,7 @@ def render_project_card(project, idx, today):
     recent = (s.get("recentSessions", [])) if s else []
     active_days = count_active_days(recent)
     feature = extract_feature(recent) if recent else None
-    version = extract_version(recent) if recent else None
+    version = extract_version(recent, project.get("path")) if recent else None
     feat_html = f'    <div class="project-feature-row"><span class="project-feature-label">Current:</span> <span class="project-feature-name">{esc(feature)}</span></div>' if feature else ""
     ver_html = f'    <div class="project-version"><span class="pv-ver">{esc(version)}</span></div>' if version else ""
 
