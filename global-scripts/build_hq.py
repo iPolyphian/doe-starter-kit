@@ -854,16 +854,20 @@ def render_portfolio_week_summary(ws, week):
     if not active:
         narrative = "No sessions this week."
     else:
-        # Extract key activities from summaries
-        activities = []
-        for s in all_summaries[:6]:
-            # Take first clause/sentence, truncate
-            short = s.split(".")[0].split(" — ")[0].split(" - ")[0]
-            if len(short) > 80: short = short[:77] + "..."
-            if short and short not in activities: activities.append(short)
-        proj_prefix = f"{', '.join(active)}: " if len(active) > 1 else f"{active[0]}: " if active[0] != "Unknown" else ""
-        if activities:
-            narrative = proj_prefix + "; ".join(activities[:3]) + "."
+        # Group summaries by project, pick one key activity per project
+        proj_activities = {}
+        for d in week["days"]:
+            for e in d["sessions"]:
+                pn = e.get("project_name", "Unknown")
+                s = e["session"].get("summary", "")
+                if s and pn not in proj_activities:
+                    # Take first clause as the headline activity
+                    short = s.split(".")[0].split(" — ")[0].split(" - ")[0]
+                    if len(short) > 60: short = short[:57] + "..."
+                    proj_activities[pn] = short
+        if proj_activities:
+            parts = [f"{pn}: {act}" for pn, act in list(proj_activities.items())[:3]]
+            narrative = ". ".join(parts) + "."
         else:
             narrative = f"{'Active across ' + ', '.join(active) if len(active) > 1 else 'Focused on ' + active[0]}. {ws['total_sessions']} sessions, {ws['total_commits']} commits."
     metrics = []

@@ -7,6 +7,11 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.27.3] — 2026-03-11
+
+### Fixed
+- `build_hq.py`: HQ "This Week" summary now shows one headline activity per project (max 3) instead of dumping multiple semicolon-separated summary fragments that got truncated.
+
 ## [v1.27.2] — 2026-03-11
 
 ### Fixed
