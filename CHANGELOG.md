@@ -7,6 +7,12 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.30.1] — 2026-03-12
+
+### Fixed
+- `CLAUDE.md` Rule 1 point (3): Awaiting Sign-off move now happens immediately when last step's `[auto]` criteria pass, not at session wrap — fixes circular dependency where manual checks couldn't be presented until a ceremony that required manual checks
+- `todo.md` format rules step (6): Awaiting Sign-off is now the default destination for completed features; Done section description clarified to "all contracts verified"
+
 ## [v1.30.0] — 2026-03-12
 
 ### Added
