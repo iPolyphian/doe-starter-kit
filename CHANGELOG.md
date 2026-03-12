@@ -7,6 +7,11 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.28.0] — 2026-03-12
+
+### Changed
+- `wrap.md`: save session JSON to `docs/wraps/` instead of copying the rendered HTML. HTML is generated on demand from JSON. Smaller commits, HQ regenerates as needed.
+
 ## [v1.27.3] — 2026-03-11
 
 ### Fixed

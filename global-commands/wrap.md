@@ -177,14 +177,14 @@ Run:
 python3 execution/wrap_html.py --json '<the JSON string>' --theme <light|dark> --output .tmp/wrap.html
 ```
 
-Then save a permanent copy for HQ and open in the browser:
+Then save the JSON data permanently for HQ and open the HTML in the browser:
 ```bash
 mkdir -p docs/wraps
-cp .tmp/wrap.html docs/wraps/session-<SESSION_NUMBER>.html
+python3 -c "import json; open('docs/wraps/session-<SESSION_NUMBER>.json', 'w').write(json.dumps(<THE_JSON_OBJECT>, indent=2))"
 open .tmp/wrap.html
 ```
 
-The `docs/wraps/` copy is what `/hq` uses to link "View Wrap" on session cards. The `.tmp/` copy is disposable.
+The `docs/wraps/session-N.json` file is what gets committed. The HTML is generated on demand (by `build_session_archive.py` regenerating it from JSON). The `.tmp/wrap.html` copy is disposable.
 
 Print a one-line summary to the terminal: `Session [N] wrap-up opened in browser. [X] commits, [Y] steps, [duration].`
 
