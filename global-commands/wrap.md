@@ -122,6 +122,17 @@ Using the stats JSON from Step 2, compose a JSON object with this schema. You mu
     "audit": {"pass": N, "warn": N, "fail": N, "details": ["detail string if warn/fail"]},
     "doeKit": {"version": "vX.Y.Z", "synced": true|false}
   },
+  "awaitingSignOff": [
+    {
+      "feature": "Feature Name [APP] (vX.Y.Z)",
+      "summary": "One-line description of what needs testing",
+      "manualItems": N,
+      "groups": [
+        {"name": "Group Name", "items": ["Manual check description", "..."]},
+        {"name": "Another Group", "items": ["..."]}
+      ]
+    }
+  ],
   "footer": {
     "session": N,
     "streak": N,
@@ -130,6 +141,8 @@ Using the stats JSON from Step 2, compose a JSON object with this schema. You mu
   "nextUp": "What to do next session -- pull from todo.md"
 }
 ```
+
+**awaitingSignOff**: Parse `## Awaiting Sign-off` in todo.md. For each feature heading (`###`), collect all unchecked `[ ] [manual]` lines. Group related items by theme (e.g. "Modal & Navigation", "Responsive", "Data Validation") -- use your judgment to create 2-5 groups per feature based on what the checks are testing. Each entry has: `feature` (heading text), `summary` (one-line description of what needs testing overall), `manualItems` (total count), and `groups` (array of `{name, items}` where items are the check descriptions stripped of `- [ ] [manual]` prefix). Cards render as collapsible -- the summary and count are always visible, groups expand on click. If the section is empty or has no features, use an empty array `[]` -- the renderer omits the section.
 
 **commitGroups**: Group commits by feature or task. Use feature names from todo.md where possible. Commits that don't belong to a feature go in "Housekeeping" or "Other". Every commit in commitLog must appear in exactly one group.
 

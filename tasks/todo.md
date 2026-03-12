@@ -2,7 +2,7 @@
 <!--
 FORMAT RULES (Claude: follow these when updating this file)
 - This file tracks immediate work only. Long-term roadmap lives elsewhere.
-- Sections: ## Current (one active feature), ## Queue (approved, not started), ## Done (completed, keep for audit)
+- Sections: ## Current (one active feature), ## Queue (approved, not started), ## Awaiting Sign-off (code complete, manual contracts pending user test), ## Done (completed, keep for audit)
 - Each feature gets a heading, short description, and numbered steps
 - Each feature heading includes a type tag: [APP] for changes users see, [INFRA] for tooling/workflow/dev improvements. Example: ### Election History [APP] (v0.9.x). Data work that produces user-visible output is [APP]. Data work that only improves dev workflow is [INFRA].
 - Complex features (3+ steps): link to the full design in .claude/plans/ — e.g. "Plan: .claude/plans/feature-name.md"
@@ -10,7 +10,7 @@ FORMAT RULES (Claude: follow these when updating this file)
 - Each step shows its version tag after the description: "→ v0.X.Y". Step 1 = v0.X.0, step 2 = v0.X.1, etc. Example: 1. [x] First step — description → v0.X.0 *(completed HH:MM DD/MM/YY)*
 - Each step must be scoped to one shippable patch — one commit, one push, one changelog entry. If a step is too big to commit as a single unit, break it down further. If a step is trivial housekeeping, combine it with the previous step.
 - When completing a step: N. [x] Step name → v0.X.Y *(completed HH:MM DD/MM/YY)* — then bump the version everywhere it appears (version badges, config files, filenames), rename any versioned deliverable files to match the new version number (even if their content didn't change — the filename must always match the project version), update the changelog, and commit.
-- When the final step of a feature completes, run the retro in the same commit: (1) Update version references. (2) Update changelog. (3) Update ROADMAP.md: move the feature from Up Next to Complete (with date and one-line summary), update any status tags (IN PROGRESS → COMPLETE), and refresh Suggested Next if it references the completed feature. (4) Update feature heading from (vX.Y.x) to (vX.Y.N). (5) Run brief retro: what worked, what was slow, what to do differently. Add learnings to learnings.md or ~/.claude/CLAUDE.md, tagged with source. If the process recurs, create a directive + trigger. Check the Progressive Disclosure triggers section in CLAUDE.md — are there any recurring patterns from this feature that should have a trigger but don't? (6) Move the whole block to ## Done.
+- When the final step of a feature completes, run the retro in the same commit: (1) Update version references. (2) Update changelog. (3) Update ROADMAP.md: move the feature from Up Next to Complete (with date and one-line summary), update any status tags (IN PROGRESS → COMPLETE), and refresh Suggested Next if it references the completed feature. (4) Update feature heading from (vX.Y.x) to (vX.Y.N). (5) Run brief retro: what worked, what was slow, what to do differently. Add learnings to learnings.md or ~/.claude/CLAUDE.md, tagged with source. If the process recurs, create a directive + trigger. Check the Progressive Disclosure triggers section in CLAUDE.md — are there any recurring patterns from this feature that should have a trigger but don't? (6) If all `[manual]` criteria are signed off (`[x]`), move the whole block to ## Done. If any `[manual]` criteria remain unchecked, move to ## Awaiting Sign-off instead — the feature is code-complete but needs user visual verification before Done.
 - Keep ## Done trimmed to last 3 completed features. Move older ones to tasks/archive.md with all steps and timestamps preserved. Newest at top of archive.
 - Don't duplicate the product roadmap here. Reference it: "See ROADMAP.md"
 - Progress tracking happens HERE, not in .claude/plans/. Plans are reference docs.
@@ -40,5 +40,9 @@ FORMAT RULES (Claude: follow these when updating this file)
 ## Queue
 
 <!-- Approved features waiting to start. Brief description + link to plan if one exists. -->
+
+## Awaiting Sign-off
+
+<!-- Code-complete features with unchecked [manual] contracts. User tests, reports pass/fail. Moves to Done when all [manual] are [x]. -->
 
 ## Done

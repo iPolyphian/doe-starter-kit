@@ -26,6 +26,7 @@ Show a bordered kick-off card, then present a plan and wait for sign-off:
 │    !! [each blocker on its own line]               │
 │  DOE KIT    vX.Y.Z [synced / * push/pull/push+pull]│
 │  PIPELINE   N in Up Next, M in Queue              │
+│  SIGN-OFF   N features (M manual items pending)   │
 │  WARNINGS   [audit WARN/FAIL items]               │
 │    ⚠️ [detail line for each WARN/FAIL item]        │
 ├──────────────────────────────────────────────────┤
@@ -48,6 +49,7 @@ Card rules:
 - FEATURE: from STATE.md "Active feature" line. If no active feature, show "No active feature".
 - PROGRESS: count [x] and [ ] steps for the current feature in todo.md ## Current. Bar uses █ for done, ░ for remaining, scaled to 10 characters. If no current feature, omit this line.
 - DOE KIT: `vX.Y.Z synced` if everything matches. `vX.Y.Z * push` if project has outbound changes to push to the starter kit via `/sync-doe` (syncable files differ but kit tag matches STATE.md version). `vX.Y.Z * pull` if the kit has inbound updates to pull into the project via `/pull-doe` (kit tag is newer than STATE.md version but no file diffs). `vX.Y.Z * push+pull` if both directions need syncing. Omit entirely if `~/doe-starter-kit` doesn't exist.
+- SIGN-OFF: Parse `## Awaiting Sign-off` in todo.md. Count `###` headings (features) and `[ ] [manual]` lines (pending manual items). Show `SIGN-OFF   N features (M manual items pending)`. If the section is empty or has no features, omit entirely.
 - PIPELINE: Compare ROADMAP.md `## Up Next` item count against todo.md `## Queue` item count. Count feature headings (lines starting with `###`) in each section. If Up Next has more items than Queue, show `PIPELINE   N in Up Next, M in Queue -- scope to promote`. If counts match (including both being 0), show `PIPELINE   Synced (N items)`. This nudges the user to scope and promote features without auto-syncing. Omit if ROADMAP.md doesn't exist.
 - WARNINGS: Run `python3 execution/audit_claims.py --hook --json` and parse the JSON output. If any findings have severity "WARN" or "FAIL", show a WARNINGS row with a summary count (e.g. "2 audit WARNs") followed by indented detail lines for each non-PASS item — use `⚠️` prefix for WARN and `❌` for FAIL. Each detail line shows the file name and message from the finding. If the first WARN/FAIL item is actionable in this session (e.g. a stale doc or missing version tag), add an indented `→ Fix now?` suggestion. **If all findings are PASS, omit the WARNINGS section entirely** — it only appears when there are problems. If the audit script doesn't exist or fails, also omit.
 - SUMMARY: After the `├──┤` separator, show 1-2 lines summarising the last session from STATE.md ## Last Session. Keep it brief — what happened, where we left off. Then a blank line before PLAN.
@@ -94,6 +96,7 @@ Show a bordered status card:
 │                                                   │
 │  MOMENTUM     [On track / Ahead / Behind] — why   │
 │  QUEUE        [next feature or "Empty"]           │
+│  SIGN-OFF     N features (M manual items pending) │
 ├──────────────────────────────────────────────────┤
 │  Model: [model] · Thinking: [level]              │
 └──────────────────────────────────────────────────┘
@@ -108,5 +111,6 @@ Card rules:
 - SINCE LAST MILESTONE: run `git tag --sort=-v:refname | head -1` to get the latest version tag. Then `git log --oneline <tag>..HEAD` to list commits since that tag. **Group related commits** by feature or theme instead of listing each one individually -- look at commit message patterns (shared prefixes, related file areas, sequential feature work). Show each group as a single bullet with the group name and a brief summary of what those commits achieved, with commit count in parentheses. Example: `-- Entity Page Redesign: grid layouts, tabbed CRM, section grouping across 5 pages (8 commits)`. Standalone commits that don't belong to a group get their own bullet without a count. Max 6 groups. If no tags exist, show commits from the last 7 days instead.
 - MOMENTUM: assess based on completed vs remaining steps and time context. More than half done → "On track". All done except housekeeping → "Ahead". Zero steps done and the feature has been in ## Current for 2+ sessions (check STATE.md ## Last Session for evidence of prior sessions working on this feature) → "Behind". Add a brief reason after the dash explaining the assessment.
 - QUEUE: first feature heading from ## Queue in todo.md. Show name + type tag, or "Empty" if nothing queued.
+- SIGN-OFF: same as kick-off mode -- parse `## Awaiting Sign-off` in todo.md, count features and `[ ] [manual]` items. Show `SIGN-OFF   N features (M manual items pending)`. Omit if section is empty.
 - BORDER: Fixed width — always 60 `─` characters between `│` borders (62 total per line). All content lines: `│` + 2 spaces + content + trailing spaces + `│` = 62 chars. If content would exceed 56 characters, truncate with `…`. Never dynamically size — the box is always the same width. **Generate boxes programmatically** — define a `line(content)` helper: `f"│  {content}".ljust(W + 1) + "│"` where W is the inner width. ALL rows including headers MUST use this helper — never construct `f"│{...}│"` manually. For headers with right-aligned text: build the inner content string first (e.g. `f"{left}{right:>{W - 2 - len(left)}}"`) then pass through `line()`. Never hand-pad bordered output. Use Unicode box-drawing characters for borders (`┌─┐`, `├─┤`, `└─┘`, `│`). Content inside borders must be ASCII-only (no emojis, no `·`, `✓`, `⚠️`, `—`, `…`) — use `--` for separators, commas for lists. Exception: progress bar uses `█` (done) and `░` (remaining) — these render at fixed width in terminals.
 - This is READ-ONLY. Do not start the session clock. Do not modify any files. Do not execute anything (except the box-generation snippet).

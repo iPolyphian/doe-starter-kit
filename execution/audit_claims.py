@@ -445,6 +445,52 @@ def check_task_format(report: AuditReport):
             ))
 
 
+@register("universal", fast=True)
+def check_manual_signoff(report: AuditReport):
+    """Features in ## Done must not have unchecked [manual] contracts."""
+    todo = PROJECT_ROOT / "tasks" / "todo.md"
+    if not todo.exists():
+        return
+    text = todo.read_text(encoding="utf-8")
+
+    in_done = False
+    current_feature = None
+    unchecked = []
+    for i, line in enumerate(text.split("\n"), 1):
+        if re.match(r"^##\s+Done", line):
+            in_done = True
+            continue
+        if in_done and re.match(r"^##\s+", line):
+            break
+        if not in_done:
+            continue
+        if line.startswith("### "):
+            current_feature = line.strip().lstrip("# ").strip()
+        if re.search(r"\[ \]\s*\[manual\]", line):
+            unchecked.append({
+                "feature": current_feature or "Unknown",
+                "line": i,
+            })
+
+    if unchecked:
+        features = {}
+        for u in unchecked:
+            features.setdefault(u["feature"], {"count": 0, "line": u["line"]})
+            features[u["feature"]]["count"] += 1
+        for feat, info in features.items():
+            report.add(Finding(
+                Severity.WARN, "manual_signoff",
+                f"{feat} -- {info['count']} unchecked [manual] contract(s) in Done",
+                file="tasks/todo.md", line=info["line"],
+            ))
+    else:
+        report.add(Finding(
+            Severity.PASS, "manual_signoff",
+            "No unchecked [manual] contracts in ## Done",
+            file="tasks/todo.md",
+        ))
+
+
 # ══════════════════════════════════════════════════════════════
 # Roadmap parsing
 # ══════════════════════════════════════════════════════════════

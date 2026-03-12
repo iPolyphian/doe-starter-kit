@@ -7,6 +7,20 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.30.0] — 2026-03-12
+
+### Added
+- `## Awaiting Sign-off` section in todo.md format rules — intermediate state between code-complete and fully verified
+- `check_manual_signoff` audit check in `audit_claims.py` — WARNs if unchecked `[manual]` contracts found in `## Done`
+- SIGN-OFF row in `stand-up.md` (both kick-off and status modes) — surfaces pending manual verification counts
+- SIGN-OFF row in `sitrep.md` — same pending count between COMMITS and ELAPSED
+- `awaitingSignOff` field in `wrap.md` JSON schema — collapsible grouped cards for manual test items
+- `render_awaiting_signoff()` in `wrap_html.py` — collapsible `<details>/<summary>` cards with themed groups, amber styling
+
+### Changed
+- `CLAUDE.md` Rule 1 `[manual]` criteria point (3): features now move to `## Awaiting Sign-off` at completion instead of `## Done`; `## Done` requires all `[manual]` criteria `[x]`
+- todo.md format rules: added conditional retro routing — features with unchecked `[manual]` go to Awaiting Sign-off, not Done
+
 ## [v1.29.0] — 2026-03-12
 
 ### Added

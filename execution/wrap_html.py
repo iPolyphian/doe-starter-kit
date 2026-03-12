@@ -442,6 +442,64 @@ def render_decisions_learnings(data):
     return "\n".join(parts)
 
 
+def render_awaiting_signoff(data):
+    items = data.get("awaitingSignOff", [])
+    if not items:
+        return ""
+
+    cards = []
+    for item in items:
+        feature = esc(item.get("feature", ""))
+        summary = esc(item.get("summary", ""))
+        count = item.get("manualItems", 0)
+        groups = item.get("groups", [])
+
+        # Build grouped checklist
+        groups_html = ""
+        if groups:
+            group_parts = []
+            for g in groups:
+                name = esc(g.get("name", ""))
+                gitems = g.get("items", [])
+                items_html = "\n".join(
+                    f'          <li class="signoff-item">{esc(i)}</li>' for i in gitems
+                )
+                group_parts.append(
+                    f'      <div class="signoff-group">'
+                    f'<div class="signoff-group-name">{name}'
+                    f'<span class="signoff-group-count">{len(gitems)}</span></div>'
+                    f'<ul class="signoff-checklist">\n{items_html}\n</ul>'
+                    f'</div>'
+                )
+            groups_html = "\n".join(group_parts)
+
+        summary_html = f'<div class="signoff-summary">{summary}</div>' if summary else ""
+
+        cards.append(
+            f'    <details class="signoff-card">\n'
+            f'      <summary class="signoff-card-header">\n'
+            f'        <span class="signoff-feature">{feature}</span>\n'
+            f'        <span class="signoff-count">{count} items</span>\n'
+            f'      </summary>\n'
+            f'      {summary_html}\n'
+            f'{groups_html}\n'
+            f'    </details>'
+        )
+
+    inner = "\n".join(cards)
+    total_features = len(items)
+    total_items = sum(i.get("manualItems", 0) for i in items)
+
+    return f"""  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">&#x270D;&#xFE0F;</span>
+      <span class="section-title">Awaiting Sign-off</span>
+      <span class="signoff-badge">{total_features} features &middot; {total_items} manual items</span>
+    </div>
+{inner}
+  </div>"""
+
+
 def render_checks(data):
     checks = data.get("checks")
     if not checks:
@@ -794,6 +852,24 @@ CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono
   .commit-group-header { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; color: var(--accent); margin-bottom: 0.4rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--border); }
   .commit-group-count { font-weight: 400; color: var(--text-dim); }
 
+  .signoff-card { background: var(--surface); border: 1px solid var(--amber); border-radius: 8px; margin-bottom: 0.8rem; }
+  .signoff-card:last-child { margin-bottom: 0; }
+  .signoff-card-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; cursor: pointer; list-style: none; }
+  .signoff-card-header::-webkit-details-marker { display: none; }
+  .signoff-card-header::before { content: '\25B6'; font-size: 0.6rem; color: var(--text-dim); margin-right: 0.6rem; transition: transform 0.2s; }
+  .signoff-card[open] > .signoff-card-header::before { transform: rotate(90deg); }
+  .signoff-feature { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: var(--text); flex: 1; }
+  .signoff-count { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--amber); background: var(--amber-dim); padding: 0.15rem 0.5rem; border-radius: 4px; flex-shrink: 0; }
+  .signoff-summary { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; padding: 0 1.2rem 0.8rem; border-bottom: 1px solid var(--border); }
+  .signoff-group { padding: 0.6rem 1.2rem; }
+  .signoff-group:last-child { padding-bottom: 1rem; }
+  .signoff-group-name { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.4rem; }
+  .signoff-group-count { font-size: 0.6rem; font-weight: 400; color: var(--amber); background: var(--amber-dim); padding: 0.05rem 0.35rem; border-radius: 3px; }
+  .signoff-checklist { list-style: none; padding: 0; margin: 0; }
+  .signoff-item { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; padding: 0.15rem 0 0.15rem 1.2rem; position: relative; }
+  .signoff-item::before { content: '\25A1'; position: absolute; left: 0; color: var(--amber); font-size: 0.7rem; }
+  .signoff-badge { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--amber); }
+
   .today-sessions { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 1.2rem; }
   .today-session-item { display: flex; align-items: baseline; gap: 0.8rem; padding: 0.4rem 0; font-size: 0.85rem; border-bottom: 1px solid rgba(42, 42, 58, 0.5); }
   .today-session-item:last-child { border-bottom: none; }
@@ -818,6 +894,7 @@ def build_html(data):
         render_commits(data),
         render_decisions_learnings(data),
         render_checks(data),
+        render_awaiting_signoff(data),
         render_today_sessions(data),
         render_next_up(data),
         render_footer(data),
