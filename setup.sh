@@ -121,7 +121,24 @@ if [ -d "$SCRIPT_DIR/.git" ] || git -C "$SCRIPT_DIR" rev-parse --git-dir > /dev/
     echo "✓ Git hooks activated"
 fi
 
-# 7. Summary
+# 7. Set DOE Role in STATE.md
+STATE_FILE="$SCRIPT_DIR/STATE.md"
+if [ -f "$STATE_FILE" ] && grep -q "DOE Role:" "$STATE_FILE"; then
+    echo ""
+    echo "Are you a DOE contributor? (Most users: no)"
+    echo "  n = Consumer — you build projects using DOE (default)"
+    echo "  y = Creator  — you contribute improvements back to the starter kit"
+    printf "Choice [n]: "
+    read -r DOE_ROLE_CHOICE
+    if [ "$DOE_ROLE_CHOICE" = "y" ] || [ "$DOE_ROLE_CHOICE" = "Y" ]; then
+        sed -i '' 's/\*\*DOE Role:\*\* consumer/**DOE Role:** creator/' "$STATE_FILE"
+        echo "✓ DOE Role set to creator"
+    else
+        echo "✓ DOE Role set to consumer"
+    fi
+fi
+
+# 8. Summary
 echo ""
 echo "✓ $COMMAND_COUNT commands installed to ~/.claude/commands/"
 echo "✓ $HOOK_COUNT hooks installed to ~/.claude/hooks/"
