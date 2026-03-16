@@ -39,16 +39,16 @@ Include `--feature` if targeting a named feature. Include `--bugs` only if `.tmp
 Show a brief summary:
 
 ```
-+--------------------------------------------------+
-|  TEST CHECKLIST -- [Feature name]                 |
-+--------------------------------------------------+
-|  Manual checks:  N items                          |
-|  Bugs surfaced:  N (or none)                      |
-|  Checklist:      open in browser                  |
-+--------------------------------------------------+
+┌──────────────────────────────────────────────────┐
+│  TEST CHECKLIST -- [Feature name]                │
+├──────────────────────────────────────────────────┤
+│  Manual checks:  N items                         │
+│  Bugs surfaced:  N (or none)                     │
+│  Checklist:      open in browser                 │
+└──────────────────────────────────────────────────┘
 ```
 
-Use simple ASCII borders. No emojis inside the box.
+Use Unicode box-drawing characters (`┌─┐`, `├─┤`, `└─┘`, `│`). No emojis inside the box.
 
 Then tell the user:
 
