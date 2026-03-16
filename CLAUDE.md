@@ -24,6 +24,7 @@ IMPORTANT: Never do execution inline when a script exists. Check `execution/` fi
 8. **Check STATE.md, learnings.md, and governed docs before every commit.** Update STATE.md if position changed, log learnings if something failed/was discovered, update governed docs if their domain was affected (check `directives/documentation-governance.md`). Skip if none apply.
 9. **Pitch spontaneously.** If you notice a genuine product improvement while working — a gap, a natural extension, a data source that would add value — pitch it briefly at the end of your response. One sentence on what it is, one on why it matters. Don't force it. Only when something genuinely clicks. The user can say "add it" to put it on the roadmap (Ideas section) or "this is important" to flag it (Must Plan section).
 10. **Parallelise by default.** When a session involves 2+ independent tasks (no shared files, no output dependencies), automatically spawn sub-agents to run them concurrently. Before launching, briefly state which tasks are running in parallel and flag any that must run sequentially (shared files, dependency on another task's output, need for user input). Commit results one task at a time per Rule 6.
+11. **Retro discipline.** Every feature in todo.md gets a mandatory retro step as its final step. Default is **quick** (30-second one-liner: "nothing to log" or a single learning routed to the right file). Escalate to **full** when any of these **Escalation Triggers** fire: something failed unexpectedly, approach changed mid-task, a workaround was used, the task touched a repeatable pattern, time significantly exceeded expectation, or you discovered something that would have prevented a past failure. Quick retro format: `[x] Retro [quick: nothing to log]` or `[quick: logged to learnings.md]`. Full retro format: `[x] Retro [full: logged to learnings.md + added hook]`. Wave agents defer: `[quick: deferred to merge]` or `[full: deferred to merge]`. The retro step has a fully auto contract — no manual gates.
 
 ## IMPORTANT: Guardrails
 
@@ -73,6 +74,8 @@ When something fails: read the full error → diagnose WHY (not just what) → f
 
 Every failure makes the system stronger.
 
+**100-session learnings curation.** Every 100 sessions (tracked via `last-curation` / `next-curation` in STATE.md `## Curation`), review all entries in learnings.md and ~/.claude/CLAUDE.md. For each entry: still accurate? still referenced? actionable or too vague? redundant or contradicted? logged 3+ times (escalate to directive/hook)? Also check for quick-retro drift — if the last 10+ retros were all `[quick: nothing to log]`, flag as suspicious. Present proposed changes (KEEP / EDIT / REMOVE / ESCALATE) for user approval before editing governed docs. Session-start commands (`/crack-on`, `/stand-up`) check whether curation is due.
+
 ## Progressive Disclosure
 For task-specific instructions, check the relevant directive in `directives/` before starting. Check `learnings.md` for project-specific patterns and `STATE.md` for recent decisions before building anything new. Universal learnings (`~/.claude/CLAUDE.md`) are auto-loaded. This file covers universal rules only — detailed SOPs live in their own docs.
 
@@ -95,5 +98,6 @@ When a task matches a trigger below, load the linked doc before starting:
 - Running parallel sessions, setting up a wave, or using `/agent-status` → read `.claude/plans/multi-agent-coordination.md` for the full coordination protocol
 - Scoping a new feature or exploring a product idea → run `/scope` for a conversational scoping session that produces a brief
 - Something went seriously wrong (bad commit, corrupted file, data damage) → read `directives/break-glass.md` and follow it
+- Session number is a multiple of 100 (check `.claude/stats.json` → `lifetime.totalSessions` against STATE.md `## Curation` → `next-curation`) → run the 100-session learnings curation protocol (see Self-Annealing section)
 
 <!-- Add project-specific triggers as the system grows -->

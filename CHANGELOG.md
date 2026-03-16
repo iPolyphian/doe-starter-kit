@@ -7,6 +7,15 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.35.0] — 2026-03-16
+
+### Added
+- CLAUDE.md rule 11: retro discipline with escalation triggers and quick/full format
+- CLAUDE.md Self-Annealing: 100-session learnings curation protocol
+- CLAUDE.md Progressive Disclosure: curation trigger (session multiple of 100)
+- `crack-on.md`: curation check at session start
+- `stand-up.md`: curation check at session start
+
 ## [v1.34.3] — 2026-03-16
 
 ### Added

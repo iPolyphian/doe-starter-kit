@@ -2,6 +2,8 @@ As your very first action, start the session clock: run `mkdir -p .tmp && date -
 
 Read CLAUDE.md, tasks/todo.md, STATE.md, and learnings.md.
 
+**Curation check:** Read `.claude/stats.json` → `lifetime.totalSessions` and STATE.md → `## Curation` → `next-curation`. If `totalSessions >= next-curation` value (e.g. `session-200` means 200), announce "Learnings curation due (session #N)" in the kick-off card and trigger the curation protocol (see CLAUDE.md Self-Annealing section) before starting any feature work.
+
 **DOE Kit check:** If `~/doe-starter-kit` exists, run `cd ~/doe-starter-kit && git describe --tags --abbrev=0 2>/dev/null` to get the current kit version. Check two things: (1) Is the kit tag newer than STATE.md's "DOE Starter Kit" version? (inbound). (2) Do any key syncable files differ? (outbound). Diff key files using these path mappings: ~/.claude/commands/*.md against ~/doe-starter-kit/global-commands/*.md, .githooks/* against ~/doe-starter-kit/.githooks/*, .claude/hooks/*.py against ~/doe-starter-kit/.claude/hooks/*.py. Count how many have changes. **For CLAUDE.md**, do a smart diff: only flag if universal sections (Who We Are, Operating Rules, Guardrails, Code Hygiene, Self-Annealing) differ between kit and project. Ignore project-specific sections (Directory Structure, Progressive Disclosure triggers, project-specific additions). If either condition is true, show `*` (meaning `/sync-doe` or `/pull-doe` needed). If the directory doesn't exist, skip the DOE Kit line entirely.
 
 Show a bordered kick-off card, then immediately pick up the next incomplete step. One step at a time -- commit, push, then stop and show what you did.
