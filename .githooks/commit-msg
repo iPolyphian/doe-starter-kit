@@ -7,3 +7,19 @@ sed '/^[Cc]o-[Aa]uthored-[Bb]y:.*[Cc]laude/d' "$1" | sed '/^[Cc]o-[Aa]uthored-[B
 # Clean up trailing blank lines
 sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$TMPFILE" > "$1"
 rm -f "$TMPFILE"
+
+# ─── Changelog enforcement ───
+# If commit message contains a version tag (vX.Y.Z), CHANGELOG.md must be staged.
+# This prevents shipping versioned steps without a changelog entry.
+if grep -qE '\(v[0-9]+\.[0-9]+\.[0-9]+\)' "$1"; then
+    if ! git diff --cached --name-only | grep -q 'CHANGELOG.md'; then
+        echo "" >&2
+        echo "⚠ Commit has a version tag but CHANGELOG.md is not staged." >&2
+        echo "  Add a changelog entry for this version before committing." >&2
+        echo "  Skip with: SKIP_CHANGELOG_CHECK=1 git commit ..." >&2
+        echo "" >&2
+        if [ "${SKIP_CHANGELOG_CHECK:-0}" != "1" ]; then
+            exit 1
+        fi
+    fi
+fi

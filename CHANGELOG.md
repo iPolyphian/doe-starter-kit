@@ -7,6 +7,11 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.37.3] — 2026-03-16
+
+### Added
+- `.githooks/commit-msg`: changelog enforcement — versioned commits (containing `(vX.Y.Z)` tag) now require `CHANGELOG.md` to be staged. Prevents shipping versioned steps without a changelog entry. Skippable with `SKIP_CHANGELOG_CHECK=1`.
+
 ## [v1.37.1] — 2026-03-16
 
 ### Changed
