@@ -142,6 +142,7 @@ Before committing, update `CHANGELOG.md`:
 ### Step 10: Commit, tag, and push
 ```bash
 cd ~/doe-starter-kit
+python3 ~/doe-starter-kit/execution/stamp_tutorial_version.py v[X.Y.Z]
 git add -A
 git diff --staged --stat
 # Show diff, wait for sign-off
@@ -179,7 +180,7 @@ git stash drop
 - If git pull in Step 2 reveals conflicts, stop and show the user — do not auto-resolve
 
 ## Post-Sync Checklist
-- [ ] Update tutorial footers (`docs/tutorial/*.html`) to match new version number
+- [ ] Tutorial footers auto-stamped by `stamp_tutorial_version.py` (verify in diff)
 - [ ] Check if tutorial docs need updating for framework changes:
 
 | If this changed... | Check this tutorial page |
