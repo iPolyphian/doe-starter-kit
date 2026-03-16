@@ -839,6 +839,7 @@ def generate_html(
     gap: 8px;
     align-items: center;
     justify-content: flex-end;
+    margin-top: 10px;
   }}
 
   .elapsed-block {{
