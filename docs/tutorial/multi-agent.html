@@ -30,6 +30,7 @@
       --accent-blue: #3B82F6;
       --accent-rose: #F43F5E;
       --sidebar-w: 260px;
+      --toc-w: 220px;
       --content-max: 720px;
       --radius: 8px;
       --radius-lg: 12px;
@@ -539,6 +540,49 @@
     @media (max-width: 600px) {
       .card-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── Right-side TOC ── */
+    .toc {
+      width: var(--toc-w);
+      min-width: var(--toc-w);
+      position: fixed;
+      right: 24px;
+      top: 120px;
+      font-size: 12px;
+    }
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .toc-link {
+      display: block;
+      padding: 3px 0 3px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid var(--border);
+      transition: all 0.1s;
+    }
+    .toc-link:hover {
+      color: var(--text-secondary);
+      border-color: var(--text-muted);
+    }
+    .toc-link.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    @media (min-width: 1201px) {
+      .content-area { padding-right: calc(var(--toc-w) + 48px); }
+    }
+    @media (max-width: 1200px) {
+      .toc { display: none; }
+      .content-area { padding-right: 0 !important; }
+    }
   </style>
 </head>
 <body>
@@ -846,6 +890,17 @@ Wave complete. 3 steps merged successfully.</pre>
       </div><!-- /content -->
     </div><!-- /content-area -->
 
+    <nav class="toc">
+      <div class="toc-title">On this page</div>
+      <a href="#waves" class="toc-link">What Are Waves</a>
+      <a href="#when" class="toc-link">When to Use Waves</a>
+      <a href="#launch" class="toc-link">How /agent-launch Works</a>
+      <a href="#status" class="toc-link">How /agent-status Works</a>
+      <a href="#example" class="toc-link">Worked Example</a>
+      <a href="#merge" class="toc-link">The Merge Process</a>
+      <a href="#pitfalls" class="toc-link">Common Pitfalls</a>
+    </nav>
+
   </div><!-- /layout -->
 
   <script>
@@ -887,6 +942,28 @@ Wave complete. 3 steps merged successfully.</pre>
         sidebar.classList.contains('open') ? close() : open();
       });
       overlay.addEventListener('click', close);
+    })();
+
+    // TOC scrollspy
+    (function() {
+      var tocLinks = document.querySelectorAll('.toc-link');
+      var sections = [];
+      tocLinks.forEach(function(link) {
+        var id = link.getAttribute('href').slice(1);
+        var el = document.getElementById(id);
+        if (el) sections.push({ id: id, el: el, link: link });
+      });
+      if (!sections.length) return;
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            tocLinks.forEach(function(l) { l.classList.remove('active'); });
+            var match = sections.find(function(s) { return s.id === entry.target.id; });
+            if (match) match.link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-80px 0px -70% 0px' });
+      sections.forEach(function(s) { observer.observe(s.el); });
     })();
   </script>
 

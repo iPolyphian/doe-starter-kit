@@ -30,6 +30,7 @@
       --accent-blue: #3B82F6;
       --accent-rose: #F43F5E;
       --sidebar-w: 260px;
+      --toc-w: 220px;
       --content-max: 720px;
       --radius: 8px;
       --radius-lg: 12px;
@@ -565,6 +566,49 @@
     @media (min-width: 601px) and (max-width: 900px) {
       .card-grid.cols-3 { grid-template-columns: 1fr 1fr; }
     }
+
+    /* ── Right-side TOC ── */
+    .toc {
+      width: var(--toc-w);
+      min-width: var(--toc-w);
+      position: fixed;
+      right: 24px;
+      top: 120px;
+      font-size: 12px;
+    }
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .toc-link {
+      display: block;
+      padding: 3px 0 3px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid var(--border);
+      transition: all 0.1s;
+    }
+    .toc-link:hover {
+      color: var(--text-secondary);
+      border-color: var(--text-muted);
+    }
+    .toc-link.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    @media (min-width: 1201px) {
+      .content-area { padding-right: calc(var(--toc-w) + 48px); }
+    }
+    @media (max-width: 1200px) {
+      .toc { display: none; }
+      .content-area { padding-right: 0 !important; }
+    }
   </style>
 </head>
 <body>
@@ -649,7 +693,7 @@
         <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">Understanding the three-layer system that keeps AI-assisted development organised.</p>
 
         <!-- The Three Layers -->
-        <h2>The Three Layers</h2>
+        <h2 id="three-layers">The Three Layers</h2>
         <p>DOE stands for <strong>Directive, Orchestration, Execution</strong>. It separates your project into three layers, each with a specific job. The AI handles reasoning (where it excels). Deterministic code handles mechanical tasks (where AI is unreliable). This separation is the foundation of everything DOE does.</p>
 
         <!-- SVG Diagram -->
@@ -762,7 +806,7 @@ Contract:
         <p>When all auto criteria pass, the feature moves to <strong>Awaiting Sign-off</strong> &mdash; not straight to Done. Manual items are presented for you to test, and the feature only moves to Done once everything passes.</p>
 
         <!-- Key Files -->
-        <h2>Key Files</h2>
+        <h2 id="key-files">Key Files</h2>
 
         <div class="card-grid">
           <div class="m-card" style="cursor: default;">
@@ -813,7 +857,7 @@ Contract:
         <p>Significant failures (cost &gt;30 minutes, broke something important, or recurred) get a structured entry with four parts: What happened, Root cause, Fix applied, Prevention added.</p>
 
         <!-- AI Concepts -->
-        <h2>AI Concepts You'll Encounter</h2>
+        <h2 id="ai-concepts">AI Concepts You'll Encounter</h2>
         <p>DOE builds on top of Claude Code. To use DOE effectively, it helps to understand a few core concepts that affect how you work day to day. None of these require technical background &mdash; just a basic understanding of what's happening under the hood.</p>
 
         <h3>Context Window</h3>
@@ -853,6 +897,17 @@ Contract:
 
       </div><!-- /content -->
     </div><!-- /content-area -->
+
+    <nav class="toc">
+      <div class="toc-title">On this page</div>
+      <a href="#three-layers" class="toc-link">The Three Layers</a>
+      <a href="#directives" class="toc-link">Directives</a>
+      <a href="#execution" class="toc-link">Execution Scripts</a>
+      <a href="#contracts" class="toc-link">Contracts</a>
+      <a href="#key-files" class="toc-link">Key Files</a>
+      <a href="#self-annealing" class="toc-link">Self-Annealing</a>
+      <a href="#ai-concepts" class="toc-link">AI Concepts</a>
+    </nav>
 
   </div><!-- /layout -->
 
@@ -895,6 +950,28 @@ Contract:
         sidebar.classList.contains('open') ? close() : open();
       });
       overlay.addEventListener('click', close);
+    })();
+
+    // TOC scrollspy
+    (function() {
+      var tocLinks = document.querySelectorAll('.toc-link');
+      var sections = [];
+      tocLinks.forEach(function(link) {
+        var id = link.getAttribute('href').slice(1);
+        var el = document.getElementById(id);
+        if (el) sections.push({ id: id, el: el, link: link });
+      });
+      if (!sections.length) return;
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            tocLinks.forEach(function(l) { l.classList.remove('active'); });
+            var match = sections.find(function(s) { return s.id === entry.target.id; });
+            if (match) match.link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-80px 0px -70% 0px' });
+      sections.forEach(function(s) { observer.observe(s.el); });
     })();
   </script>
 

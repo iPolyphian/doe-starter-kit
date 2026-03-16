@@ -30,6 +30,7 @@
       --accent-blue: #3B82F6;
       --accent-rose: #F43F5E;
       --sidebar-w: 260px;
+      --toc-w: 220px;
       --content-max: 720px;
       --radius: 8px;
       --radius-lg: 12px;
@@ -796,6 +797,49 @@
         width: 32px;
       }
     }
+
+    /* ── Right-side TOC ── */
+    .toc {
+      width: var(--toc-w);
+      min-width: var(--toc-w);
+      position: fixed;
+      right: 24px;
+      top: 120px;
+      font-size: 12px;
+    }
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .toc-link {
+      display: block;
+      padding: 3px 0 3px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid var(--border);
+      transition: all 0.1s;
+    }
+    .toc-link:hover {
+      color: var(--text-secondary);
+      border-color: var(--text-muted);
+    }
+    .toc-link.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    @media (min-width: 1201px) {
+      .content-area { padding-right: calc(var(--toc-w) + 48px); }
+    }
+    @media (max-width: 1200px) {
+      .toc { display: none; }
+      .content-area { padding-right: 0 !important; }
+    }
   </style>
 </head>
 <body>
@@ -880,7 +924,7 @@
         <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">Walk through building something with DOE from start to finish &mdash; from opening the terminal to wrapping up with all your progress saved.</p>
 
         <!-- The Session Rhythm -->
-        <h2>The Session Rhythm</h2>
+        <h2 id="rhythm">The Session Rhythm</h2>
         <p>Every DOE <a href="glossary.html#session">session</a> follows the same three-beat rhythm. Once you've done it a few times, it becomes second nature.</p>
 
         <div class="card-grid cols-3">
@@ -910,7 +954,7 @@
         <p>Let's walk through each beat using a real example: <strong>building a recipe book app</strong>.</p>
 
         <!-- Starting Up -->
-        <h2>Starting Up</h2>
+        <h2 id="starting">Starting Up</h2>
         <p>Open your terminal, navigate to your project folder, and start Claude Code. If you're using VSCode, open your project folder first (<strong>File &gt; Open Folder</strong> or drag the folder into the window), then open the integrated terminal with <strong>Ctrl+`</strong> (or <strong>Cmd+`</strong> on Mac).</p>
 
         <div class="code-block"><pre>cd ~/my-project
@@ -1042,7 +1086,7 @@ claude</pre></div>
         </ul>
 
         <!-- Building -->
-        <h2>Building</h2>
+        <h2 id="building">Building</h2>
         <p>Now describe what you want to build. Just type in plain English &mdash; be specific about the end result, not the technical details:</p>
 
         <div class="code-block"><pre>I want to build a recipe book app where I can add recipes with a title,
@@ -1063,7 +1107,7 @@ ingredient, and mark my favourites so I can find them quickly.</pre></div>
         <p>You can talk to Claude throughout this process. Ask questions, change direction, or tell it to skip something. It's a conversation, not a one-way instruction.</p>
 
         <!-- Wrapping Up -->
-        <h2>Wrapping Up</h2>
+        <h2 id="wrapping">Wrapping Up</h2>
         <p>When you're done for the day (or just need a break), run:</p>
 
         <div class="code-block"><pre>/wrap</pre></div>
@@ -1213,7 +1257,7 @@ ingredient, and mark my favourites so I can find them quickly.</pre></div>
         </div>
 
         <!-- What Just Happened? -->
-        <h2>What Just Happened?</h2>
+        <h2 id="what-happened">What Just Happened?</h2>
         <p>In this first session, here's what DOE did behind the scenes:</p>
         <ul>
           <li><strong>Checked STATE.md</strong> &mdash; read the project's current position (empty on first session)</li>
@@ -1277,6 +1321,16 @@ showing all recipes. Next: implement favourites.</pre></div>
 
       </div><!-- /content -->
     </div><!-- /content-area -->
+
+    <nav class="toc">
+      <div class="toc-title">On this page</div>
+      <a href="#rhythm" class="toc-link">The Session Rhythm</a>
+      <a href="#starting" class="toc-link">Starting Up</a>
+      <a href="#building" class="toc-link">Building</a>
+      <a href="#wrapping" class="toc-link">Wrapping Up</a>
+      <a href="#what-happened" class="toc-link">What Just Happened?</a>
+      <a href="#state" class="toc-link">Sessions and State</a>
+    </nav>
 
   </div><!-- /layout -->
 
@@ -1350,6 +1404,28 @@ showing all recipes. Next: implement favourites.</pre></div>
       }
 
       initTabGroup('.env-tabs', 'env-tab-btn', 'env-tab-panel');
+    })();
+
+    // TOC scrollspy
+    (function() {
+      var tocLinks = document.querySelectorAll('.toc-link');
+      var sections = [];
+      tocLinks.forEach(function(link) {
+        var id = link.getAttribute('href').slice(1);
+        var el = document.getElementById(id);
+        if (el) sections.push({ id: id, el: el, link: link });
+      });
+      if (!sections.length) return;
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            tocLinks.forEach(function(l) { l.classList.remove('active'); });
+            var match = sections.find(function(s) { return s.id === entry.target.id; });
+            if (match) match.link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-80px 0px -70% 0px' });
+      sections.forEach(function(s) { observer.observe(s.el); });
     })();
   </script>
 
