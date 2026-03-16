@@ -1335,7 +1335,7 @@
 
         <!-- ── Keeping DOE Updated ── -->
         <h2 id="updates">Keeping Your Kit Updated</h2>
-        <p>DOE is a living framework. It gets better over time &mdash; new commands, bug fixes, smarter hooks. Two commands handle updates, and they work in opposite directions.</p>
+        <p>The DOE creator releases improvements over time &mdash; new commands, bug fixes, smarter hooks. One command keeps you up to date.</p>
 
         <div class="card-grid">
           <div class="m-card" style="cursor: default;">
@@ -1344,13 +1344,6 @@
             </div>
             <h4>/pull-doe</h4>
             <p>Pulls updates <em>from</em> the starter kit <em>into</em> your project. Like downloading an app update. Safe &mdash; won't overwrite your customisations.</p>
-          </div>
-          <div class="m-card" style="cursor: default;">
-            <div class="card-icon indigo">
-              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="m8 16 4 4 4-4"/><path d="M4 8a8 8 0 1 1 16 0"/></svg>
-            </div>
-            <h4>/sync-doe</h4>
-            <p>Pushes improvements <em>from</em> your project <em>back</em> to the starter kit. Shares your improvements with all your other projects.</p>
           </div>
         </div>
 
@@ -1374,19 +1367,13 @@
                 <span class="terminal-dot red"></span>
                 <span class="terminal-dot yellow"></span>
                 <span class="terminal-dot green"></span>
-                <span class="terminal-title">Update flow</span>
+                <span class="terminal-title">Pulling updates</span>
               </div>
-              <pre><span class="t-comment"># Getting updates FROM the starter kit:</span>
+              <pre><span class="t-comment"># Getting updates from the starter kit:</span>
 <span class="t-prompt">$</span> <span class="t-cmd">/pull-doe</span>
 <span class="t-out">  Checking version... your project: v1.28.0, latest: v1.32.0</span>
 <span class="t-out">  Changelog: new /scope command, improved /wrap output, hook fix</span>
-<span class="t-out">  Apply update? [y/n]</span>
-
-<span class="t-comment"># Sending improvements TO the starter kit:</span>
-<span class="t-prompt">$</span> <span class="t-cmd">/sync-doe</span>
-<span class="t-out">  Comparing framework files...</span>
-<span class="t-out">  Universal changes found: improved /wrap summary format</span>
-<span class="t-out">  Sync to starter kit? [y/n]</span></pre>
+<span class="t-out">  Apply update? [y/n]</span></pre>
             </div>
           </div>
 
@@ -1440,20 +1427,14 @@
                   </div>
                   <div class="vscode-terminal-area">
                     <div class="vscode-terminal-tabs">
-                      <span class="vscode-terminal-tab-label"><span class="vscode-terminal-tab-icon">&#9654;</span> claude &mdash; update flow</span>
+                      <span class="vscode-terminal-tab-label"><span class="vscode-terminal-tab-icon">&#9654;</span> claude &mdash; pulling updates</span>
                     </div>
                     <div class="vscode-terminal-body">
-                      <pre><span class="t-comment"># Getting updates FROM the starter kit:</span>
+                      <pre><span class="t-comment"># Getting updates from the starter kit:</span>
 <span class="t-prompt">$</span> <span class="t-cmd">/pull-doe</span>
 <span class="t-out">  Checking version... your project: v1.28.0, latest: v1.32.0</span>
 <span class="t-out">  Changelog: new /scope command, improved /wrap output, hook fix</span>
-<span class="t-out">  Apply update? [y/n]</span>
-
-<span class="t-comment"># Sending improvements TO the starter kit:</span>
-<span class="t-prompt">$</span> <span class="t-cmd">/sync-doe</span>
-<span class="t-out">  Comparing framework files...</span>
-<span class="t-out">  Universal changes found: improved /wrap summary format</span>
-<span class="t-out">  Sync to starter kit? [y/n]</span></pre>
+<span class="t-out">  Apply update? [y/n]</span></pre>
                     </div>
                   </div>
                 </div>
@@ -1470,27 +1451,19 @@
         </ul>
         <p>It's safe &mdash; it won't overwrite your project-specific customisations. If there's a conflict, it shows you the diff and asks how to resolve it.</p>
 
-        <h3>When to use <code>/sync-doe</code></h3>
-        <ul>
-          <li>You improved a command, hook, or script in a way that isn't specific to your project</li>
-          <li>For example: you fixed a bug in <code>/wrap</code>, improved a hook, or added a useful pattern to an execution script</li>
-          <li>The <code>/stand-up</code> card shows <code>DOE KIT vX.Y.Z * push</code></li>
-        </ul>
-        <p>This is optional. But if you've made the framework better, syncing means your other projects &mdash; and future projects &mdash; get the improvement too.</p>
+        <div class="callout tip">
+          <span class="callout-icon">&#9432;</span>
+          <div class="callout-body">
+            The DOE creator pushes improvements to the starter kit whenever the framework gets better. Running <code>/pull-doe</code> brings those improvements into your project &mdash; you get the latest commands, hooks, and bug fixes without starting over.
+          </div>
+        </div>
 
         <div class="callout tip">
           <span class="callout-icon">&#9432;</span>
           <div class="callout-body">
-            Think of the DOE Starter Kit as a template. If you find a better way to do something in one project, <code>/sync-doe</code> updates the template so your next project starts from that better version. And <code>/pull-doe</code> brings those improvements into projects you've already started.
+            You don't need a GitHub account or fork to receive updates. <code>/pull-doe</code> handles everything &mdash; just run it when you want the latest version.
           </div>
         </div>
-
-        <h3>When not to sync</h3>
-        <ul>
-          <li>Project-specific changes (your data, your directives, your custom scripts) &mdash; these stay in your project</li>
-          <li>Changes you're not sure about &mdash; only sync when you're confident the improvement is universal</li>
-          <li><code>/sync-doe</code> always asks for confirmation before syncing, so you can review what's being sent</li>
-        </ul>
 
         <!-- ── Troubleshooting ── -->
         <h2 id="troubleshoot">Troubleshooting</h2>

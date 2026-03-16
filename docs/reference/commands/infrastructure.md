@@ -4,39 +4,6 @@ These commands handle the plumbing — keeping the framework updated, checking w
 
 ---
 
-## /sync-doe
-
-**What it does:** Pushes improvements you've made in your project back to the DOE Starter Kit repository, so other projects can benefit from them.
-
-**When to use it:** When you've improved a slash command, hook, execution script, or other framework component that isn't specific to your project. For example: you fixed a bug in a command, added a useful hook, or improved a shared script.
-
-**How it works:**
-
-1. Compares your project's framework files against the starter kit repository.
-2. Uses smart diffing to separate **universal changes** (improvements to commands, hooks, scripts that any project would want) from **project-specific content** (your data, your directives, your custom logic).
-3. Shows you what it wants to sync and asks for confirmation.
-4. Handles versioning — bumps the starter kit version number.
-5. Creates a git tag and GitHub release.
-
-**What to expect:**
-
-```
-Scanning for universal changes...
-
-Changes to sync:
-  .claude/commands/wrap.md — Fixed streak calculation bug
-  .githooks/pre-commit — Added new check for trailing whitespace
-  execution/build.py — No (project-specific changes only)
-
-Sync these to DOE Starter Kit? (y/n)
-```
-
-Only universal changes get synced. Your project-specific code, data, and configuration stay in your project.
-
-**Important:** This command follows a specific procedure documented in `directives/starter-kit-sync.md`. It handles versioning, tagging, and releases automatically — you don't need to manage any of that manually.
-
----
-
 ## /pull-doe
 
 **What it does:** Pulls the latest updates from the DOE Starter Kit into your project.
@@ -149,8 +116,7 @@ This is a read-only, feel-good command. It doesn't change anything — it just s
 | Situation | Command |
 |-----------|---------|
 | "Is my framework up to date?" | `/pull-doe` |
-| "I fixed a command that other projects should get" | `/sync-doe` |
 | "What commands do I have?" | `/commands` |
 | "Show me the big picture" | `/hq` |
 
-These are maintenance commands — you won't use them every session. `/commands` is useful when getting started. `/pull-doe` is worth running every week or two. `/sync-doe` only when you've improved something universal. `/hq` whenever you want perspective.
+These are maintenance commands — you won't use them every session. `/commands` is useful when getting started. `/pull-doe` is worth running every week or two. `/hq` whenever you want perspective.
