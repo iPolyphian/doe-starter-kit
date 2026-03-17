@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Troubleshooting — DOE Starter Kit</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-body: #FFFFFF;
+      --bg-sidebar: #FAFAFA;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8FAFC;
+      --bg-code: #0F172A;
+      --bg-callout-info: #EFF6FF;
+      --bg-callout-tip: #F0FDF4;
+      --bg-callout-warn: #FFFBEB;
+      --border: #E2E8F0;
+      --border-light: #F1F5F9;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #94A3B8;
+      --text-sidebar: #334155;
+      --text-sidebar-active: #0F172A;
+      --accent: #6366F1;
+      --accent-light: #EEF2FF;
+      --accent-green: #10B981;
+      --accent-amber: #F59E0B;
+      --accent-blue: #3B82F6;
+      --accent-rose: #F43F5E;
+      --sidebar-w: 260px;
+      --toc-w: 220px;
+      --content-max: 720px;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.08);
+      --font: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0B1120;
+      --bg-sidebar: #0F172A;
+      --bg-card: #1E293B;
+      --bg-card-hover: #243347;
+      --bg-code: #020617;
+      --bg-callout-info: #1E293B;
+      --bg-callout-tip: #1E293B;
+      --bg-callout-warn: #1E293B;
+      --border: #1E293B;
+      --border-light: #1E293B;
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --text-sidebar: #94A3B8;
+      --text-sidebar-active: #F1F5F9;
+      --accent-light: #1E1B4B;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      background: var(--bg-body);
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, background 0.2s, border-color 0.2s;
+    }
+
+    .sidebar-brand {
+      display: block;
+      padding: 20px 16px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.01em;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .sidebar-brand:hover { color: var(--accent); }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 10px 24px;
+      overflow-y: auto;
+    }
+
+    .sidebar-section { margin-bottom: 20px; }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 0 4px;
+      margin-bottom: 6px;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-sidebar);
+      text-decoration: none;
+      line-height: 1.4;
+      transition: background 0.1s, color 0.1s;
+    }
+    .sidebar-link:hover {
+      background: var(--border-light);
+      color: var(--text-sidebar-active);
+    }
+    .sidebar-link.active {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .sidebar-link.nested {
+      padding-left: 20px;
+      font-size: 12.5px;
+    }
+
+    /* ── Hamburger (mobile) ── */
+    .hamburger {
+      display: none;
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 200;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+      padding: 0;
+      transition: background 0.2s;
+    }
+    .hamburger span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--text-primary);
+      border-radius: 2px;
+    }
+
+    /* ── Dark mode button ── */
+    .theme-btn {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 200;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .theme-btn:hover { background: var(--bg-card-hover); }
+
+    /* ── Sidebar overlay (mobile) ── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 99;
+    }
+    .sidebar-overlay.visible { display: block; }
+
+    /* ── Content area ── */
+    .content-area {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 40px 48px;
+      min-width: 0;
+    }
+
+    .content {
+      max-width: var(--content-max);
+      width: 100%;
+    }
+
+    /* ── Typography ── */
+    .content h1 {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .content h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .content h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .content p {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .content ul, .content ol {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      padding-left: 20px;
+    }
+    .content li { margin-bottom: 6px; }
+
+    .content a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .content a:hover { text-decoration: underline; }
+
+    .content code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      background: var(--bg-sidebar);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── Cards ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .m-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      background: var(--bg-card);
+      transition: all 0.15s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .m-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-1px);
+      text-decoration: none;
+    }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .card-icon.indigo { background: var(--accent-light); color: var(--accent); }
+    .card-icon.green  { background: #ECFDF5; color: var(--accent-green); }
+    .card-icon.amber  { background: #FEF3C7; color: var(--accent-amber); }
+    .card-icon.blue   { background: #DBEAFE; color: var(--accent-blue); }
+    .card-icon.rose   { background: #FFE4E6; color: var(--accent-rose); }
+
+    [data-theme="dark"] .card-icon.indigo { background: #312E81; }
+    [data-theme="dark"] .card-icon.green  { background: #064E3B; }
+    [data-theme="dark"] .card-icon.amber  { background: #78350F; }
+    [data-theme="dark"] .card-icon.blue   { background: #1E3A5F; }
+    [data-theme="dark"] .card-icon.rose   { background: #4C0519; }
+
+    .m-card h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+    .m-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ── Terminal ── */
+    .terminal {
+      background: #0F172A;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin: 24px 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #1E293B;
+    }
+    .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .terminal-dot.red    { background: #EF4444; }
+    .terminal-dot.yellow { background: #F59E0B; }
+    .terminal-dot.green  { background: #22C55E; }
+    .terminal-title {
+      margin-left: 8px;
+      font-size: 12px;
+      color: #64748B;
+      font-family: var(--font-mono);
+    }
+    .terminal pre {
+      padding: 20px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: #CBD5E1;
+      overflow-x: auto;
+      margin: 0;
+    }
+    .t-comment { color: #64748B; }
+    .t-prompt  { color: #F59E0B; }
+    .t-cmd     { color: #6EE7B7; }
+    .t-out     { color: #94A3B8; }
+    .t-label   { color: #818CF8; }
+    .t-value   { color: #F1F5F9; }
+    .t-green   { color: #6EE7B7; }
+    .t-amber   { color: #FCD34D; }
+    .t-dim     { color: #475569; }
+    .t-border  { color: #334155; }
+    .t-error   { color: #F87171; }
+    .t-warn    { color: #F59E0B; }
+
+    /* ── Callout ── */
+    .callout {
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: flex;
+      gap: 10px;
+      line-height: 1.5;
+    }
+    .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .callout.tip {
+      background: var(--bg-callout-tip);
+      border: 1px solid #BBF7D0;
+      color: #166534;
+    }
+    [data-theme="dark"] .callout.tip { border-color: #064E3B; color: #6EE7B7; }
+    .callout.info {
+      background: var(--bg-callout-info);
+      border: 1px solid #BFDBFE;
+      color: #1E40AF;
+    }
+    [data-theme="dark"] .callout.info { border-color: #1E3A5F; color: #93C5FD; }
+    .callout.warn {
+      background: var(--bg-callout-warn);
+      border: 1px solid #FDE68A;
+      color: #92400E;
+    }
+    [data-theme="dark"] .callout.warn { border-color: #78350F; color: #FCD34D; }
+    .callout strong { font-weight: 600; }
+    .callout a { color: inherit; font-weight: 500; }
+    .callout .callout-body { color: inherit; }
+
+    /* ── Code block ── */
+    .code-block {
+      background: var(--bg-code);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 12px 0 16px;
+      overflow-x: auto;
+    }
+    .code-block pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      color: #CBD5E1;
+    }
+
+    /* ── Scenario card ── */
+    .scenario {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .scenario-title {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .scenario-title h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    .scenario-body {
+      padding: 0;
+    }
+    .scenario-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .scenario-row:last-child {
+      border-bottom: none;
+    }
+    .scenario-label {
+      padding: 14px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      align-items: flex-start;
+      padding-top: 16px;
+    }
+    .scenario-label.see   { color: var(--accent-rose); }
+    .scenario-label.means { color: var(--accent-amber); }
+    .scenario-label.do    { color: var(--accent-green); }
+    .scenario-content {
+      padding: 14px 20px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .scenario-content code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--bg-sidebar);
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+    }
+    .scenario-content p { margin: 0 0 8px; color: var(--text-secondary); }
+    .scenario-content p:last-child { margin-bottom: 0; }
+    .scenario-content ul {
+      margin: 4px 0 8px;
+      padding-left: 18px;
+      color: var(--text-secondary);
+    }
+    .scenario-content ul:last-child { margin-bottom: 0; }
+    .scenario-content li { margin-bottom: 4px; }
+
+    /* ── Quick Reference table ── */
+    .ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin: 20px 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .ref-table thead {
+      background: var(--bg-sidebar);
+    }
+    .ref-table th {
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .ref-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: top;
+      color: var(--text-secondary);
+    }
+    .ref-table tr:last-child td { border-bottom: none; }
+    .ref-table tr:hover td { background: var(--bg-card-hover); }
+    .ref-table td code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--bg-sidebar);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      gap: 16px;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .pagination a {
+      flex: 1;
+      display: block;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.15s;
+    }
+    .pagination a:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-card);
+      text-decoration: none;
+    }
+    .pg-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .pg-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+    .pagination .next { text-align: right; }
+
+    /* ── Footer ── */
+    .site-footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ── Right-side TOC ── */
+    .toc {
+      width: var(--toc-w);
+      min-width: var(--toc-w);
+      position: fixed;
+      right: 24px;
+      top: 120px;
+      font-size: 12px;
+    }
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .toc-link {
+      display: block;
+      padding: 3px 0 3px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid var(--border);
+      transition: all 0.1s;
+    }
+    .toc-link:hover {
+      color: var(--text-secondary);
+      border-color: var(--text-muted);
+    }
+    .toc-link.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+      .sidebar.open { transform: translateX(0); }
+      .content-area { margin-left: 0; padding: 24px 20px; padding-top: 60px; }
+      .hamburger { display: flex; }
+    }
+
+    @media (max-width: 600px) {
+      .card-grid { grid-template-columns: 1fr; }
+      .card-grid.cols-3 { grid-template-columns: 1fr; }
+      .scenario-row { grid-template-columns: 1fr; }
+      .scenario-label { border-right: none; border-bottom: 1px solid var(--border-light); padding: 10px 16px; }
+    }
+
+    @media (min-width: 1201px) {
+      .content-area { padding-right: calc(var(--toc-w) + 48px); }
+    }
+    @media (max-width: 1200px) {
+      .toc { display: none; }
+      .content-area { padding-right: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile hamburger -->
+  <button class="hamburger" id="hamburger" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <!-- Dark mode toggle -->
+  <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">&#9789;</button>
+
+  <!-- Sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="layout">
+
+    <!-- ── Sidebar ── -->
+    <nav class="sidebar" id="sidebar">
+      <a class="sidebar-brand" href="index.html">DOE Starter Kit</a>
+      <div class="sidebar-nav">
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Getting Started</div>
+          <a class="sidebar-link" href="index.html">Welcome</a>
+          <a class="sidebar-link" href="getting-started.html">Installation</a>
+          <a class="sidebar-link" href="first-session.html">Your First Session</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Core Concepts</div>
+          <a class="sidebar-link" href="key-concepts.html">DOE Architecture</a>
+          <a class="sidebar-link nested" href="key-concepts.html#directives">Directives</a>
+          <a class="sidebar-link nested" href="key-concepts.html#execution">Execution Scripts</a>
+          <a class="sidebar-link" href="first-session.html#state">Sessions &amp; State</a>
+          <a class="sidebar-link" href="context.html">Context &amp; Sessions</a>
+          <a class="sidebar-link" href="key-concepts.html#contracts">Contracts</a>
+          <a class="sidebar-link" href="key-concepts.html#self-annealing">Self-Annealing</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Commands</div>
+          <a class="sidebar-link" href="commands.html">Session Lifecycle</a>
+          <a class="sidebar-link" href="commands.html#quality">Quality &amp; Review</a>
+          <a class="sidebar-link" href="commands.html#reports">Visual Reports</a>
+          <a class="sidebar-link nested" href="commands.html#planning">Planning &amp; Ideas</a>
+          <a class="sidebar-link nested" href="commands.html#multiagent">Advanced</a>
+          <a class="sidebar-link nested" href="commands.html#maintenance">Maintenance</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Workflows</div>
+          <a class="sidebar-link" href="daily-flow.html">A Day with DOE</a>
+          <a class="sidebar-link" href="workflows.html">Feature Lifecycle</a>
+          <a class="sidebar-link" href="workflows.html#planning">Planning &amp; Prompts</a>
+          <a class="sidebar-link" href="multi-agent.html">Multi-Agent</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Quality</div>
+          <a class="sidebar-link" href="testing.html">Testing &amp; Quality</a>
+          <a class="sidebar-link active" href="troubleshooting.html">Troubleshooting</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Examples</div>
+          <a class="sidebar-link" href="example-apps.html#recipe">Recipe Book</a>
+          <a class="sidebar-link" href="example-apps.html#fitness">Fitness Tracker</a>
+          <a class="sidebar-link" href="example-apps.html#events">Events Board</a>
+          <a class="sidebar-link" href="example-apps.html#dashboard">Team Dashboard</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Reference</div>
+          <a class="sidebar-link" href="tips-and-mistakes.html">Tips &amp; Mistakes</a>
+          <a class="sidebar-link" href="faq.html">FAQ</a>
+          <a class="sidebar-link" href="glossary.html">Glossary</a>
+        </div>
+
+      </div>
+    </nav>
+
+    <!-- ── Main Content ── -->
+    <div class="content-area">
+      <div class="content">
+
+        <h1>Troubleshooting</h1>
+        <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">When tools flag issues, this page tells you exactly what happened and how to fix it. Every scenario below shows what you'll see in your terminal, explains what it means in plain English, and gives you the exact command or action to resolve it.</p>
+
+        <div class="callout info">
+          <span class="callout-icon">&#9432;</span>
+          <div class="callout-body">
+            <strong>How to use this page:</strong> Find the section that matches what you're seeing, then read the "What to do" row. You don't need to understand the internals &mdash; just follow the steps.
+          </div>
+        </div>
+
+        <!-- ESLint Issues -->
+        <h2 id="eslint">ESLint Issues</h2>
+
+        <p>ESLint checks your JavaScript for problems before you commit. When it finds something, it tells you exactly which file and line to look at.</p>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>ESLint blocks my commit</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>An error in your terminal mentioning a filename and line number, like:</p>
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">src/js/main.js:42:5  error  'result' is assigned a value but never used  no-unused-vars</span>
+<span class="t-error">1 error found. Commit blocked.</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>ESLint found a code problem — in this example, a variable that's created but never actually used. The file name, line number, and rule name are all shown.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Read the error message and note the file and line number. Then tell Claude: <em>"ESLint is flagging line 42 in main.js for unused variable 'result' — please fix it."</em></p>
+                <p>If you're in a hurry and need to commit anyway, you can bypass ESLint once:</p>
+                <div class="code-block"><pre>SKIP_ESLINT=1 git commit -m "your message here"</pre></div>
+                <p>Use this sparingly &mdash; it's a workaround, not a solution. The issue will still be there next time.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>ESLint warns about unused variables</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>A list of warnings like:</p>
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-amber">warning  'handleClick' is defined but never used  no-unused-vars</span>
+<span class="t-amber">warning  'formatDate' is defined but never used  no-unused-vars</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Functions are defined in a JavaScript file, but ESLint can't see that they're being called from your HTML (e.g. in <code>onclick</code> handlers or <code>&lt;script&gt;</code> tags). This is a common false alarm in projects that mix HTML and JS.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>If the function is used somewhere in your HTML (like <code>onclick="handleClick()"</code>), it's safe to ignore the warning. Warnings don't block commits.</p>
+                <p>If you're confident the function is genuinely unused and not needed, you can delete it to keep the code tidy. When in doubt, ask Claude: <em>"Is 'handleClick' actually used anywhere?"</em></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>I disagree with an ESLint rule</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>ESLint keeps flagging something you think is fine, or a rule is getting in the way of a deliberate design decision.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>ESLint rules are configurable. The defaults are sensible but they're not always right for every project.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Tell Claude which rule is being flagged and why you want to change it. Claude will update <code>eslint.config.mjs</code> to disable or adjust the rule. For example: <em>"ESLint keeps warning about 'no-console' but I need console.log for debugging — please turn that rule off."</em></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Playwright Issues -->
+        <h2 id="playwright">Playwright Issues</h2>
+
+        <p>Playwright runs automated browser tests — it opens a real browser and checks that your pages load correctly and behave as expected.</p>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Playwright test fails</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">FAIL  tests/dashboard.spec.js</span>
+<span class="t-error">  x dashboard loads correctly (2341ms)</span>
+<span class="t-dim">    Error: locator('.summary-card') expected to be visible</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>A page didn't load correctly, or an element the test was looking for wasn't found. The test name tells you which feature is affected.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>First, check if the feature works when you open it manually in your browser. If it looks fine to you, the test itself may be out of date or looking for a slightly different element &mdash; tell Claude: <em>"The dashboard test is failing but the page looks fine in my browser. Please update the test."</em></p>
+                <p>If the page genuinely looks broken, that's a real bug. Ask Claude to investigate.</p>
+                <p>To see a visual report of what failed:</p>
+                <div class="code-block"><pre>npx playwright show-report</pre></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Tests pass locally but fail in CI</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>Everything passes when you run tests on your machine, but they fail when GitHub Actions runs them.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>There's an environment difference. CI runs on Linux with a specific screen size and no real display. Your Mac has different fonts, screen dimensions, and system behaviour. Timing-sensitive tests are also more likely to flake in CI because it's slower.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>The most common culprits are viewport size and animation timing. Tell Claude: <em>"Tests pass locally but fail in CI — the error is [paste error here]. Can you make the test more robust?"</em> Claude can add explicit waits, fix viewport settings, or adjust the test to be less sensitive to timing.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Visual regression flags every page</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>Many screenshot comparison failures, often with messages like "screenshot differs from baseline".</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Visual regression tests compare the current state of each page against a saved "baseline" screenshot. If the data on the page changes (new entries, updated charts), the screenshots won't match &mdash; even if the code is completely correct.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>If the visual changes are intentional (you updated data, changed a chart, restyled a component), update the baseline screenshots so they reflect the new correct state:</p>
+                <div class="code-block"><pre>npx playwright test --update-snapshots</pre></div>
+                <p>Commit the new screenshots. If the changes look wrong or unexpected, that's a real regression &mdash; ask Claude to investigate.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lighthouse Issues -->
+        <h2 id="lighthouse">Lighthouse Issues</h2>
+
+        <p>Lighthouse measures how fast, accessible, and well-built your pages are. Scores run from 0 to 100 &mdash; higher is better.</p>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Performance score dropped</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>A Lighthouse performance score lower than before, flagged in a test report or during a quality check.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>New code made the app slower to load. This might be an expected trade-off (adding a large chart library will naturally slow things down), or it might be accidental (loading something twice, including a file that's not needed).</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Ask yourself: did I just add a significant new feature? If yes, a modest score drop may be acceptable. If the drop is large (more than 10 points) or you didn't add anything obviously heavy, ask Claude: <em>"The Lighthouse performance score dropped to [X] after my last change. What caused it and can we improve it?"</em></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Accessibility score dropped</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>A lower accessibility score, often with specific failures listed like "image elements do not have alt attributes" or "buttons do not have accessible names".</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>A new UI element is missing something that screen readers and assistive technologies need &mdash; most commonly an <code>alt</code> attribute on an image, a label on a button, or insufficient colour contrast.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Ask Claude to fix the accessibility issue. Share the specific Lighthouse message: <em>"Lighthouse is failing on 'buttons do not have accessible names' after I added the export button. Please fix it."</em> This is almost always a quick fix &mdash; usually a single attribute.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Health Check Issues -->
+        <h2 id="health-check">Health Check Issues</h2>
+
+        <p>The health check script scans your codebase for common problems &mdash; stubs, TODOs, and incomplete implementations.</p>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Stub detected: return null</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">[STUB]  src/js/api.js:18  fetchUserData() returns null</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>A function exists but doesn't do anything useful yet &mdash; it was written as a placeholder. Code that calls it will get <code>null</code> back and may behave unexpectedly.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Implement the function properly, or delete it if it's no longer needed. Tell Claude: <em>"fetchUserData in api.js is returning null as a stub. Please implement it properly."</em></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>TODO found in shipped code</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-amber">[TODO]  src/js/charts.js:74  // TODO: handle empty data case</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Someone (or Claude) left a reminder comment that never got actioned. The feature may work fine in normal cases but could fail when the situation described in the TODO arises.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Either do the TODO, or remove the comment if it's no longer relevant. Tell Claude: <em>"There's a TODO at charts.js:74 about handling empty data — please implement it."</em></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- /code-trace Issues -->
+        <h2 id="code-trace">/code-trace Issues</h2>
+
+        <p>The <code>/code-trace</code> command analyses your code and flags potential bugs, unreachable code, and unclear patterns. It uses three severity levels.</p>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>BUG: function returns NaN</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">[BUG]  calculateTotal()  can return NaN when 'price' is undefined</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>NaN stands for "Not a Number". This happens when a calculation receives an undefined or non-numeric input. The function will silently return NaN instead of a number, which can cause strange behaviour (NaN is not equal to anything, including itself).</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Claude will offer to fix it &mdash; say yes. The fix is typically adding a guard at the top of the function to handle the case where the input is missing.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>WARN: unreachable code</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-amber">[WARN]  src/js/utils.js:31  code after return statement is unreachable</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>There are lines of code written after a <code>return</code> statement. A function stops executing as soon as it hits <code>return</code>, so anything after it can never run &mdash; it's dead code.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>It's safe to delete the unreachable lines. Ask Claude: <em>"There's unreachable code at utils.js:31 after a return statement. Please clean it up."</em></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>INFO: magic number</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-dim">[INFO]  src/js/charts.js:89  magic number: 86400</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>A number appears in the code with no explanation of what it represents. To someone reading the code later (including you), <code>86400</code> is meaningless without context. (In this case, it's the number of seconds in a day.)</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>This is an INFO &mdash; the lowest severity, and optional to fix. If you know what the number means, add a short comment next to it: <code>// 86400 = seconds in a day</code>. Or ask Claude to replace it with a named constant. You can also ignore it entirely.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- npm / Node Issues -->
+        <h2 id="npm">npm / Node Issues</h2>
+
+        <p>npm is the package manager that installs the tools your project depends on. Most npm problems have straightforward solutions.</p>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>npm install fails</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>An error during <code>npm install</code>, often with <code>ENOENT</code>, <code>EACCES</code>, or a long stack trace mentioning package names.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>The packages couldn't be installed. This is often caused by a corrupted <code>node_modules</code> folder from a previous failed install, a lock file conflict, or a network issue.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Delete <code>node_modules</code> and try again from scratch:</p>
+                <div class="code-block"><pre>rm -rf node_modules &amp;&amp; npm install</pre></div>
+                <p>If that still fails, check your Node version:</p>
+                <div class="code-block"><pre>node --version</pre></div>
+                <p>Then paste the full error to Claude for diagnosis.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>npx command not found</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">sh: npx: command not found</span>
+<span class="t-comment"># or</span>
+<span class="t-error">npx: No such file or directory</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>The npm packages your project needs aren't installed yet, or Node itself isn't installed properly. <code>npx</code> comes with npm, so if it's missing, npm is missing too.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Make sure you're in your project folder, then run:</p>
+                <div class="code-block"><pre>npm install</pre></div>
+                <p>If that also fails with "command not found", Node is not installed. Follow the installation steps in the <a href="getting-started.html">Getting Started</a> guide.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Engine warnings during install</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-amber">npm warn EBADENGINE  Unsupported engine {
+  package: 'some-package@3.0.0',
+  required: { node: '>=20' },
+  current: { node: 'v18.12.0' }
+}</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Your version of Node is older than a package recommends. This is a warning, not an error &mdash; the install will usually succeed and things will mostly work.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Usually you can ignore this and continue. If you start seeing strange errors or features not working, it may be worth upgrading Node to the latest LTS version. Ask Claude: <em>"I'm getting engine warnings for Node v18. Do I need to upgrade for this project to work correctly?"</em></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Git Hook Issues -->
+        <h2 id="git-hooks">Git Hook Issues</h2>
+
+        <p>Git hooks run automatically before you commit. They check for quality issues and can block the commit if something needs fixing.</p>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Pre-commit hook blocks commit</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">Pre-commit hook: ESLint found 2 errors. Commit blocked.</span>
+<span class="t-comment"># or</span>
+<span class="t-error">Pre-commit audit: potential credentials found in src/config.js</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>The hook detected an issue &mdash; either an ESLint error or a potential security problem (like an API key in a file). These are important catches.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Fix the issue that was flagged. Ask Claude to help if needed. Once the issue is resolved, commit normally.</p>
+                <p>For genuine emergencies where you need to commit immediately and will fix the issue in the next commit, you can bypass all hooks:</p>
+                <div class="code-block"><pre>git commit --no-verify -m "your message here"</pre></div>
+                <p>Use this sparingly. The hook exists to protect you &mdash; bypassing it should be the exception, not the habit.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Contract check blocks commit</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">Contract check: todo.md has unchecked [auto] criteria. Commit blocked.</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Your <code>todo.md</code> has a task with acceptance criteria that haven't been verified yet. The contract check ensures you don't commit code that hasn't been tested against its own spec.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Run the verification command to check all the criteria:</p>
+                <div class="code-block"><pre>/agent-verify</pre></div>
+                <p>If you're doing housekeeping or documentation work that doesn't relate to any open task, you can bypass the check:</p>
+                <div class="code-block"><pre>SKIP_CONTRACT_CHECK=1 git commit -m "your message here"</pre></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Reference -->
+        <h2 id="quick-reference">Quick Reference</h2>
+
+        <p>The most common commands you'll need when something goes wrong.</p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>What it does</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>npx eslint src/js/</code></td>
+              <td>Run ESLint manually on all JavaScript files</td>
+            </tr>
+            <tr>
+              <td><code>npx playwright test</code></td>
+              <td>Run all browser tests</td>
+            </tr>
+            <tr>
+              <td><code>npx playwright show-report</code></td>
+              <td>Open the last test report in your browser</td>
+            </tr>
+            <tr>
+              <td><code>npx playwright test --update-snapshots</code></td>
+              <td>Update visual baseline screenshots to reflect current state</td>
+            </tr>
+            <tr>
+              <td><code>python3 execution/health_check.py</code></td>
+              <td>Scan codebase for stubs, TODOs, and incomplete code</td>
+            </tr>
+            <tr>
+              <td><code>python3 execution/verify.py --regression</code></td>
+              <td>Run the full regression verification suite</td>
+            </tr>
+            <tr>
+              <td><code>SKIP_ESLINT=1 git commit -m "..."</code></td>
+              <td>Bypass ESLint for this commit (use sparingly)</td>
+            </tr>
+            <tr>
+              <td><code>SKIP_CONTRACT_CHECK=1 git commit -m "..."</code></td>
+              <td>Bypass the contract check for this commit (housekeeping only)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout tip">
+          <span class="callout-icon">&#10003;</span>
+          <div class="callout-body">
+            <strong>Still stuck?</strong> Paste the full error message to Claude &mdash; the exact text, including file names and line numbers. The more context you give, the faster Claude can diagnose it. You can also check the <a href="faq.html">FAQ</a> for common questions.
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <a href="testing-quality.html">
+            <div class="pg-label">Previous</div>
+            <div class="pg-title">&larr; Testing &amp; Quality</div>
+          </a>
+        </div>
+
+        <footer class="site-footer">DOE Starter Kit v1.38.0</footer>
+
+      </div><!-- /content -->
+    </div><!-- /content-area -->
+
+    <nav class="toc">
+      <div class="toc-title">On this page</div>
+      <a href="#eslint" class="toc-link">ESLint Issues</a>
+      <a href="#playwright" class="toc-link">Playwright Issues</a>
+      <a href="#lighthouse" class="toc-link">Lighthouse Issues</a>
+      <a href="#health-check" class="toc-link">Health Check Issues</a>
+      <a href="#code-trace" class="toc-link">/code-trace Issues</a>
+      <a href="#npm" class="toc-link">npm / Node Issues</a>
+      <a href="#git-hooks" class="toc-link">Git Hook Issues</a>
+      <a href="#quick-reference" class="toc-link">Quick Reference</a>
+    </nav>
+
+  </div><!-- /layout -->
+
+  <script>
+    // ── Dark mode ──
+    (function () {
+      var btn  = document.getElementById('themeBtn');
+      var html = document.documentElement;
+
+      function applyTheme(dark) {
+        if (dark) {
+          html.setAttribute('data-theme', 'dark');
+          btn.innerHTML = '&#9788;';
+        } else {
+          html.removeAttribute('data-theme');
+          btn.innerHTML = '&#9789;';
+        }
+      }
+
+      var stored = localStorage.getItem('doe-docs-theme');
+      applyTheme(stored === 'dark');
+
+      btn.addEventListener('click', function () {
+        var isDark = html.getAttribute('data-theme') === 'dark';
+        localStorage.setItem('doe-docs-theme', isDark ? 'light' : 'dark');
+        applyTheme(!isDark);
+      });
+    })();
+
+    // ── Mobile sidebar ──
+    (function () {
+      var hamburger = document.getElementById('hamburger');
+      var sidebar   = document.getElementById('sidebar');
+      var overlay   = document.getElementById('sidebarOverlay');
+
+      function open()  { sidebar.classList.add('open');    overlay.classList.add('visible'); }
+      function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
+
+      hamburger.addEventListener('click', function () {
+        sidebar.classList.contains('open') ? close() : open();
+      });
+      overlay.addEventListener('click', close);
+    })();
+
+    // ── TOC scrollspy ──
+    (function() {
+      var tocLinks = document.querySelectorAll('.toc-link');
+      var sections = [];
+      tocLinks.forEach(function(link) {
+        var id = link.getAttribute('href').slice(1);
+        var el = document.getElementById(id);
+        if (el) sections.push({ id: id, el: el, link: link });
+      });
+      if (!sections.length) return;
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            tocLinks.forEach(function(l) { l.classList.remove('active'); });
+            var match = sections.find(function(s) { return s.id === entry.target.id; });
+            if (match) match.link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-80px 0px -70% 0px' });
+      sections.forEach(function(s) { observer.observe(s.el); });
+    })();
+  </script>
+
+</body>
+</html>

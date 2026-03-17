@@ -7,6 +7,20 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.38.0] — 2026-03-17
+
+### Added
+- **New command: `/code-trace`** — AI-driven code tracing with three modes: single module (deep logic trace with BUG/WARN/INFO severity), integration (cross-module data flow), and full sweep. The probabilistic layer of the Quality Stack.
+- **New tutorial page: Testing & Quality** (`docs/tutorial/testing.html`) — explains the three-layer defence (deterministic/probabilistic/empirical), what runs when, the user's role, and the signposting system.
+- **New tutorial page: Troubleshooting** (`docs/tutorial/troubleshooting.html`) — every tool covered with "what you see / what it means / what to do" format. ESLint, Playwright, Lighthouse, health check, /code-trace, npm/Node, and git hook scenarios.
+- **Quality sidebar section** added to all 15 tutorial pages linking to Testing & Quality and Troubleshooting.
+- **ESLint + stub detection** in pre-commit hook — lints staged JS files (blocks on errors, bypassable with `SKIP_ESLINT=1`), warns on stubs (`return null`, `return []`, empty functions, "not implemented" markers). Path configurable via `JS_PATH` variable.
+- **TEST HEALTH row** in `/stand-up` kick-off card — shows regression suite count and health check results at session start.
+- **Health check step** in `/wrap` housekeeping — runs `health_check.py --quick` + regression suite at session end, records results in System Checks.
+- `/code-trace` and `/health-check` added to commands.html Quality & Review section.
+- npm/package.json setup note added to getting-started.html.
+- Quality stack callout added to daily-flow.html work cycle.
+
 ## [v1.37.4] — 2026-03-16
 
 ### Fixed

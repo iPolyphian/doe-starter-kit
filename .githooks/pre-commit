@@ -18,6 +18,47 @@ if [ $EXIT_CODE -ne 0 ]; then
     exit 1
 fi
 
+# ─── ESLint (blocks on errors, warns on warnings) ───
+# Customize JS_PATH for your project (e.g. src/js/, lib/, app/scripts/)
+JS_PATH="src/"
+
+STAGED_JS=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null | grep -E "^${JS_PATH}.*\.js$" || true)
+if [ -n "$STAGED_JS" ]; then
+    npx eslint --no-warn-ignored $STAGED_JS 2>/dev/null
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo "═══ ESLint found errors in staged JS files ═══"
+        echo ""
+        echo "Fix errors or use SKIP_ESLINT=1 git commit to bypass."
+        if [ "${SKIP_ESLINT:-0}" != "1" ]; then
+            exit 1
+        fi
+    fi
+fi
+
+# ─── Stub detection (warnings only — never blocks commit) ───
+
+if [ -n "$STAGED_JS" ]; then
+    for f in $STAGED_JS; do
+        STUBS=$(git diff --cached -- "$f" | grep -E '^\+.*return null\b' | grep -v '// ok' || true)
+        if [ -n "$STUBS" ]; then
+            echo "⚠ Stub detected in $f — 'return null' (is this intentional?)" >&2
+        fi
+        STUBS2=$(git diff --cached -- "$f" | grep -E '^\+.*return \[\]' | grep -v '// ok' || true)
+        if [ -n "$STUBS2" ]; then
+            echo "⚠ Stub detected in $f — 'return []' (is this intentional?)" >&2
+        fi
+        STUBS3=$(git diff --cached -- "$f" | grep -E '^\+.*function.*\{\s*\}' || true)
+        if [ -n "$STUBS3" ]; then
+            echo "⚠ Empty function body in $f (is this intentional?)" >&2
+        fi
+        STUBS4=$(git diff --cached -- "$f" | grep -E "^\+.*not.implemented|^\+.*NOT.IMPLEMENTED" || true)
+        if [ -n "$STUBS4" ]; then
+            echo "⚠ 'Not implemented' marker in $f" >&2
+        fi
+    done
+fi
+
 # ─── Audit sweep (warnings only — never blocks commit) ───
 
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null)

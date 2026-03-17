@@ -27,6 +27,7 @@ Show a bordered kick-off card, then present a plan and wait for sign-off:
 │  BLOCKERS   [from STATE.md blockers section]       │
 │    !! [each blocker on its own line]               │
 │  DOE KIT    vX.Y.Z [synced / * pull (Nu Mc)]       │
+│  TEST HEALTH [regression N/N, health N pass M warn] │
 │  PIPELINE   N in Up Next, M in Queue              │
 │  SIGN-OFF   N features (M manual items pending)   │
 │  WARNINGS   [audit WARN/FAIL items]               │
@@ -51,6 +52,7 @@ Card rules:
 - FEATURE: from STATE.md "Active feature" line. If no active feature, show "No active feature".
 - PROGRESS: count [x] and [ ] steps for the current feature in todo.md ## Current. Bar uses █ for done, ░ for remaining, scaled to 10 characters. If no current feature, omit this line.
 - DOE KIT: `vX.Y.Z synced` if everything matches. `vX.Y.Z * push (Nu Mc)` if project has outbound changes to push to the starter kit via `/sync-doe`. `vX.Y.Z * pull (Nu Mc)` if the kit has inbound updates to pull via `/pull-doe`. `vX.Y.Z * push+pull (Nu Mc)` if both directions need syncing. `u` = user-facing (commands, hooks, rules), `c` = creator-facing (kit infra, tutorials, setup). Omit entirely if `~/doe-starter-kit` doesn't exist.
+- TEST HEALTH: If `tests/suite.json` exists and is non-empty, run `python3 execution/verify.py --regression` silently and count pass/fail. If `execution/health_check.py` exists, run `python3 execution/health_check.py --quick --json` and count results. Show `TEST HEALTH   Regression N/N, Health N pass M warn`. If the regression suite is empty, show `TEST HEALTH   No regression tests yet`. If neither exists, omit entirely. This surfaces test infrastructure status at session start.
 - SIGN-OFF: Parse `## Awaiting Sign-off` in todo.md. Count `###` headings (features) and `[ ] [manual]` lines (pending manual items). Show `SIGN-OFF   N features (M manual items pending)`. If the section is empty or has no features, omit entirely.
 - PIPELINE: Compare ROADMAP.md `## Up Next` item count against todo.md `## Queue` item count. Count feature headings (lines starting with `###`) in each section. If Up Next has more items than Queue, show `PIPELINE   N in Up Next, M in Queue -- scope to promote`. If counts match (including both being 0), show `PIPELINE   Synced (N items)`. This nudges the user to scope and promote features without auto-syncing. Omit if ROADMAP.md doesn't exist.
 - WARNINGS: Run `python3 execution/audit_claims.py --hook --json` and parse the JSON output. If any findings have severity "WARN" or "FAIL", show a WARNINGS row with a summary count (e.g. "2 audit WARNs") followed by indented detail lines for each non-PASS item — use `⚠️` prefix for WARN and `❌` for FAIL. Each detail line shows the file name and message from the finding. If the first WARN/FAIL item is actionable in this session (e.g. a stale doc or missing version tag), add an indented `→ Fix now?` suggestion. **If all findings are PASS, omit the WARNINGS section entirely** — it only appears when there are problems. If the audit script doesn't exist or fails, also omit.

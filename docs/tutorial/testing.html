@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Testing &amp; Quality — DOE Starter Kit</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-body: #FFFFFF;
+      --bg-sidebar: #FAFAFA;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8FAFC;
+      --bg-code: #0F172A;
+      --bg-callout-info: #EFF6FF;
+      --bg-callout-tip: #F0FDF4;
+      --bg-callout-warn: #FFFBEB;
+      --border: #E2E8F0;
+      --border-light: #F1F5F9;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #94A3B8;
+      --text-sidebar: #334155;
+      --text-sidebar-active: #0F172A;
+      --accent: #6366F1;
+      --accent-light: #EEF2FF;
+      --accent-green: #10B981;
+      --accent-amber: #F59E0B;
+      --accent-blue: #3B82F6;
+      --accent-rose: #F43F5E;
+      --sidebar-w: 260px;
+      --toc-w: 220px;
+      --content-max: 720px;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.08);
+      --font: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0B1120;
+      --bg-sidebar: #0F172A;
+      --bg-card: #1E293B;
+      --bg-card-hover: #243347;
+      --bg-code: #020617;
+      --bg-callout-info: #1E293B;
+      --bg-callout-tip: #1E293B;
+      --bg-callout-warn: #1E293B;
+      --border: #1E293B;
+      --border-light: #1E293B;
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --text-sidebar: #94A3B8;
+      --text-sidebar-active: #F1F5F9;
+      --accent-light: #1E1B4B;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      background: var(--bg-body);
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, background 0.2s, border-color 0.2s;
+    }
+
+    .sidebar-brand {
+      display: block;
+      padding: 20px 16px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.01em;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .sidebar-brand:hover { color: var(--accent); }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 10px 24px;
+      overflow-y: auto;
+    }
+
+    .sidebar-section { margin-bottom: 20px; }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 0 4px;
+      margin-bottom: 6px;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-sidebar);
+      text-decoration: none;
+      line-height: 1.4;
+      transition: background 0.1s, color 0.1s;
+    }
+    .sidebar-link:hover {
+      background: var(--border-light);
+      color: var(--text-sidebar-active);
+    }
+    .sidebar-link.active {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .sidebar-link.nested {
+      padding-left: 20px;
+      font-size: 12.5px;
+    }
+
+    /* ── Hamburger (mobile) ── */
+    .hamburger {
+      display: none;
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 200;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+      padding: 0;
+      transition: background 0.2s;
+    }
+    .hamburger span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--text-primary);
+      border-radius: 2px;
+    }
+
+    /* ── Dark mode button ── */
+    .theme-btn {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 200;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .theme-btn:hover { background: var(--bg-card-hover); }
+
+    /* ── Sidebar overlay (mobile) ── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 99;
+    }
+    .sidebar-overlay.visible { display: block; }
+
+    /* ── Content area ── */
+    .content-area {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 40px 48px;
+      min-width: 0;
+    }
+
+    .content {
+      max-width: var(--content-max);
+      width: 100%;
+    }
+
+    /* ── Typography ── */
+    .content h1 {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .content h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .content h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .content p {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .content ul, .content ol {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      padding-left: 20px;
+    }
+    .content li { margin-bottom: 6px; }
+
+    .content a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .content a:hover { text-decoration: underline; }
+
+    .content code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      background: var(--bg-sidebar);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── Cards ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .m-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      background: var(--bg-card);
+      transition: all 0.15s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .m-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-1px);
+      text-decoration: none;
+    }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .card-icon.indigo { background: var(--accent-light); color: var(--accent); }
+    .card-icon.green  { background: #ECFDF5; color: var(--accent-green); }
+    .card-icon.amber  { background: #FEF3C7; color: var(--accent-amber); }
+    .card-icon.blue   { background: #DBEAFE; color: var(--accent-blue); }
+    .card-icon.rose   { background: #FFE4E6; color: var(--accent-rose); }
+
+    [data-theme="dark"] .card-icon.indigo { background: #312E81; }
+    [data-theme="dark"] .card-icon.green  { background: #064E3B; }
+    [data-theme="dark"] .card-icon.amber  { background: #78350F; }
+    [data-theme="dark"] .card-icon.blue   { background: #1E3A5F; }
+    [data-theme="dark"] .card-icon.rose   { background: #4C0519; }
+
+    .m-card h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+    .m-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ── Callout ── */
+    .callout {
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: flex;
+      gap: 10px;
+      line-height: 1.5;
+    }
+    .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .callout.tip {
+      background: var(--bg-callout-tip);
+      border: 1px solid #BBF7D0;
+      color: #166534;
+    }
+    [data-theme="dark"] .callout.tip { border-color: #064E3B; color: #6EE7B7; }
+    .callout.info {
+      background: var(--bg-callout-info);
+      border: 1px solid #BFDBFE;
+      color: #1E40AF;
+    }
+    [data-theme="dark"] .callout.info { border-color: #1E3A5F; color: #93C5FD; }
+    .callout.warn {
+      background: var(--bg-callout-warn);
+      border: 1px solid #FDE68A;
+      color: #92400E;
+    }
+    [data-theme="dark"] .callout.warn { border-color: #78350F; color: #FCD34D; }
+    .callout strong { font-weight: 600; }
+    .callout a { color: inherit; font-weight: 500; }
+    .callout .callout-body { color: inherit; }
+
+    /* ── Code block ── */
+    .code-block {
+      background: var(--bg-code);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 12px 0 16px;
+      overflow-x: auto;
+    }
+    .code-block pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      color: #CBD5E1;
+    }
+
+    /* ── Table ── */
+    .quality-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0 28px;
+      font-size: 13.5px;
+    }
+    .quality-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-bottom: 2px solid var(--border);
+    }
+    .quality-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+    .quality-table tr:last-child td {
+      border-bottom: none;
+    }
+    .quality-table tr:hover td {
+      background: var(--bg-card-hover);
+    }
+    .quality-table td:first-child {
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+    .quality-table td:last-child {
+      color: var(--accent-green);
+      font-size: 13px;
+    }
+    .badge-auto {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: #ECFDF5;
+      color: #065F46;
+      letter-spacing: 0.02em;
+    }
+    [data-theme="dark"] .badge-auto { background: #064E3B; color: #6EE7B7; }
+    .badge-read {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--accent-light);
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+    [data-theme="dark"] .badge-read { background: #312E81; }
+
+    /* ── Command reference cards ── */
+    .cmd-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      background: var(--bg-card);
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .cmd-badge {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 600;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    [data-theme="dark"] .cmd-badge { background: #312E81; }
+    .cmd-body {}
+    .cmd-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .cmd-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ── Role items ── */
+    .role-list {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0 28px;
+    }
+    .role-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .role-item:last-child { border-bottom: none; }
+    .role-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 15px;
+    }
+    .role-icon.indigo { background: var(--accent-light); }
+    .role-icon.green  { background: #ECFDF5; }
+    .role-icon.amber  { background: #FEF3C7; }
+    .role-icon.rose   { background: #FFE4E6; }
+    [data-theme="dark"] .role-icon.indigo { background: #312E81; }
+    [data-theme="dark"] .role-icon.green  { background: #064E3B; }
+    [data-theme="dark"] .role-icon.amber  { background: #78350F; }
+    [data-theme="dark"] .role-icon.rose   { background: #4C0519; }
+    .role-body {}
+    .role-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .role-desc {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .role-desc a { color: var(--accent); }
+
+    /* ── Signpost diagram ── */
+    .signpost-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+      padding: 24px;
+      margin: 24px 0 32px;
+      box-shadow: var(--shadow-card);
+    }
+    .signpost-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .signpost-row:last-child { margin-bottom: 0; }
+    .sp-trigger {
+      font-size: 12.5px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      background: var(--bg-code);
+      color: #6EE7B7;
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .sp-arrow {
+      color: var(--text-muted);
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .sp-result {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .sp-result strong {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      gap: 16px;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .pagination a {
+      flex: 1;
+      display: block;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.15s;
+    }
+    .pagination a:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-card);
+      text-decoration: none;
+    }
+    .pg-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .pg-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+    .pagination .next { text-align: right; }
+
+    /* ── Footer ── */
+    .site-footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ── Right-side TOC ── */
+    .toc {
+      width: var(--toc-w);
+      min-width: var(--toc-w);
+      position: fixed;
+      right: 24px;
+      top: 120px;
+      font-size: 12px;
+    }
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .toc-link {
+      display: block;
+      padding: 3px 0 3px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid var(--border);
+      transition: all 0.1s;
+    }
+    .toc-link:hover {
+      color: var(--text-secondary);
+      border-color: var(--text-muted);
+    }
+    .toc-link.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+      .sidebar.open { transform: translateX(0); }
+      .content-area { margin-left: 0; padding: 24px 20px; padding-top: 60px; }
+      .hamburger { display: flex; }
+    }
+
+    @media (max-width: 600px) {
+      .card-grid { grid-template-columns: 1fr; }
+      .card-grid.cols-3 { grid-template-columns: 1fr; }
+      .quality-table { font-size: 12.5px; }
+      .quality-table td, .quality-table th { padding: 8px 8px; }
+    }
+
+    @media (min-width: 601px) and (max-width: 900px) {
+      .card-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (min-width: 1201px) {
+      .content-area { padding-right: calc(var(--toc-w) + 48px); }
+    }
+    @media (max-width: 1200px) {
+      .toc { display: none; }
+      .content-area { padding-right: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile hamburger -->
+  <button class="hamburger" id="hamburger" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <!-- Dark mode toggle -->
+  <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">&#9789;</button>
+
+  <!-- Sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="layout">
+
+    <!-- ── Sidebar ── -->
+    <nav class="sidebar" id="sidebar">
+      <a class="sidebar-brand" href="index.html">DOE Starter Kit</a>
+      <div class="sidebar-nav">
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Getting Started</div>
+          <a class="sidebar-link" href="index.html">Welcome</a>
+          <a class="sidebar-link" href="getting-started.html">Installation</a>
+          <a class="sidebar-link" href="first-session.html">Your First Session</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Core Concepts</div>
+          <a class="sidebar-link" href="key-concepts.html">DOE Architecture</a>
+          <a class="sidebar-link nested" href="key-concepts.html#directives">Directives</a>
+          <a class="sidebar-link nested" href="key-concepts.html#execution">Execution Scripts</a>
+          <a class="sidebar-link" href="first-session.html#state">Sessions &amp; State</a>
+          <a class="sidebar-link" href="context.html">Context &amp; Sessions</a>
+          <a class="sidebar-link" href="key-concepts.html#contracts">Contracts</a>
+          <a class="sidebar-link" href="key-concepts.html#self-annealing">Self-Annealing</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Commands</div>
+          <a class="sidebar-link" href="commands.html">Session Lifecycle</a>
+          <a class="sidebar-link" href="commands.html#quality">Quality &amp; Review</a>
+          <a class="sidebar-link" href="commands.html#reports">Visual Reports</a>
+          <a class="sidebar-link nested" href="commands.html#planning">Planning &amp; Ideas</a>
+          <a class="sidebar-link nested" href="commands.html#multiagent">Advanced</a>
+          <a class="sidebar-link nested" href="commands.html#maintenance">Maintenance</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Workflows</div>
+          <a class="sidebar-link" href="daily-flow.html">A Day with DOE</a>
+          <a class="sidebar-link" href="workflows.html">Feature Lifecycle</a>
+          <a class="sidebar-link" href="workflows.html#planning">Planning &amp; Prompts</a>
+          <a class="sidebar-link" href="multi-agent.html">Multi-Agent</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Quality</div>
+          <a class="sidebar-link active" href="testing.html">Testing &amp; Quality</a>
+          <a class="sidebar-link" href="troubleshooting.html">Troubleshooting</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Examples</div>
+          <a class="sidebar-link" href="example-apps.html#recipe">Recipe Book</a>
+          <a class="sidebar-link" href="example-apps.html#fitness">Fitness Tracker</a>
+          <a class="sidebar-link" href="example-apps.html#events">Events Board</a>
+          <a class="sidebar-link" href="example-apps.html#dashboard">Team Dashboard</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Reference</div>
+          <a class="sidebar-link" href="tips-and-mistakes.html">Tips &amp; Mistakes</a>
+          <a class="sidebar-link" href="faq.html">FAQ</a>
+          <a class="sidebar-link" href="glossary.html">Glossary</a>
+        </div>
+
+      </div>
+    </nav>
+
+    <!-- ── Main Content ── -->
+    <div class="content-area">
+      <div class="content">
+
+        <h1>Testing &amp; Quality</h1>
+        <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">DOE has a multi-layer quality system that catches bugs automatically so you can focus on building. Most of it runs without you doing anything.</p>
+
+        <div class="callout info">
+          <span class="callout-icon">&#9432;</span>
+          <div class="callout-body">
+            <strong>Nothing to memorise.</strong> Claude tells you what ran, what passed, and what needs your attention at every step transition. If Claude doesn't ask, everything passed.
+          </div>
+        </div>
+
+        <!-- Three Layers -->
+        <h2 id="three-layers">The Three Layers</h2>
+
+        <p>Every DOE project checks code quality in three fundamentally different ways. Together they cover almost every class of bug.</p>
+
+        <div class="card-grid cols-3">
+          <div class="m-card">
+            <div class="card-icon indigo">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <h4>Deterministic</h4>
+            <p>ESLint + type checking. Same result every time. Runs automatically on every commit.</p>
+          </div>
+          <div class="m-card">
+            <div class="card-icon amber">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            </div>
+            <h4>Probabilistic</h4>
+            <p>Claude reads your code and traces logic paths looking for bugs. Runs after data-layer steps.</p>
+          </div>
+          <div class="m-card">
+            <div class="card-icon green">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h4>Empirical</h4>
+            <p>Playwright opens your app in a real browser and checks pages load, buttons work, and elements exist. Runs after UI steps.</p>
+          </div>
+        </div>
+
+        <h3>Why three layers?</h3>
+
+        <p>Each layer catches a different category of problem that the others miss:</p>
+
+        <ul>
+          <li><strong>Deterministic checks</strong> catch typos, undefined variables, and unused code. They're fast, cheap, and mechanical. The same lint rule fires the same way every time.</li>
+          <li><strong>Probabilistic checks</strong> catch logic errors — a function that returns the wrong thing in an edge case, two modules passing data in incompatible formats. These require reasoning, which is why Claude does them rather than a script.</li>
+          <li><strong>Empirical checks</strong> catch integration failures — a button that exists in the code but doesn't do anything in the browser, a page that loads but throws an error in the console. Nothing beats running the actual app.</li>
+        </ul>
+
+        <!-- What Runs When -->
+        <h2 id="what-runs-when">What Runs When</h2>
+
+        <p>You don't need to remember any of this. Claude signals the right checks at each transition. This table is a reference if you want to know what's happening behind the scenes.</p>
+
+        <table class="quality-table">
+          <thead>
+            <tr>
+              <th>When</th>
+              <th>What Runs</th>
+              <th>Your Input</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Every commit</td>
+              <td>ESLint + stub detection</td>
+              <td><span class="badge-auto">None &mdash; automatic</span></td>
+            </tr>
+            <tr>
+              <td>Every build</td>
+              <td>Regression suite</td>
+              <td><span class="badge-auto">None &mdash; automatic</span></td>
+            </tr>
+            <tr>
+              <td>After data-layer steps</td>
+              <td><code>/code-trace</code></td>
+              <td><span class="badge-read">Read findings</span></td>
+            </tr>
+            <tr>
+              <td>After UI steps</td>
+              <td>Playwright browser tests</td>
+              <td><span class="badge-read">See pass/fail</span></td>
+            </tr>
+            <tr>
+              <td>Feature complete</td>
+              <td><code>/snagging</code> manual checklist</td>
+              <td><span class="badge-read">Test from checklist</span></td>
+            </tr>
+            <tr>
+              <td>Session end (<code>/wrap</code>)</td>
+              <td>Health check + Lighthouse</td>
+              <td><span class="badge-read">Glance at summary</span></td>
+            </tr>
+            <tr>
+              <td>Every push (CI)</td>
+              <td>All of the above</td>
+              <td><span class="badge-auto">None &mdash; automatic</span></td>
+            </tr>
+            <tr>
+              <td>After UI changes</td>
+              <td>Visual regression review</td>
+              <td><span class="badge-read">Approve diffs</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout tip">
+          <span class="callout-icon">&#10003;</span>
+          <div class="callout-body">
+            <strong>Green = nothing to do.</strong> When automatic checks pass, Claude mentions it briefly and moves on. You only need to act when something fails or when Claude explicitly asks for your input.
+          </div>
+        </div>
+
+        <!-- Your Role -->
+        <h2 id="your-role">Your Role</h2>
+
+        <p>The quality system is designed to run itself. Here's what you actually contribute:</p>
+
+        <ul class="role-list">
+          <li class="role-item">
+            <div class="role-icon indigo">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+            <div class="role-body">
+              <div class="role-title">You define what "working" means</div>
+              <div class="role-desc">Contracts in <code>todo.md</code> specify what a passing feature looks like. Without these, Claude can't verify its own work. They take 30 seconds to write and prevent hours of rework.</div>
+            </div>
+          </li>
+          <li class="role-item">
+            <div class="role-icon green">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div class="role-body">
+              <div class="role-title">Claude installs and configures tools</div>
+              <div class="role-desc">ESLint, Playwright, the regression suite &mdash; Claude sets these up when starting a new project. You approve once, and they stay configured. You never touch the config files directly.</div>
+            </div>
+          </li>
+          <li class="role-item">
+            <div class="role-icon amber">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="role-body">
+              <div class="role-title">Tests run automatically &mdash; you review results</div>
+              <div class="role-desc">When a step completes, Claude summarises what ran and what the results were. Green checks you can ignore. Red failures come with a plain-English explanation and a fix recommendation.</div>
+            </div>
+          </li>
+          <li class="role-item">
+            <div class="role-icon rose">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="role-body">
+              <div class="role-title">When something breaks</div>
+              <div class="role-desc">Claude explains what failed, why it likely happened, and what to try first. For anything Claude can't diagnose automatically, see the <a href="troubleshooting.html">Troubleshooting</a> page.</div>
+            </div>
+          </li>
+        </ul>
+
+        <!-- Commands -->
+        <h2 id="commands">Commands</h2>
+
+        <p>These quality commands are available in any DOE session. You rarely need to invoke them manually &mdash; Claude calls them at the right moments &mdash; but you can run any of them yourself at any time.</p>
+
+        <div class="cmd-card">
+          <div class="cmd-badge">/code-trace [module]</div>
+          <div class="cmd-body">
+            <div class="cmd-title">Trace a module for logic bugs</div>
+            <p class="cmd-desc">Claude reads the specified module and traces every code path looking for edge cases, incorrect returns, and logic errors. Replace <code>[module]</code> with a filename or a natural description like "the import script".</p>
+          </div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-badge">/code-trace --integration</div>
+          <div class="cmd-body">
+            <div class="cmd-title">Check cross-module data flow</div>
+            <p class="cmd-desc">Checks how modules pass data to each other &mdash; mismatched field names, type mismatches, values that transform in unexpected ways as they move through the pipeline.</p>
+          </div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-badge">/test-suite</div>
+          <div class="cmd-body">
+            <div class="cmd-title">Run the regression suite</div>
+            <p class="cmd-desc">Runs all automated tests that have been accumulated for the project. Each test checks a behaviour that was previously verified as correct. A pass means nothing has regressed since the last run.</p>
+          </div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-badge">/snagging</div>
+          <div class="cmd-body">
+            <div class="cmd-title">Generate a manual test checklist</div>
+            <p class="cmd-desc">Produces an interactive HTML checklist of things to manually verify for the current feature &mdash; visual layout, interaction feel, edge cases that automated tests can't cover. Generated at feature completion.</p>
+          </div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-badge">/review</div>
+          <div class="cmd-body">
+            <div class="cmd-title">Adversarial code review</div>
+            <p class="cmd-desc">Claude adopts an adversarial stance and reviews the recent changes looking for bugs, security issues, and design problems. Useful after complex data-layer work or before a significant release.</p>
+          </div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-badge">/audit</div>
+          <div class="cmd-body">
+            <div class="cmd-title">Claims truthfulness check</div>
+            <p class="cmd-desc">Verifies that all data-backed claims in the project (charts, statistics, summaries) match the underlying source data. Catches stale numbers and copy-paste errors before they reach users.</p>
+          </div>
+        </div>
+
+        <!-- Signposting System -->
+        <h2 id="signposting">The Signposting System</h2>
+
+        <p>One of the most useful things about DOE is that you never have to remember what to run next. Claude signals the state of the quality system at every step transition.</p>
+
+        <div class="signpost-box">
+          <div class="signpost-row">
+            <span class="sp-trigger">step completes</span>
+            <span class="sp-arrow">&rarr;</span>
+            <span class="sp-result">Claude runs the appropriate checks and reports <strong>pass / fail / skipped</strong></span>
+          </div>
+          <div class="signpost-row">
+            <span class="sp-trigger">all pass</span>
+            <span class="sp-arrow">&rarr;</span>
+            <span class="sp-result">Claude moves on without asking. <strong>Silence means green.</strong></span>
+          </div>
+          <div class="signpost-row">
+            <span class="sp-trigger">something fails</span>
+            <span class="sp-arrow">&rarr;</span>
+            <span class="sp-result">Claude explains what happened and proposes a fix. You approve or redirect.</span>
+          </div>
+          <div class="signpost-row">
+            <span class="sp-trigger">manual check needed</span>
+            <span class="sp-arrow">&rarr;</span>
+            <span class="sp-result">Claude asks explicitly: "Can you check X in the browser?" No ambiguity.</span>
+          </div>
+          <div class="signpost-row">
+            <span class="sp-trigger">feature complete</span>
+            <span class="sp-arrow">&rarr;</span>
+            <span class="sp-result">Claude runs <code>/snagging</code> automatically and presents the checklist for sign-off.</span>
+          </div>
+        </div>
+
+        <p>The rule is simple: <strong>if Claude doesn't ask, everything passed.</strong> You don't need to poll for status or remember to run checks yourself. The system tells you when it needs you.</p>
+
+        <div class="callout tip">
+          <span class="callout-icon">&#10003;</span>
+          <div class="callout-body">
+            <strong>Tip:</strong> If you want to know the current quality status at any time, ask Claude directly &mdash; "What tests have run so far?" or "Is there anything failing?" Claude can give a full summary on demand.
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <a href="glossary.html">
+            <div class="pg-label">Previous</div>
+            <div class="pg-title">&larr; Glossary</div>
+          </a>
+          <a href="troubleshooting.html" class="next">
+            <div class="pg-label">Next</div>
+            <div class="pg-title">Troubleshooting &rarr;</div>
+          </a>
+        </div>
+
+        <footer class="site-footer">DOE Starter Kit v1.38.0</footer>
+
+      </div><!-- /content -->
+    </div><!-- /content-area -->
+
+    <nav class="toc">
+      <div class="toc-title">On this page</div>
+      <a href="#three-layers" class="toc-link">The Three Layers</a>
+      <a href="#what-runs-when" class="toc-link">What Runs When</a>
+      <a href="#your-role" class="toc-link">Your Role</a>
+      <a href="#commands" class="toc-link">Commands</a>
+      <a href="#signposting" class="toc-link">The Signposting System</a>
+    </nav>
+
+  </div><!-- /layout -->
+
+  <script>
+    // ── Dark mode ──
+    (function () {
+      var btn  = document.getElementById('themeBtn');
+      var html = document.documentElement;
+
+      function applyTheme(dark) {
+        if (dark) {
+          html.setAttribute('data-theme', 'dark');
+          btn.innerHTML = '&#9788;';
+        } else {
+          html.removeAttribute('data-theme');
+          btn.innerHTML = '&#9789;';
+        }
+      }
+
+      var stored = localStorage.getItem('doe-docs-theme');
+      applyTheme(stored === 'dark');
+
+      btn.addEventListener('click', function () {
+        var isDark = html.getAttribute('data-theme') === 'dark';
+        localStorage.setItem('doe-docs-theme', isDark ? 'light' : 'dark');
+        applyTheme(!isDark);
+      });
+    })();
+
+    // ── Mobile sidebar ──
+    (function () {
+      var hamburger = document.getElementById('hamburger');
+      var sidebar   = document.getElementById('sidebar');
+      var overlay   = document.getElementById('sidebarOverlay');
+
+      function open()  { sidebar.classList.add('open');    overlay.classList.add('visible'); }
+      function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
+
+      hamburger.addEventListener('click', function () {
+        sidebar.classList.contains('open') ? close() : open();
+      });
+      overlay.addEventListener('click', close);
+    })();
+
+    // TOC scrollspy
+    (function() {
+      var tocLinks = document.querySelectorAll('.toc-link');
+      var sections = [];
+      tocLinks.forEach(function(link) {
+        var id = link.getAttribute('href').slice(1);
+        var el = document.getElementById(id);
+        if (el) sections.push({ id: id, el: el, link: link });
+      });
+      if (!sections.length) return;
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            tocLinks.forEach(function(l) { l.classList.remove('active'); });
+            var match = sections.find(function(s) { return s.id === entry.target.id; });
+            if (match) match.link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-80px 0px -70% 0px' });
+      sections.forEach(function(s) { observer.observe(s.el); });
+    })();
+  </script>
+
+</body>
+</html>
