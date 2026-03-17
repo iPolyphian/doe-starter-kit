@@ -7,6 +7,11 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.39.4] — 2026-03-17
+
+### Fixed
+- **SVG lifecycle diagram**: cropped viewBox from `0 0 720 320` to `0 0 590 254` to match actual content bounds. Eliminates ~76px dead whitespace below legend and ~130px unused right margin.
+
 ## [v1.39.3] — 2026-03-17
 
 ### Changed
