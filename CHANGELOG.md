@@ -7,6 +7,13 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.39.1] — 2026-03-17
+
+### Changed
+- **testing.html**: New "The Snagging Checklist" section explaining the automated results card (4 metric tiles, status badge, dark mode toggle), baseline updates, and the new /snagging flow. Updated /snagging command card, "What Runs When" table, "Your Role" section, and signposting description.
+- **troubleshooting.html**: New "Snagging v2 Issues" section with 5 scenario cards (Lighthouse errors, port conflicts, APP_PATH mismatch, visual regression diffs, dark mode toggle). TOC link and Quick Reference table updated.
+- **commands.html**: /snagging entry updated to describe automated test suite integration, results card, dark mode toggle, and baseline updates.
+
 ## [v1.39.0] — 2026-03-17
 
 ### Added

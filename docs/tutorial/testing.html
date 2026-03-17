@@ -853,8 +853,8 @@
             </tr>
             <tr>
               <td>Feature complete</td>
-              <td><code>/snagging</code> manual checklist</td>
-              <td><span class="badge-read">Test from checklist</span></td>
+              <td><code>/snagging</code> &mdash; automated suite + manual checklist</td>
+              <td><span class="badge-read">Review results, test manual items</span></td>
             </tr>
             <tr>
               <td>Session end (<code>/wrap</code>)</td>
@@ -910,8 +910,8 @@
               <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </div>
             <div class="role-body">
-              <div class="role-title">Tests run automatically &mdash; you review results</div>
-              <div class="role-desc">When a step completes, Claude summarises what ran and what the results were. Green checks you can ignore. Red failures come with a plain-English explanation and a fix recommendation.</div>
+              <div class="role-title">Tests run automatically &mdash; results appear in the snagging checklist</div>
+              <div class="role-desc">When a feature completes, the snagging checklist shows automated results as metric tiles you can read at a glance. Green tiles you can ignore. Red failures come with a plain-English explanation and a fix recommendation. Manual checks appear below for things only a human can judge.</div>
             </div>
           </li>
           <li class="role-item">
@@ -957,8 +957,8 @@
         <div class="cmd-card">
           <div class="cmd-badge">/snagging</div>
           <div class="cmd-body">
-            <div class="cmd-title">Generate a manual test checklist</div>
-            <p class="cmd-desc">Produces an interactive HTML checklist of things to manually verify for the current feature &mdash; visual layout, interaction feel, edge cases that automated tests can't cover. Generated at feature completion.</p>
+            <div class="cmd-title">Run test suite + generate snagging checklist</div>
+            <p class="cmd-desc">Runs the full automated test suite (Playwright browser tests, Lighthouse performance audit, accessibility scan, health check), then generates an interactive HTML checklist. Automated results appear as metric tiles at the top; manual checks follow below a "YOUR REVIEW" divider. See <a href="#snagging-checklist">The Snagging Checklist</a> for details.</p>
           </div>
         </div>
 
@@ -975,6 +975,89 @@
           <div class="cmd-body">
             <div class="cmd-title">Claims truthfulness check</div>
             <p class="cmd-desc">Verifies that all data-backed claims in the project (charts, statistics, summaries) match the underlying source data. Catches stale numbers and copy-paste errors before they reach users.</p>
+          </div>
+        </div>
+
+        <!-- Snagging Checklist -->
+        <h2 id="snagging-checklist">The Snagging Checklist</h2>
+
+        <p>When a feature is code-complete, Claude runs <code>/snagging</code> to produce an interactive HTML checklist. This is where all quality results converge into one page you can review.</p>
+
+        <h3 id="snagging-flow">How it works</h3>
+
+        <ol>
+          <li>Claude runs the automated test suite (Playwright, Lighthouse, accessibility, health check) &mdash; takes about 30&ndash;60 seconds.</li>
+          <li>Results are collected into a JSON file and passed to the checklist generator.</li>
+          <li>The checklist HTML opens in your browser with two distinct sections: <strong>automated results</strong> at the top, and <strong>manual checks</strong> below a "YOUR REVIEW" banner divider.</li>
+          <li>You review the automated tiles at a glance, then work through the manual items. Mark each manual check pass or fail, click "Copy Results", and paste back to Claude.</li>
+        </ol>
+
+        <h3 id="snagging-tiles">Automated results tiles</h3>
+
+        <p>The top of the checklist shows four metric tiles summarising what the machines found. Each tile has its own pass/warn/fail status &mdash; if one tool crashes, the others still report independently.</p>
+
+        <table class="quality-table">
+          <thead>
+            <tr>
+              <th>Tile</th>
+              <th>What It Shows</th>
+              <th>Thresholds</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Browser Tests</td>
+              <td>Pass/total count (e.g., "32/32") plus the number of routes configured</td>
+              <td>Green = all pass. Red = any failures.</td>
+            </tr>
+            <tr>
+              <td>Visual Regression</td>
+              <td>Number of screenshot diffs detected (e.g., "0 diffs")</td>
+              <td>Green = 0 diffs. Red = diffs found (with page names listed).</td>
+            </tr>
+            <tr>
+              <td>Accessibility</td>
+              <td>New violation count vs baseline (e.g., "0 new, 3 known")</td>
+              <td>Green = no new violations. Amber = known violations older than 30 days. Red = new violations detected.</td>
+            </tr>
+            <tr>
+              <td>Performance</td>
+              <td>Lighthouse score with delta from baseline (e.g., "78 (+0)")</td>
+              <td>Green = within &plusmn;5 of baseline (noise-adjusted). Amber = &plusmn;6&ndash;10. Red = more than &plusmn;10.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>A <strong>Health Check</strong> tile appears as a 5th tile when warnings or failures are found (e.g., stubs or TODOs in the code). When clean, health check results are available in a collapsible detail section only.</p>
+
+        <p>Above the tiles, a status badge summarises the overall state: <strong>ALL PASS</strong> (green), <strong>WARNINGS</strong> (amber), or <strong>FAILURES</strong> (red).</p>
+
+        <div class="callout info">
+          <span class="callout-icon">&#9432;</span>
+          <div class="callout-body">
+            <strong>Dark mode.</strong> The snagging checklist includes a dark mode toggle in the top-right corner, just like these docs. Your preference is remembered across sessions.
+          </div>
+        </div>
+
+        <h3 id="snagging-baselines">Updating baselines</h3>
+
+        <p>Baselines are the "known good" reference points for visual screenshots, Lighthouse scores, and accessibility violations. When you intentionally change something &mdash; redesign a page, accept a performance trade-off, or fix an accessibility violation &mdash; the baselines need updating so future runs compare against the new state.</p>
+
+        <p>Tell Claude which baselines to update:</p>
+
+        <ul>
+          <li><code>--update-baselines</code> &mdash; update all baselines (visual, Lighthouse, accessibility)</li>
+          <li><code>--update-visual</code> &mdash; accept current screenshots as the new reference</li>
+          <li><code>--update-lighthouse</code> &mdash; accept current Lighthouse score as the new baseline</li>
+          <li><code>--update-a11y</code> &mdash; accept current accessibility violations as the known baseline</li>
+        </ul>
+
+        <p>After any baseline update, the test suite automatically re-runs and regenerates the checklist so you see clean results immediately &mdash; no need to run <code>/snagging</code> twice.</p>
+
+        <div class="callout tip">
+          <span class="callout-icon">&#10003;</span>
+          <div class="callout-body">
+            <strong>Baseline improvements are detected automatically.</strong> If you fix an accessibility violation and the count drops below the baseline, the checklist flags it: "violations reduced from 3 to 2 &mdash; run <code>--update-a11y</code> to update baseline." No manual bookkeeping needed.
           </div>
         </div>
 
@@ -1007,7 +1090,7 @@
           <div class="signpost-row">
             <span class="sp-trigger">feature complete</span>
             <span class="sp-arrow">&rarr;</span>
-            <span class="sp-result">Claude runs <code>/snagging</code> automatically and presents the checklist for sign-off.</span>
+            <span class="sp-result">Claude runs <code>/snagging</code> automatically &mdash; automated test suite runs first, then the HTML checklist opens with results tiles and manual checks.</span>
           </div>
         </div>
 
@@ -1032,7 +1115,7 @@
           </a>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.39.0</footer>
+        <footer class="site-footer">DOE Starter Kit v1.39.1</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->
@@ -1043,6 +1126,7 @@
       <a href="#what-runs-when" class="toc-link">What Runs When</a>
       <a href="#your-role" class="toc-link">Your Role</a>
       <a href="#commands" class="toc-link">Commands</a>
+      <a href="#snagging-checklist" class="toc-link">The Snagging Checklist</a>
       <a href="#signposting" class="toc-link">The Signposting System</a>
     </nav>
 

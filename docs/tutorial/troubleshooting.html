@@ -1345,6 +1345,172 @@
           </div>
         </div>
 
+        <!-- Snagging v2 Issues -->
+        <h2 id="snagging">Snagging v2 Issues</h2>
+
+        <p>The <code>/snagging</code> command runs a full quality sweep &mdash; Playwright tests, Lighthouse audits, accessibility checks, and visual regression &mdash; then presents results in a tile dashboard. These scenarios cover common failures you may see.</p>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Lighthouse tile shows dash or error</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>The Lighthouse tile in the snagging dashboard shows a dash (<code>-</code>) instead of a score, or displays an error message:</p>
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">Lighthouse did not produce output</span>
+<span class="t-comment"># or</span>
+<span class="t-error">Timed out waiting for Lighthouse</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Lighthouse couldn't run at all. The three most common causes are:</p>
+                <ul>
+                  <li><strong>Node version too old.</strong> Lighthouse 13 requires Node 20+. If you're on Node 18, it will silently fail.</li>
+                  <li><strong>Chrome not found.</strong> Lighthouse needs a Chromium-based browser to run its audits.</li>
+                  <li><strong>Dev server not running.</strong> Lighthouse needs something to audit on the expected port.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Check your Node version first:</p>
+                <div class="code-block"><pre>node --version</pre></div>
+                <p>If you're on Node 18, pin Lighthouse 11 which supports it:</p>
+                <div class="code-block"><pre>npm install --save-dev lighthouse@11</pre></div>
+                <p>If Node is fine, check that Chrome is installed and that your dev server is running on the expected port. The <code>/snagging</code> orchestrator starts the server automatically, but if you're running Lighthouse manually, you'll need to start it yourself.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>All tiles show dashes</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>Every tile in the snagging dashboard shows <code>-</code> instead of results. No tests ran at all.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>The dev server failed to start on port 8080. This usually happens because a stale process from a previous run is still occupying the port.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Kill whatever is using the port, then run snagging again:</p>
+                <div class="code-block"><pre>lsof -ti:8080 | xargs kill</pre></div>
+                <p>The snagging orchestrator normally handles this automatically, but if it couldn't kill the process (e.g. it was started by another user or requires elevated permissions), you may need to do it manually. After clearing the port, re-run <code>/snagging</code>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>APP_PATH mismatch warning</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-amber">WARNING: APP_PATH in test files references v2.3.0 but current version is v2.4.0</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Your app version was bumped (e.g. the HTML file was renamed from <code>app-v2.3.0.html</code> to <code>app-v2.4.0.html</code>), but the test files still reference the old version. Tests will fail because they're trying to open a file that no longer exists.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>The <code>/snagging</code> command auto-detects and fixes this. If you need to fix it manually, update the <code>APP_PATH</code> constant in each test file:</p>
+                <ul>
+                  <li><code>tests/app.spec.js</code></li>
+                  <li><code>tests/accessibility.spec.js</code></li>
+                  <li><code>tests/visual.spec.js</code></li>
+                </ul>
+                <p>Change the version string to match your current app filename.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Visual regression shows unexpected diffs</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>The visual regression tile shows failures. Screenshot comparisons highlight differences between the current page and the saved baseline.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>The page looks different from the last time baselines were captured. This could be an intentional UI change that hasn't been acknowledged yet, or it could be caused by non-deterministic data (timestamps, random IDs, live API responses) that changes between runs.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>If the visual change is intentional (you restyled a component, changed a layout, updated data), update the baselines:</p>
+                <div class="code-block"><pre>python3 execution/run_test_suite.py --update-visual</pre></div>
+                <p>If the change is unexpected, investigate what's different. Common culprits are dynamic dates, randomised content, or a CSS change with unintended side-effects. Ask Claude: <em>"The visual regression is flagging [page name]. I didn't change anything there &mdash; what's causing the diff?"</em></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Dark mode toggle not working</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>The page is stuck in light mode or dark mode. Clicking the toggle button has no effect, or the page reverts to the wrong mode on reload.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>The dark mode toggle stores the user's preference in <code>localStorage</code>. If a stale or corrupted value is stored, the toggle logic can get stuck &mdash; it reads the old value on page load and ignores clicks.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Clear the stored preference. Open your browser's DevTools (F12 or Cmd+Option+I), go to the Console tab, and run:</p>
+                <div class="code-block"><pre>localStorage.removeItem('theme');
+location.reload();</pre></div>
+                <p>The exact key name may vary by project (e.g. <code>'dark-mode'</code>, <code>'color-scheme'</code>). Check your app's toggle code if <code>'theme'</code> doesn't work. After clearing, the toggle should work normally again.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Quick Reference -->
         <h2 id="quick-reference">Quick Reference</h2>
 
@@ -1383,6 +1549,14 @@
               <td>Run the full regression verification suite</td>
             </tr>
             <tr>
+              <td><code>lsof -ti:8080 | xargs kill</code></td>
+              <td>Kill stale process on port 8080 (fixes "all dashes" in snagging)</td>
+            </tr>
+            <tr>
+              <td><code>python3 execution/run_test_suite.py --update-visual</code></td>
+              <td>Update visual regression baselines after intentional UI changes</td>
+            </tr>
+            <tr>
               <td><code>SKIP_ESLINT=1 git commit -m "..."</code></td>
               <td>Bypass ESLint for this commit (use sparingly)</td>
             </tr>
@@ -1408,7 +1582,7 @@
           </a>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.39.0</footer>
+        <footer class="site-footer">DOE Starter Kit v1.39.1</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->
@@ -1422,6 +1596,7 @@
       <a href="#code-trace" class="toc-link">/code-trace Issues</a>
       <a href="#npm" class="toc-link">npm / Node Issues</a>
       <a href="#git-hooks" class="toc-link">Git Hook Issues</a>
+      <a href="#snagging" class="toc-link">Snagging v2 Issues</a>
       <a href="#quick-reference" class="toc-link">Quick Reference</a>
     </nav>
 

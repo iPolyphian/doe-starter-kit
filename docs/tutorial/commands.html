@@ -2192,12 +2192,12 @@
           <div class="cmd-header">
             <span class="cmd-badge">/snagging</span>
             <span class="cmd-origin doe">DOE</span>
-            <span class="cmd-summary">Generates an interactive HTML test checklist from your <code>[manual]</code> contract items.</span>
+            <span class="cmd-summary">Runs automated tests, then generates an interactive HTML checklist with results card and manual check sections.</span>
           </div>
           <div class="cmd-detail">
-            <p><strong>When to use it:</strong> After a feature is code-complete and all <code>[auto]</code> criteria pass, but <code>[manual]</code> items still need human testing.</p>
-            <p><strong>What it generates:</strong> A standalone HTML page at <code>docs/[feature-name]-manual-tests.html</code> with three-state checkboxes (untested/pass/fail), copyable console commands, setup prerequisites, a test timer, localStorage persistence, and export buttons for pasting results back to Claude.</p>
-            <p><strong>How it works:</strong> Reads <code>todo.md</code>, extracts <code>[manual]</code> items for the current feature, splits multi-sentence items into individual checks, detects console commands, and traces code for known edge cases. The generated checklist is your sign-off workflow &mdash; test, export failures, paste back, fix, regenerate, repeat until all pass.</p>
+            <p><strong>When to use it:</strong> After a feature is code-complete and all <code>[auto]</code> criteria pass. Runs the automated test suite first, then presents manual items for human testing.</p>
+            <p><strong>What it generates:</strong> A standalone HTML page at <code>docs/[feature-name]-manual-tests.html</code> with an automated results card (status badge, metric tiles, expandable details for Playwright/Lighthouse/a11y/health check results) and manual check sections with three-state checkboxes (untested/pass/fail), copyable console commands, setup prerequisites, a test timer, localStorage persistence, and export buttons for pasting results back to Claude. Supports dark mode toggle and baseline updates.</p>
+            <p><strong>How it works:</strong> First runs the automated test suite if an orchestrator exists &mdash; Playwright browser tests, Lighthouse performance/SEO audits, accessibility checks, and health check scripts. Then reads <code>todo.md</code>, extracts <code>[manual]</code> items for the current feature, splits multi-sentence items into individual checks, detects console commands, and traces code for known edge cases. Results from both automated and manual phases are combined into a single HTML page. The generated checklist is your sign-off workflow &mdash; review automated results, test manual items, export failures, paste back, fix, regenerate, repeat until all pass.</p>
           </div>
         </div>
 
@@ -2476,7 +2476,7 @@
           </a>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.39.0</footer>
+        <footer class="site-footer">DOE Starter Kit v1.39.1</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->
