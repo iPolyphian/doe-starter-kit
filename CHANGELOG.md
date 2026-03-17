@@ -7,6 +7,11 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.39.2] — 2026-03-17
+
+### Changed
+- **Command card layout** across 3 tutorial pages (commands.html, testing.html, daily-flow.html): command badge now sits above the description text instead of beside it. Cleaner layout for long command names like `/code-trace --integration`.
+
 ## [v1.39.1] — 2026-03-17
 
 ### Changed
