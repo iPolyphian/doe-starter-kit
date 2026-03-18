@@ -74,9 +74,12 @@ Keep universal checks (`@register("universal")`), add your own project checks.
 - `routes` — array of hash routes to test. Each entry: `{"hash": "dashboard", "pageId": "page-dashboard", "label": "Dashboard"}`. Leave empty for single-page apps.
 - `initScript` — JS to run before each test (e.g. `"localStorage.setItem('role', 'admin');"`)
 - `buildCommand` — your build script (e.g. `"python3 execution/build.py"`)
-- `projectType` — `"html-app"` for static HTML projects
+- `projectType` — framework type. Supported: `"html-app"`, `"nextjs"`, `"vite"`, `"angular"`, `"nuxt"`, `"vue"`, `"svelte"`, `"remix"`, `"astro"`, `"react-native"`, `"expo"`, `"flutter"`, `"python"`, `"go"`, `"php"`, `"ruby"`. Auto-detected from project files if empty.
+- `routeMode` — `"hash"` (default, for static HTML) or `"path"` (for Next.js, Vite with path-based routing)
 
-**First-time setup:** Run `python3 execution/run_test_suite.py --bootstrap` to install Playwright, axe-core, and create initial baselines. Then run `/snagging` to see automated results.
+**First-time setup:** Run `python3 execution/run_test_suite.py --bootstrap` to install dependencies and create initial baselines. For web projects this installs Playwright + axe-core. For mobile projects (React Native, Expo, Flutter) this installs Maestro CLI. Then run `/snagging` to see automated results.
+
+**Mobile testing with Maestro:** If `projectType` is `react-native`, `expo`, or `flutter`, the Quality Stack uses Maestro for testing instead of Playwright. Template flows are in `.maestro/` — customize `app-launch.yaml` and `navigation.yaml` for your app. Maestro uses YAML-based flows that work across all mobile frameworks.
 
 ### tests/*.spec.js — Test specs
 

@@ -13,9 +13,10 @@ Then read directives/starter-kit-pull.md and follow it precisely. The directive 
 9. Templates: compare learnings.md and todo.md format rules — add new headings/rules, never touch content
 10. Directives: list kit vs project directives — update universal ones, add new ones, skip project-specific
 11. Execution scripts: compare universal checks in audit_claims.py — add new universal checks, preserve @register("project-specific") checks
-12. Show full summary — get approval before applying
-13. Apply approved changes
-14. Update STATE.md's "DOE Starter Kit" line to the new version (e.g. `v1.24.1 · ~/doe-starter-kit · synced`)
+12. Quality Stack: compare run_test_suite.py, health_check.py, verify_tests.py, generate_test_checklist.py between kit `execution/` and project `execution/` — show diffs, propose updates, preserve project customisations. Also compare tests/helpers.js, tests/*.spec.js, and playwright.config.js — update framework-generic code, preserve project-specific test specs and config
+13. Show full summary — get approval before applying
+14. Apply approved changes
+15. Update STATE.md's "DOE Starter Kit" line to the new version (e.g. `v1.24.1 · ~/doe-starter-kit · synced`)
 16. Commit: "Pull DOE kit v[X.Y.Z] — [summary]"
 
 To push DOE improvements FROM this project to the starter kit (reverse direction), use `/sync-doe`.

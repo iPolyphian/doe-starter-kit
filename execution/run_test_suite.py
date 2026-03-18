@@ -95,6 +95,133 @@ def check_app_path(version: str) -> list[str]:
     return warnings
 
 
+def detect_project_type() -> str:
+    """Detect the project framework type.
+
+    Priority: tests/config.json projectType > file-based auto-detection > html-app.
+    Writes detected type back to config.json for subsequent runs.
+    """
+    config_path = PROJECT_ROOT / "tests" / "config.json"
+    config = {}
+    if config_path.exists():
+        try:
+            with open(config_path) as f:
+                config = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    # Check explicit config first
+    project_type = config.get("projectType", "")
+    if project_type and project_type != "html-app":
+        return project_type
+
+    if project_type == "html-app":
+        return "html-app"
+
+    # Auto-detect from project files
+    # Order: unambiguous file markers first, then package.json dep checks
+    # (more specific before less specific)
+    detected = "html-app"
+
+    if (PROJECT_ROOT / "pubspec.yaml").exists():
+        detected = "flutter"
+    elif (PROJECT_ROOT / "angular.json").exists():
+        detected = "angular"
+    elif (PROJECT_ROOT / "composer.json").exists():
+        detected = "php"
+    elif (PROJECT_ROOT / "Gemfile").exists():
+        detected = "ruby"
+    elif (PROJECT_ROOT / "go.mod").exists():
+        detected = "go"
+    elif (PROJECT_ROOT / "app.json").exists():
+        try:
+            with open(PROJECT_ROOT / "app.json") as f:
+                app_data = json.load(f)
+            if "expo" in app_data:
+                detected = "expo"
+        except (json.JSONDecodeError, OSError):
+            pass
+    elif (PROJECT_ROOT / "package.json").exists():
+        try:
+            with open(PROJECT_ROOT / "package.json") as f:
+                pkg = json.load(f)
+            deps = pkg.get("dependencies", {})
+            all_deps = {}
+            all_deps.update(deps)
+            all_deps.update(pkg.get("devDependencies", {}))
+            if "react-native" in all_deps:
+                detected = "react-native"
+            elif "next" in all_deps:
+                detected = "nextjs"
+            elif "nuxt" in all_deps:
+                detected = "nuxt"
+            elif "@remix-run/react" in deps:
+                detected = "remix"
+            elif "svelte" in all_deps or "@sveltejs/kit" in all_deps:
+                detected = "svelte"
+            elif "astro" in deps:
+                detected = "astro"
+            elif "vue" in deps:
+                detected = "vue"
+            elif "vite" in all_deps:
+                detected = "vite"
+        except (json.JSONDecodeError, OSError):
+            pass
+    elif any((PROJECT_ROOT / f).exists() for f in ("pyproject.toml", "requirements.txt", "manage.py")):
+        detected = "python"
+
+    # Write back to config so subsequent runs skip detection
+    config["projectType"] = detected
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+
+    return detected
+
+
+def get_server_config() -> dict:
+    """Get server configuration based on projectType in tests/config.json.
+
+    Returns a dict with build, serve, port keys (and optionally mobile: True).
+    """
+    config_path = PROJECT_ROOT / "tests" / "config.json"
+    config = {}
+    if config_path.exists():
+        try:
+            with open(config_path) as f:
+                config = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    project_type = config.get("projectType", "html-app")
+
+    configs = {
+        "nextjs":   {"build": config.get("buildCommand", "npm run build"), "serve": config.get("startCommand", "npm start -- -p {port}"), "port": config.get("port", 3000)},
+        "vite":     {"build": config.get("buildCommand", "npm run build"), "serve": config.get("startCommand", "npx vite preview --port {port}"), "port": config.get("port", 4173)},
+        "angular":  {"build": config.get("buildCommand", "npx ng build"), "serve": config.get("startCommand", "npx serve dist/ -p {port} --no-clipboard"), "port": config.get("port", 4200)},
+        "nuxt":     {"build": config.get("buildCommand", "npx nuxt build"), "serve": config.get("startCommand", "node .output/server/index.mjs"), "port": config.get("port", 3000)},
+        "vue":      {"build": config.get("buildCommand", "npm run build"), "serve": config.get("startCommand", "npx serve dist/ -p {port} --no-clipboard"), "port": config.get("port", 5173)},
+        "svelte":   {"build": config.get("buildCommand", "npm run build"), "serve": config.get("startCommand", "npm run preview -- --port {port}"), "port": config.get("port", 4173)},
+        "remix":    {"build": config.get("buildCommand", "npx remix build"), "serve": config.get("startCommand", "npx remix-serve build/server/index.js"), "port": config.get("port", 3000)},
+        "astro":    {"build": config.get("buildCommand", "npx astro build"), "serve": config.get("startCommand", "npx serve dist/ -p {port} --no-clipboard"), "port": config.get("port", 4321)},
+        "php":      {"build": None, "serve": config.get("startCommand", "php -S localhost:{port} -t public"), "port": config.get("port", 8000)},
+        "ruby":     {"build": None, "serve": config.get("startCommand", "bundle exec rails server -p {port}"), "port": config.get("port", 3000)},
+        "go":       {"build": config.get("buildCommand", "go build -o .tmp/app ."), "serve": config.get("startCommand", ".tmp/app"), "port": config.get("port", 8080)},
+        "python":   {"build": None, "serve": config.get("startCommand", "python3 manage.py runserver {port}"), "port": config.get("port", 8000)},
+    }
+
+    if project_type in configs:
+        return configs[project_type]
+    elif project_type in ("react-native", "expo", "flutter"):
+        return {"build": None, "serve": None, "port": None, "mobile": True}
+    else:
+        # html-app (default)
+        return {
+            "build": None,
+            "serve": "npx serve . -p {port} --no-clipboard",
+            "port": 8080,
+        }
+
+
 def kill_port(port: int) -> None:
     """Kill any process on the given port."""
     try:
@@ -125,16 +252,27 @@ def wait_for_port(port: int, timeout: int = 10) -> bool:
     return False
 
 
-def start_server() -> subprocess.Popen | None:
-    """Start npx serve and return the process."""
-    kill_port(PORT)
+def start_server(server_config: dict | None = None) -> subprocess.Popen | None:
+    """Start the dev/preview server and return the process.
+
+    Uses server_config's serve command and port if provided,
+    otherwise falls back to npx serve on the default PORT.
+    """
+    port = server_config["port"] if server_config and server_config.get("port") else PORT
+    serve_cmd = (
+        server_config["serve"] if server_config and server_config.get("serve")
+        else f"npx serve . -p {port} --no-clipboard"
+    )
+    kill_port(port)
+    # Format port into serve command and split for Popen
+    cmd_str = serve_cmd.format(port=port)
     proc = subprocess.Popen(
-        ["npx", "serve", ".", "-p", str(PORT), "--no-clipboard"],
+        cmd_str.split(),
         cwd=str(PROJECT_ROOT),
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
-    if not wait_for_port(PORT, SERVER_TIMEOUT):
+    if not wait_for_port(port, SERVER_TIMEOUT):
         proc.terminate()
         return None
     return proc
@@ -179,6 +317,74 @@ def _error_result(section: str, msg: str) -> dict:
 # ---------------------------------------------------------------------------
 # Tool runners
 # ---------------------------------------------------------------------------
+
+def run_maestro() -> dict:
+    """Run Maestro flows and return parsed results."""
+    # Look for .maestro/ directory
+    maestro_dir = PROJECT_ROOT / ".maestro"
+    if not maestro_dir.exists():
+        return {"status": "error", "total": 0, "passed": 0, "failed": 0,
+                "flows": [], "error_message": "No .maestro/ directory found"}
+
+    # Find all .yaml flow files
+    flows = list(maestro_dir.glob("*.yaml"))
+    if not flows:
+        return {"status": "error", "total": 0, "passed": 0, "failed": 0,
+                "flows": [], "error_message": "No .yaml flows in .maestro/"}
+
+    # Run maestro test and parse results
+    # Maestro outputs JUnit XML — parse it
+    try:
+        result = subprocess.run(
+            ["maestro", "test", str(maestro_dir), "--format", "junit",
+             "--output", str(TMP_DIR / "maestro-results.xml")],
+            capture_output=True, text=True,
+            cwd=str(PROJECT_ROOT),
+            timeout=180,
+        )
+        # Parse JUnit XML results
+        xml_path = TMP_DIR / "maestro-results.xml"
+        if xml_path.exists():
+            return _parse_maestro_xml(xml_path, flows)
+        else:
+            # Fall back to exit code
+            status = "pass" if result.returncode == 0 else "fail"
+            return {"status": status, "total": len(flows),
+                    "passed": len(flows) if status == "pass" else 0,
+                    "failed": 0 if status == "pass" else len(flows),
+                    "flows": [{"name": f.stem, "status": status} for f in flows],
+                    "error_message": None}
+    except FileNotFoundError:
+        return {"status": "error", "total": 0, "passed": 0, "failed": 0,
+                "flows": [], "error_message": "Maestro CLI not found. Run --bootstrap"}
+    except subprocess.TimeoutExpired:
+        return {"status": "error", "total": 0, "passed": 0, "failed": 0,
+                "flows": [], "error_message": "Maestro timed out after 180s"}
+
+
+def _parse_maestro_xml(xml_path, flows):
+    """Parse Maestro JUnit XML output into unified result dict."""
+    import xml.etree.ElementTree as ET
+    try:
+        tree = ET.parse(xml_path)
+        root = tree.getroot()
+        total = int(root.attrib.get("tests", len(flows)))
+        failed = int(root.attrib.get("failures", 0)) + int(root.attrib.get("errors", 0))
+        passed = total - failed
+
+        flow_results = []
+        for tc in root.iter("testcase"):
+            name = tc.attrib.get("name", "unknown")
+            has_failure = tc.find("failure") is not None or tc.find("error") is not None
+            flow_results.append({"name": name, "status": "fail" if has_failure else "pass"})
+
+        return {"status": "fail" if failed > 0 else "pass", "total": total,
+                "passed": passed, "failed": failed, "flows": flow_results,
+                "error_message": None}
+    except Exception as e:
+        return {"status": "error", "total": len(flows), "passed": 0, "failed": 0,
+                "flows": [], "error_message": f"Could not parse Maestro XML: {e}"}
+
 
 def run_playwright() -> dict:
     """Run Playwright tests and return parsed results."""
@@ -494,7 +700,10 @@ def update_a11y_baseline() -> None:
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Run test suite for snagging integration")
+    parser = argparse.ArgumentParser(
+        description="DOE Quality Stack test suite orchestrator. "
+        "Runs Playwright, Lighthouse, and health checks against your project.",
+    )
     parser.add_argument("--update-baselines", action="store_true", help="Update all baselines")
     parser.add_argument("--update-visual", action="store_true", help="Update visual baselines only")
     parser.add_argument("--update-lighthouse", action="store_true", help="Update Lighthouse baseline only")
@@ -502,9 +711,86 @@ def main():
     parser.add_argument("--bootstrap", action="store_true", help="Install dependencies and create initial baselines")
     args = parser.parse_args()
 
+    # Detect project type early (before bootstrap, so config is available)
+    project_type = detect_project_type()
+    server_config = get_server_config()
+    port = server_config.get("port") or PORT
+
+    # Mobile projects -- run Maestro flows
+    if server_config.get("mobile"):
+        print(f"Mobile project detected ({project_type}) -- running Maestro flows")
+        start_time = time.time()
+        TMP_DIR.mkdir(parents=True, exist_ok=True)
+
+        # Check if maestro CLI is installed
+        maestro_installed = shutil.which("maestro") is not None
+        if not maestro_installed:
+            print("Error: Maestro CLI not found. Run --bootstrap to install.", file=sys.stderr)
+            maestro_results = {"status": "error", "total": 0, "passed": 0, "failed": 0,
+                               "flows": [], "error_message": "Maestro CLI not found. Run --bootstrap"}
+        else:
+            maestro_results = run_maestro()
+
+        health_results = run_health_check()
+        duration = round(time.time() - start_time)
+
+        results = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "duration_seconds": duration,
+            "project_type": project_type,
+            "warnings": [],
+            "maestro_results": maestro_results,
+            "lighthouse": _error_result("lighthouse", "Not applicable for mobile projects"),
+            "health_check": health_results,
+        }
+        RESULTS_PATH.write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps(results, indent=2))
+        sys.exit(0)
+
     # Bootstrap mode: install deps, Playwright browser, and create baselines
     if args.bootstrap:
         print("Bootstrapping Quality Stack...")
+
+        if project_type in ("react-native", "expo", "flutter"):
+            # Mobile bootstrap: install Maestro CLI and create template flows
+            print(f"  Mobile project ({project_type}) -- setting up Maestro...")
+            if shutil.which("maestro"):
+                print("  Maestro CLI already installed.")
+            else:
+                print("  Installing Maestro CLI...")
+                subprocess.run(
+                    ["bash", "-c", 'curl -Ls "https://get.maestro.mobile.dev" | bash'],
+                    cwd=str(PROJECT_ROOT), timeout=120,
+                )
+            maestro_dir = PROJECT_ROOT / ".maestro"
+            if not maestro_dir.exists():
+                print("  Creating .maestro/ with template flows...")
+                maestro_dir.mkdir(parents=True, exist_ok=True)
+                template_flow = maestro_dir / "app-launch.yaml"
+                template_flow.write_text(
+                    "appId: com.example.app\n"
+                    "---\n"
+                    "- launchApp\n"
+                    "- assertVisible: \".*\"\n",
+                    encoding="utf-8",
+                )
+            else:
+                print("  .maestro/ directory already exists.")
+            print("  Bootstrap complete. Run again without --bootstrap to execute tests.")
+            sys.exit(0)
+
+        # Non-Node projects: minimal bootstrap (baselines only, no npm)
+        if project_type in ("php", "ruby", "go", "python"):
+            print(f"  Non-Node project ({project_type}) -- creating baselines only...")
+            BASELINES_DIR.mkdir(parents=True, exist_ok=True)
+            if not LIGHTHOUSE_BASELINE.exists():
+                LIGHTHOUSE_BASELINE.write_text('{"score": 0, "first_run": true}\n', encoding="utf-8")
+            if not A11Y_BASELINE.exists():
+                A11Y_BASELINE.write_text('{"known_violations": [], "total_known_critical": 0}\n', encoding="utf-8")
+            print("  Bootstrap complete. Run again without --bootstrap to execute tests.")
+            sys.exit(0)
+
+        # Web bootstrap: install Playwright and create baselines
         pkg_json = PROJECT_ROOT / "package.json"
         if not pkg_json.exists():
             print("  Creating package.json...")
@@ -583,11 +869,36 @@ def main():
         print(json.dumps(results, indent=2))
         sys.exit(1)
 
-    # 4. Start server
-    print(f"Starting server on port {PORT}...")
-    server = start_server()
+    # 4. Run build step if needed (nextjs, vite)
+    if server_config.get("build"):
+        print(f"Running build: {server_config['build']}...")
+        build_result = subprocess.run(
+            server_config["build"].split(),
+            cwd=str(PROJECT_ROOT),
+            timeout=300,
+        )
+        if build_result.returncode != 0:
+            error_msg = f"Build command failed: {server_config['build']}"
+            print(f"Error: {error_msg}", file=sys.stderr)
+            health_results = run_health_check()
+            results = {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "duration_seconds": round(time.time() - start_time),
+                "warnings": warnings + [error_msg],
+                "playwright": _error_result("playwright", error_msg),
+                "accessibility": _error_result("accessibility", error_msg),
+                "lighthouse": _error_result("lighthouse", error_msg),
+                "health_check": health_results,
+            }
+            RESULTS_PATH.write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
+            print(json.dumps(results, indent=2))
+            sys.exit(1)
+
+    # 5. Start server
+    print(f"Starting server on port {port}...")
+    server = start_server(server_config)
     if server is None:
-        error_msg = f"Server failed to start on port {PORT}"
+        error_msg = f"Server failed to start on port {port}"
         print(f"Error: {error_msg}", file=sys.stderr)
         health_results = run_health_check()
         results = {
@@ -604,10 +915,14 @@ def main():
         sys.exit(1)
 
     try:
-        app_prefix = get_app_prefix()
-        url = f"http://localhost:{PORT}/{app_prefix}-{version}"
+        # URL construction: html-app uses path-based routing, frameworks use root
+        if project_type != "html-app":
+            url = f"http://localhost:{port}"
+        else:
+            app_prefix = get_app_prefix()
+            url = f"http://localhost:{port}/{app_prefix}-{version}"
 
-        # 5. Handle baseline updates (server must be running)
+        # 6. Handle baseline updates (server must be running)
         if update_mode:
             if update_mode in ("all", "visual"):
                 update_visual()
@@ -616,7 +931,7 @@ def main():
             if update_mode in ("all", "a11y"):
                 update_a11y_baseline()
 
-        # 6. Parallel execution: Playwright + Lighthouse
+        # 7. Parallel execution: Playwright + Lighthouse
         print(f"Running tests against {url}...")
         with ThreadPoolExecutor(max_workers=2) as executor:
             pw_future = executor.submit(run_playwright)
@@ -624,14 +939,14 @@ def main():
             playwright_results = pw_future.result()
             lighthouse_results = lh_future.result()
 
-        # 7. Health check (sequential, fast)
+        # 8. Health check (sequential, fast)
         health_results = run_health_check()
 
-        # 8. Build a11y results from Playwright + baselines
+        # 9. Build a11y results from Playwright + baselines
         a11y_info = get_a11y_info()
         a11y_results = build_a11y_results(playwright_results, a11y_info)
 
-        # 9. Baseline improvement detection
+        # 10. Baseline improvement detection
         if (
             a11y_info
             and a11y_results.get("new_critical") == 0
@@ -651,13 +966,13 @@ def main():
                             f"-- run --update-a11y to update baseline"
                         )
 
-        # 10. All routes failed warning
+        # 11. All routes failed warning
         if playwright_results.get("_all_routes_failed"):
             warnings.append(
                 "All routes failed -- APP_PATH may not match current version"
             )
 
-        # 11. First Lighthouse run -- write baseline
+        # 12. First Lighthouse run -- write baseline
         if lighthouse_results.get("first_run") and lighthouse_results.get("score") is not None:
             BASELINES_DIR.mkdir(parents=True, exist_ok=True)
             LIGHTHOUSE_BASELINE.write_text(
@@ -687,7 +1002,7 @@ def main():
         print(json.dumps(results, indent=2))
 
     finally:
-        # 12. Always kill server
+        # 13. Always kill server
         stop_server(server)
 
 

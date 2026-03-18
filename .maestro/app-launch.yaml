@@ -1,0 +1,9 @@
+# DOE Quality Stack — App Launch Flow
+# Verifies the app launches successfully and the home screen renders.
+# Customize the assertions below to match your app's home screen.
+appId: ${APP_ID}
+---
+- launchApp
+- assertVisible:
+    text: ".*"
+    optional: true

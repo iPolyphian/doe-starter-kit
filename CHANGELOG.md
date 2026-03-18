@@ -7,6 +7,22 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.42.0] — 2026-03-18
+
+### Added
+- **Multi-framework testing** — Quality Stack now supports 16 project types: static HTML, Next.js, Vite/React, Angular, Nuxt, Vue, SvelteKit, Remix, Astro, React Native, Expo, Flutter, Python, Go, PHP/Laravel, and Ruby/Rails. Auto-detects framework from project files and configures testing accordingly.
+- **Maestro mobile testing** — React Native, Expo, and Flutter projects use Maestro for YAML-based UI testing. Bootstrap installs Maestro CLI automatically. Template flows in `.maestro/` (app-launch + navigation).
+- **Framework-aware orchestrator** — `run_test_suite.py` reads `projectType` from `tests/config.json`, uses framework-specific build and serve commands. Adapters for all web frameworks, PHP built-in server, Rails, Go, and Python/Django.
+- **Multi-language health check** — `health_check.py` scans 10+ languages with per-framework scan paths, stub patterns, TODO detection, and empty function detection. Supports `.js`, `.jsx`, `.ts`, `.tsx`, `.vue`, `.svelte`, `.astro`, `.py`, `.go`, `.php`, `.rb`, `.dart` files.
+- **Path routing support** — `routeMode` field in `tests/config.json` — `"hash"` (default) or `"path"` (Next.js, Vite, SvelteKit, etc). helpers.js uses root path for path-based routing.
+- **Distribution fix** — `setup.sh` copies Quality Stack execution scripts and test infrastructure to new projects. `/pull-doe` syncs Quality Stack files between kit and project.
+- **Snagging auto-bootstrap** — `/snagging` automatically runs `--bootstrap` on first use instead of telling the user to do it manually.
+- **Snagging copy dropdown** — Copy Results + Copy Bugs + Export section consolidated into a single dropdown menu with failure count badge.
+
+### Changed
+- **Generator multi-framework** — `generate_test_checklist.py` handles `maestro_results` with framework-specific tile labels, shows `projectType` badge in automated results header.
+- **Health check per-language patterns** — TODO/FIXME detection uses `#` for Python/Ruby, `//` for JS/Go/Dart, `<!--` for Vue/Svelte/Astro templates. Empty function detection uses language-specific syntax (`def...pass` for Python, `func...{}` for Go, etc).
+
 ## [v1.41.3] — 2026-03-18
 
 ### Fixed

@@ -349,12 +349,35 @@ def build_auto_results_html(tr: dict | None, code_trace: list | None = None) -> 
     duration = tr.get("duration_seconds", 0)
     warnings = tr.get("warnings", [])
     pw = tr.get("playwright", {})
+    maestro = tr.get("maestro_results", {})
+    is_maestro = bool(maestro)
     a11y = tr.get("accessibility", {})
     lh = tr.get("lighthouse", {})
     hc = tr.get("health_check", {})
 
+    # -- Read projectType from tests/config.json --
+    PROJECT_TYPE_DISPLAY = {
+        "html-app": "HTML App", "nextjs": "Next.js", "vite": "Vite",
+        "react-native": "React Native", "expo": "Expo", "flutter": "Flutter",
+        "angular": "Angular", "nuxt": "Nuxt", "vue": "Vue", "svelte": "SvelteKit",
+        "remix": "Remix", "astro": "Astro", "python": "Python", "go": "Go",
+        "php": "PHP/Laravel", "ruby": "Ruby/Rails",
+    }
+    project_type_badge = ""
+    try:
+        config_path = PROJECT_ROOT / "tests" / "config.json"
+        if config_path.exists():
+            with open(config_path, encoding="utf-8") as _cf:
+                _cfg = json.load(_cf)
+            pt = _cfg.get("projectType", "")
+            pt_display = PROJECT_TYPE_DISPLAY.get(pt, pt)
+            if pt_display:
+                project_type_badge = f'<span class="ar-project-type">{escape_html(pt_display)}</span>'
+    except (json.JSONDecodeError, OSError):
+        pass
+
     # -- Determine overall status badge --
-    statuses = [s for s in [pw.get("status"), a11y.get("status"), lh.get("status"), hc.get("status")] if s is not None]
+    statuses = [s for s in [pw.get("status"), maestro.get("status"), a11y.get("status"), lh.get("status"), hc.get("status")] if s is not None]
     # Add code trace status
     if code_trace is not None:
         ct_high = sum(1 for f in code_trace if f.get("severity", "").lower() == "high")
@@ -384,35 +407,49 @@ def build_auto_results_html(tr: dict | None, code_trace: list | None = None) -> 
         )
 
     tiles = []
-    has_test_suite = bool(pw or a11y or lh or hc)
+    has_test_suite = bool(pw or maestro or a11y or lh or hc)
 
     if has_test_suite:
-        # Browser Tests
-        pw_status = pw.get("status", "error")
-        if pw_status == "error":
-            tiles.append(_tile("Browser Tests", "&mdash;", escape_html(pw.get("error_message", "Error")), "error"))
+        # Browser Tests / Maestro Flows
+        if is_maestro:
+            m_status = maestro.get("status", "error")
+            if m_status == "error":
+                tiles.append(_tile("Maestro Flows", "&mdash;", escape_html(maestro.get("error_message", "Error")), "error"))
+            else:
+                tiles.append(_tile(
+                    "Maestro Flows",
+                    f'{maestro.get("passed", 0)}/{maestro.get("total", 0)}',
+                    f'All flows pass' if maestro.get("failed", 0) == 0 else f'{maestro.get("failed", 0)} failures',
+                    m_status,
+                ))
         else:
-            route_count = len(pw.get("routes", []))
-            tiles.append(_tile(
-                "Browser Tests",
-                f'{pw.get("passed", 0)}/{pw.get("total", 0)}',
-                f'All pages load, nav works' if pw.get("failed", 0) == 0 else f'{pw.get("failed", 0)} failures',
-                pw_status,
-            ))
+            pw_status = pw.get("status", "error")
+            if pw_status == "error":
+                tiles.append(_tile("Browser Tests", "&mdash;", escape_html(pw.get("error_message", "Error")), "error"))
+            else:
+                route_count = len(pw.get("routes", []))
+                tiles.append(_tile(
+                    "Browser Tests",
+                    f'{pw.get("passed", 0)}/{pw.get("total", 0)}',
+                    f'All pages load, nav works' if pw.get("failed", 0) == 0 else f'{pw.get("failed", 0)} failures',
+                    pw_status,
+                ))
 
-        # Visual Regression
+        # Visual Regression (not applicable for Maestro/mobile projects)
         diffs = pw.get("visual_diffs", [])
-        if pw_status == "error":
-            tiles.append(_tile("Visual Regression", "&mdash;", "Requires browser tests", "error"))
-        else:
-            diff_count = len(diffs)
-            vr_status = "fail" if diff_count > 0 else "pass"
-            tiles.append(_tile(
-                "Visual Regression",
-                f'{diff_count} diff{"s" if diff_count != 1 else ""}',
-                f'4 screenshots match baseline' if diff_count == 0 else f'{diff_count} screenshot{"s" if diff_count != 1 else ""} changed',
-                vr_status,
-            ))
+        if not is_maestro:
+            pw_status = pw.get("status", "error")
+            if pw_status == "error":
+                tiles.append(_tile("Visual Regression", "&mdash;", "Requires browser tests", "error"))
+            else:
+                diff_count = len(diffs)
+                vr_status = "fail" if diff_count > 0 else "pass"
+                tiles.append(_tile(
+                    "Visual Regression",
+                    f'{diff_count} diff{"s" if diff_count != 1 else ""}',
+                    f'4 screenshots match baseline' if diff_count == 0 else f'{diff_count} screenshot{"s" if diff_count != 1 else ""} changed',
+                    vr_status,
+                ))
 
         # Accessibility
         a11y_status = a11y.get("status", "error")
@@ -476,7 +513,16 @@ def build_auto_results_html(tr: dict | None, code_trace: list | None = None) -> 
 
     # -- Failure cards --
     failure_cards_html = ""
-    if pw.get("failed", 0) > 0:
+    if is_maestro and maestro.get("failed", 0) > 0:
+        for flow in maestro.get("flows", []):
+            if flow.get("status") == "fail":
+                failure_cards_html += (
+                    f'<div class="ar-fail-card">'
+                    f'<span class="ar-fail-label">Flow</span> '
+                    f'<strong>{escape_html(flow["name"])}</strong> flow failed'
+                    f'</div>'
+                )
+    elif pw.get("failed", 0) > 0:
         for route in pw.get("routes", []):
             if route.get("status") == "fail":
                 failure_cards_html += (
@@ -529,21 +575,37 @@ def build_auto_results_html(tr: dict | None, code_trace: list | None = None) -> 
             f'</details>'
         )
 
-    # Route coverage detail
-    routes = pw.get("routes", [])
-    if routes:
-        chevron = '<span class="chevron-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg></span>'
-        rows = ""
-        for r in routes:
-            cls = "route-pass" if r["status"] == "pass" else "route-fail"
-            icon = "&#10003;" if r["status"] == "pass" else "&#10007;"
-            rows += f'<div class="route-row {cls}"><span class="route-icon">{icon}</span> {escape_html(r["name"])}</div>'
-        details_html += (
-            f'<details class="ar-detail">'
-            f'<summary>{chevron}Route coverage &mdash; {len(routes)} pages tested</summary>'
-            f'<div class="ar-detail-body">{rows}</div>'
-            f'</details>'
-        )
+    # Route / Flow coverage detail
+    if is_maestro:
+        flows = maestro.get("flows", [])
+        if flows:
+            chevron = '<span class="chevron-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg></span>'
+            rows = ""
+            for fl in flows:
+                cls = "route-pass" if fl["status"] == "pass" else "route-fail"
+                icon = "&#10003;" if fl["status"] == "pass" else "&#10007;"
+                rows += f'<div class="route-row {cls}"><span class="route-icon">{icon}</span> {escape_html(fl["name"])}</div>'
+            details_html += (
+                f'<details class="ar-detail">'
+                f'<summary>{chevron}Flow coverage &mdash; {len(flows)} flows tested</summary>'
+                f'<div class="ar-detail-body">{rows}</div>'
+                f'</details>'
+            )
+    else:
+        routes = pw.get("routes", [])
+        if routes:
+            chevron = '<span class="chevron-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg></span>'
+            rows = ""
+            for r in routes:
+                cls = "route-pass" if r["status"] == "pass" else "route-fail"
+                icon = "&#10003;" if r["status"] == "pass" else "&#10007;"
+                rows += f'<div class="route-row {cls}"><span class="route-icon">{icon}</span> {escape_html(r["name"])}</div>'
+            details_html += (
+                f'<details class="ar-detail">'
+                f'<summary>{chevron}Route coverage &mdash; {len(routes)} pages tested</summary>'
+                f'<div class="ar-detail-body">{rows}</div>'
+                f'</details>'
+            )
 
     # Code trace detail
     if code_trace is not None and len(code_trace) > 0:
@@ -572,6 +634,7 @@ def build_auto_results_html(tr: dict | None, code_trace: list | None = None) -> 
         f'    <div class="ar-header">\n'
         f'      <div class="ar-header-left">\n'
         f'        <span class="ar-title">Automated Results</span>\n'
+        f'        {project_type_badge}\n'
         f'        <span class="ar-badge {badge_cls}">{badge_text}</span>\n'
         f'      </div>\n'
         f'      <span class="ar-duration">{f"completed in {duration}s" if duration > 0 else "code trace only"}</span>\n'
@@ -631,6 +694,17 @@ def build_auto_results_css() -> str:
   .badge-pass { background: var(--green-light); color: var(--green); border: 1px solid var(--green-mid); }
   .badge-warn { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-mid); }
   .badge-fail { background: var(--red-light); color: var(--red); border: 1px solid var(--red-mid); }
+  .ar-project-type {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: var(--grey-100);
+    color: var(--grey-600);
+    border: 1px solid var(--grey-200);
+  }
   .ar-duration {
     font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 13px;
@@ -1068,9 +1142,13 @@ def generate_html(
     auto_results_css = build_auto_results_css() if has_auto else ""
     auto_verified_count = 0
     if test_results:
-        pw = test_results.get("playwright", {})
-        if pw.get("status") not in ("error", None):
-            auto_verified_count = pw.get("total", 0)
+        maestro = test_results.get("maestro_results", {})
+        if maestro and maestro.get("status") not in ("error", None):
+            auto_verified_count = maestro.get("total", 0)
+        else:
+            pw = test_results.get("playwright", {})
+            if pw.get("status") not in ("error", None):
+                auto_verified_count = pw.get("total", 0)
 
     # Build signpost callout
     signpost_html = build_signpost_html(total_checks, test_results)
@@ -1275,6 +1353,50 @@ def generate_html(
     font-weight: 600;
   }}
   .btn-amber:hover {{ background: #fde68a; }}
+
+  /* Copy dropdown */
+  .copy-dropdown {{
+    position: relative;
+  }}
+  .copy-caret {{
+    font-size: 10px;
+    margin-left: 2px;
+  }}
+  .copy-menu {{
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background: white;
+    border: 1px solid var(--grey-200);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    min-width: 200px;
+    z-index: 100;
+    overflow: hidden;
+  }}
+  .copy-menu.open {{ display: block; }}
+  .copy-menu-item {{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 14px;
+    border: none;
+    background: none;
+    font-size: 13px;
+    color: var(--grey-700);
+    cursor: pointer;
+    text-align: left;
+  }}
+  .copy-menu-item:hover {{ background: var(--grey-50); }}
+  .copy-menu-item + .copy-menu-item {{ border-top: 1px solid var(--grey-100); }}
+  .fail-count {{
+    font-size: 11px;
+    color: var(--grey-400);
+    margin-left: auto;
+  }}
+  .fail-count.has-fails {{ color: var(--red); font-weight: 600; }}
 
   /* Progress card */
   .progress-card {{
@@ -1834,50 +1956,6 @@ def generate_html(
 
   .bug-found {{ font-size: 11px; color: var(--grey-400); }}
 
-  /* -- Export section -- */
-  .export-section {{
-    background: white;
-    border: 1px solid var(--grey-200);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 16px;
-    padding: 16px 18px;
-  }}
-
-  .export-title {{
-    font-weight: 600;
-    color: var(--grey-700);
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 11px;
-  }}
-
-  .export-buttons {{
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }}
-
-  .btn-export {{
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border: 1px solid var(--grey-300);
-    background: white;
-    color: var(--grey-700);
-    transition: all 0.15s;
-  }}
-  .btn-export:hover {{ background: var(--grey-50); border-color: var(--grey-400); }}
-  .btn-export.primary {{ background: var(--blue); color: white; border-color: var(--blue); }}
-  .btn-export.primary:hover {{ background: #1d4ed8; }}
-  .btn-export.copied-confirm {{ background: var(--green-light); color: var(--green); border-color: var(--green-mid); }}
-
   /* -- Footer -- */
   .footer {{
     text-align: center;
@@ -1991,11 +2069,12 @@ def generate_html(
   body.dark .hc-row, body.dark .route-row {{ border-color: #334155; }}
   body.dark .signpost-banner-line {{ background: #475569; }}
   body.dark .signpost-banner-text {{ color: #94a3b8; }}
-  body.dark .export-section {{ background: #1e293b; border-color: #334155; }}
-  body.dark .export-title {{ color: #e2e8f0; }}
-  body.dark .btn-export {{ background: #334155; border-color: #475569; color: #cbd5e1; }}
-  body.dark .btn-export:hover {{ background: #475569; }}
-  body.dark .btn-export.primary {{ background: #1d4ed8; border-color: #1d4ed8; color: white; }}
+  body.dark .copy-menu {{ background: #1e293b; border-color: #334155; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }}
+  body.dark .copy-menu-item {{ color: #cbd5e1; }}
+  body.dark .copy-menu-item:hover {{ background: #334155; }}
+  body.dark .copy-menu-item + .copy-menu-item {{ border-color: #334155; }}
+  body.dark .fail-count {{ color: #64748b; }}
+  body.dark .fail-count.has-fails {{ color: #f87171; }}
   body.dark .btn {{ color: #cbd5e1; border-color: #475569; }}
   body.dark .btn:hover {{ background: #334155; }}
   body.dark .btn-primary {{ background: #2563eb; color: white; }}
@@ -2091,8 +2170,14 @@ def generate_html(
         <span class="elapsed-value" id="timer-display">0:00</span>
       </div>
       <button class="btn btn-danger" onclick="resetAll()">Reset all</button>
-      <button class="btn btn-ghost" onclick="copyResults(false)">Copy Results</button>
-      {'<button class="btn btn-amber" onclick="copyBugs()">Copy Bugs</button>' if bugs else ''}
+      <div class="copy-dropdown" id="copy-dropdown">
+        <button class="btn btn-ghost" onclick="toggleCopyMenu(event)">Copy <span class="copy-caret">&#9662;</span></button>
+        <div class="copy-menu" id="copy-menu">
+          <button class="copy-menu-item" onclick="doCopy('all')">Copy All Results</button>
+          <button class="copy-menu-item" onclick="doCopy('fail')">Copy Failures Only <span class="fail-count" id="copy-fail-count"></span></button>
+          {'<button class="copy-menu-item" onclick="doCopy(&quot;bugs&quot;)">Copy Bugs</button>' if bugs else ''}
+        </div>
+      </div>
       <a class="btn btn-primary" href="../{escape_html(app_filename)}" target="_blank">Open App &#8599;</a>
     </div>
   </div>
@@ -2103,21 +2188,6 @@ def generate_html(
 <!-- PAGE BODY -->
 <div class="page-body">
 {sections_html}
-
-  <!-- EXPORT SECTION -->
-  <div class="export-section">
-    <div class="export-title">Export Results</div>
-    <div class="export-buttons">
-      <button class="btn-export primary" id="btn-copy-all" onclick="copyResults(false)">
-        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z"/><path d="M3 5a2 2 0 012-2 3 3 0 003 3h4a3 3 0 003-3 2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"/></svg>
-        Copy Test Results
-      </button>
-      <button class="btn-export" id="btn-copy-fail" onclick="copyResults(true)">
-        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 7l2.55 2.4A1 1 0 0116 11H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd"/></svg>
-        Copy Failures Only
-      </button>
-    </div>
-  </div>
 
 {bugs_html}
 
@@ -2519,18 +2589,46 @@ function buildResultsText(failOnly) {{
   return lines.join('\\n');
 }}
 
+function toggleCopyMenu(e) {{
+  e.stopPropagation();
+  const menu = document.getElementById('copy-menu');
+  menu.classList.toggle('open');
+  // Update fail count each time the menu opens
+  if (menu.classList.contains('open')) {{
+    let failCount = 0;
+    for (const sid of Object.keys(SECTIONS)) {{
+      for (let i = 0; i < SECTIONS[sid].total; i++) {{
+        if (state[sid][i] && state[sid][i].state === 'fail') failCount++;
+      }}
+    }}
+    const el = document.getElementById('copy-fail-count');
+    if (el) {{
+      el.textContent = failCount > 0 ? '(' + failCount + ')' : '';
+      el.className = 'fail-count' + (failCount > 0 ? ' has-fails' : '');
+    }}
+  }}
+}}
+
+// Close menu on outside click
+document.addEventListener('click', function(e) {{
+  const menu = document.getElementById('copy-menu');
+  if (menu && !e.target.closest('.copy-dropdown')) {{
+    menu.classList.remove('open');
+  }}
+}});
+
+function doCopy(mode) {{
+  document.getElementById('copy-menu').classList.remove('open');
+  if (mode === 'bugs') {{
+    copyBugs();
+  }} else {{
+    copyResults(mode === 'fail');
+  }}
+}}
+
 function copyResults(failOnly) {{
   const text = buildResultsText(failOnly);
   navigator.clipboard.writeText(text).then(() => {{
-    const btnId = failOnly ? 'btn-copy-fail' : 'btn-copy-all';
-    const btn = document.getElementById(btnId);
-    const orig = btn.innerHTML;
-    btn.classList.add('copied-confirm');
-    btn.textContent = 'Copied!';
-    setTimeout(() => {{
-      btn.classList.remove('copied-confirm');
-      btn.innerHTML = orig;
-    }}, 2000);
     showToast(failOnly ? 'Failures copied to clipboard' : 'Test results copied to clipboard', 'success');
   }}).catch(() => {{
     showToast('Clipboard write failed -- try a different browser', 'error');

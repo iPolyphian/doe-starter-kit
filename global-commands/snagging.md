@@ -14,7 +14,7 @@ If nothing is found anywhere, report: "No manual tests pending." and stop.
 
 **Portability guard:** Only run this step if `execution/run_test_suite.py` exists. If it doesn't exist, skip to Step 3.
 
-**Bootstrap check:** Before running, verify Playwright is installed by checking if `node_modules/.bin/playwright` exists. If not, tell the user: "Quality Stack not bootstrapped. Run: `python3 execution/run_test_suite.py --bootstrap` to install dependencies and create baselines." Then skip to Step 3.
+**Auto-bootstrap:** Before running, verify Playwright is installed by checking if `node_modules/.bin/playwright` exists. If not, tell the user: "Quality Stack not bootstrapped -- installing dependencies..." and run `python3 execution/run_test_suite.py --bootstrap` automatically. If bootstrap succeeds, continue with the test suite. If it fails, log the error and skip to Step 3.
 
 Tell the user: "Running automated tests (Playwright, Lighthouse, health check) -- about 30-60 seconds."
 
@@ -25,6 +25,8 @@ python3 execution/run_test_suite.py
 Use `timeout: 180000` on the Bash tool call (3 minutes max).
 
 **APP_PATH mismatch handling:** If the results JSON (`.tmp/test-suite-results.json`) contains a warning about APP_PATH mismatch, update the `APP_PATH` constant in all 3 test files (`tests/app.spec.js`, `tests/accessibility.spec.js`, `tests/visual.spec.js`) to match the current version from STATE.md, then re-run the test suite.
+
+**Mobile projects (Maestro):** If `projectType` in `tests/config.json` is `react-native`, `expo`, or `flutter`, the test suite runs Maestro flows instead of Playwright tests. Results appear under a `maestro_results` key in the results JSON, and the checklist generator will show "Maestro Flows" tiles instead of "Browser Tests".
 
 ## Step 3: Run automated code trace
 

@@ -48,15 +48,186 @@ def _project_name():
 
 
 # ---------------------------------------------------------------------------
+# Framework-aware scan profiles
+# ---------------------------------------------------------------------------
+
+SCAN_PROFILES = {
+    "html-app": {
+        "paths": ["src/js/"],
+        "extensions": [".js"],
+        "stub_patterns": [r"\breturn\s+null\s*;"],
+        "not_impl_patterns": [r"console\.log\s*\(\s*['\"]not implemented['\"]"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "nextjs": {
+        "paths": ["src/", "app/", "pages/", "components/"],
+        "extensions": [".js", ".jsx", ".ts", ".tsx"],
+        "stub_patterns": [r"\breturn\s+null\s*;", r"throw\s+new\s+Error\s*\(\s*['\"]not implemented['\"]"],
+        "not_impl_patterns": [r"console\.log\s*\(\s*['\"]not implemented['\"]"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "vite": {
+        "paths": ["src/", "app/", "pages/", "components/"],
+        "extensions": [".js", ".jsx", ".ts", ".tsx"],
+        "stub_patterns": [r"\breturn\s+null\s*;", r"throw\s+new\s+Error\s*\(\s*['\"]not implemented['\"]"],
+        "not_impl_patterns": [r"console\.log\s*\(\s*['\"]not implemented['\"]"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "react-native": {
+        "paths": ["src/", "app/", "components/", "screens/"],
+        "extensions": [".js", ".jsx", ".ts", ".tsx"],
+        "stub_patterns": [r"\breturn\s+null\s*;", r"throw\s+new\s+Error\s*\(\s*['\"]not implemented['\"]"],
+        "not_impl_patterns": [r"console\.log\s*\(\s*['\"]not implemented['\"]"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "expo": {
+        "paths": ["src/", "app/", "components/", "screens/"],
+        "extensions": [".js", ".jsx", ".ts", ".tsx"],
+        "stub_patterns": [r"\breturn\s+null\s*;", r"throw\s+new\s+Error\s*\(\s*['\"]not implemented['\"]"],
+        "not_impl_patterns": [r"console\.log\s*\(\s*['\"]not implemented['\"]"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "flutter": {
+        "paths": ["lib/"],
+        "extensions": [".dart"],
+        "stub_patterns": [r"throw\s+UnimplementedError\s*\("],
+        "not_impl_patterns": [r"//\s*TODO\b"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\w+\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "angular": {
+        "paths": ["src/app/", "src/"],
+        "extensions": [".ts", ".html"],
+        "stub_patterns": [r"\breturn\s+null\s*;", r"throw\s+new\s+Error\s*\(\s*['\"]not implemented['\"]"],
+        "not_impl_patterns": [r"console\.log\s*\(\s*['\"]not implemented['\"]"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "nuxt": {
+        "paths": ["src/", "pages/", "components/", "composables/", "server/"],
+        "extensions": [".vue", ".js", ".ts"],
+        "stub_patterns": [r"\breturn\s+null\s*;", r"throw\s+new\s+Error\s*\(\s*['\"]not implemented['\"]"],
+        "not_impl_patterns": [r"console\.log\s*\(\s*['\"]not implemented['\"]"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b", r"<!--\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "vue": {
+        "paths": ["src/", "components/", "views/", "composables/"],
+        "extensions": [".vue", ".js", ".ts"],
+        "stub_patterns": [r"\breturn\s+null\s*;", r"throw\s+new\s+Error\s*\(\s*['\"]not implemented['\"]"],
+        "not_impl_patterns": [r"console\.log\s*\(\s*['\"]not implemented['\"]"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b", r"<!--\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "svelte": {
+        "paths": ["src/", "src/routes/", "src/lib/"],
+        "extensions": [".svelte", ".js", ".ts"],
+        "stub_patterns": [r"\breturn\s+null\s*;", r"throw\s+new\s+Error\s*\(\s*['\"]not implemented['\"]"],
+        "not_impl_patterns": [r"console\.log\s*\(\s*['\"]not implemented['\"]"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b", r"<!--\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "remix": {
+        "paths": ["app/", "app/routes/"],
+        "extensions": [".tsx", ".ts", ".jsx", ".js"],
+        "stub_patterns": [r"\breturn\s+null\s*;", r"throw\s+new\s+Error\s*\(\s*['\"]not implemented['\"]"],
+        "not_impl_patterns": [r"console\.log\s*\(\s*['\"]not implemented['\"]"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "astro": {
+        "paths": ["src/pages/", "src/components/", "src/layouts/"],
+        "extensions": [".astro", ".tsx", ".ts", ".jsx", ".js"],
+        "stub_patterns": [r"\breturn\s+null\s*;", r"throw\s+new\s+Error\s*\(\s*['\"]not implemented['\"]"],
+        "not_impl_patterns": [r"console\.log\s*\(\s*['\"]not implemented['\"]"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b", r"<!--\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "python": {
+        "paths": ["src/", "app/", "api/", "core/", "services/"],
+        "extensions": [".py"],
+        "stub_patterns": [r"\braise\s+NotImplementedError", r"\bpass\s*$"],
+        "not_impl_patterns": [r"#\s*not\s+implemented", r"raise\s+NotImplementedError"],
+        "comment_line": "#",
+        "todo_patterns": [r"#\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"def\s+\w+\s*\([^)]*\)\s*:\s*pass\s*$"],
+    },
+    "go": {
+        "paths": ["cmd/", "internal/", "pkg/", "api/", "handlers/"],
+        "extensions": [".go"],
+        "stub_patterns": [r"panic\s*\(\s*\"not implemented\"", r"return\s+nil\s*$"],
+        "not_impl_patterns": [r"//\s*not\s+implemented", r"panic\s*\(\s*\""],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"func\s+\w+\s*\([^)]*\)\s*(\([^)]*\)\s*)?\{\s*\}"],
+    },
+    "php": {
+        "paths": ["app/", "src/", "routes/", "resources/views/"],
+        "extensions": [".php"],
+        "stub_patterns": [r"throw\s+new\s+\\?Exception\s*\(\s*['\"]not implemented['\"]", r"\breturn\s+null\s*;"],
+        "not_impl_patterns": [r"//\s*not\s+implemented", r"throw\s+new\s+\\?Exception"],
+        "comment_line": "//",
+        "todo_patterns": [r"//\s*(TODO|FIXME)\b", r"#\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [r"\bfunction\s+\w+\s*\([^)]*\)\s*\{\s*\}"],
+    },
+    "ruby": {
+        "paths": ["app/", "lib/", "config/"],
+        "extensions": [".rb"],
+        "stub_patterns": [r"\braise\s+NotImplementedError", r"\braise\s+\"not implemented\""],
+        "not_impl_patterns": [r"#\s*not\s+implemented", r"raise\s+NotImplementedError"],
+        "comment_line": "#",
+        "todo_patterns": [r"#\s*(TODO|FIXME)\b"],
+        "empty_fn_patterns": [],
+    },
+}
+
+
+def _get_scan_profile():
+    """Get scan profile based on projectType from tests/config.json."""
+    config_path = ROOT / "tests" / "config.json"
+    project_type = "html-app"
+    if config_path.exists():
+        try:
+            with open(config_path) as f:
+                cfg = json.load(f)
+            project_type = cfg.get("projectType", "html-app") or "html-app"
+        except (json.JSONDecodeError, OSError):
+            pass
+    return SCAN_PROFILES.get(project_type, SCAN_PROFILES["html-app"])
+
+
+# ---------------------------------------------------------------------------
 # Universal checks
 # ---------------------------------------------------------------------------
 
 def _js_files():
-    """Return all .js files under src/js/."""
-    src_js = ROOT / "src" / "js"
-    if not src_js.exists():
-        return []
-    return list(src_js.rglob("*.js"))
+    """Return source files based on project type scan profile."""
+    profile = _get_scan_profile()
+    files = []
+    for scan_path in profile["paths"]:
+        base = ROOT / scan_path
+        if not base.exists():
+            continue
+        for ext in profile["extensions"]:
+            files.extend(base.rglob(f"*{ext}"))
+    return files
 
 
 def _strip_comments(text):
@@ -69,14 +240,14 @@ def _strip_comments(text):
 
 
 def check_stubs():
-    """Scan src/js/ for return null in non-trivial functions.
+    """Scan source files for stub patterns based on project type.
 
-    A 'stub' is a function body that contains only `return null` (after stripping
-    whitespace and comments). We skip single-expression arrow functions — those
-    intentionally return null sometimes.
+    Patterns are defined per-framework in SCAN_PROFILES.
     """
+    profile = _get_scan_profile()
     files = _js_files()
     hits = []
+    comment_prefix = profile["comment_line"]
 
     for f in files:
         try:
@@ -86,20 +257,22 @@ def check_stubs():
         lines = raw.splitlines()
         for i, line in enumerate(lines, start=1):
             stripped = line.strip()
-            # Skip comment lines
-            if stripped.startswith("//") or stripped.startswith("*"):
+            if stripped.startswith(comment_prefix) or stripped.startswith("*"):
                 continue
-            # Look for return null; as the only statement hint in a block
-            if re.search(r"\breturn\s+null\s*;", stripped):
-                hits.append(f"{f.relative_to(ROOT)}:{i}")
+            for pattern in profile["stub_patterns"]:
+                if re.search(pattern, stripped):
+                    hits.append(f"{f.relative_to(ROOT)}:{i}")
+                    break
 
     return hits
 
 
 def check_todos():
-    """Scan src/js/ for TODO and FIXME comments."""
+    """Scan source files for TODO/FIXME comments using per-profile patterns."""
+    profile = _get_scan_profile()
     files = _js_files()
     hits = []
+    todo_patterns = profile.get("todo_patterns", [r"//\s*(TODO|FIXME)\b"])
 
     for f in files:
         try:
@@ -108,16 +281,21 @@ def check_todos():
             continue
         lines = raw.splitlines()
         for i, line in enumerate(lines, start=1):
-            if re.search(r"//\s*(TODO|FIXME)\b", line, re.IGNORECASE):
-                hits.append(f"{f.relative_to(ROOT)}:{i}")
+            for pattern in todo_patterns:
+                if re.search(pattern, line, re.IGNORECASE):
+                    hits.append(f"{f.relative_to(ROOT)}:{i}")
+                    break
 
     return hits
 
 
 def check_empty_functions():
-    """Scan src/js/ for empty function bodies: function name() {}."""
+    """Scan source files for empty function bodies using per-profile patterns."""
+    profile = _get_scan_profile()
     files = _js_files()
     hits = []
+    comment_prefix = profile["comment_line"]
+    empty_patterns = profile.get("empty_fn_patterns", [r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}"])
 
     for f in files:
         try:
@@ -127,19 +305,22 @@ def check_empty_functions():
         lines = raw.splitlines()
         for i, line in enumerate(lines, start=1):
             stripped = line.strip()
-            if stripped.startswith("//"):
+            if stripped.startswith(comment_prefix):
                 continue
-            # Match function foo() {} or function() {} (empty body on same line)
-            if re.search(r"\bfunction\s*\w*\s*\([^)]*\)\s*\{\s*\}", stripped):
-                hits.append(f"{f.relative_to(ROOT)}:{i}")
+            for pattern in empty_patterns:
+                if re.search(pattern, stripped):
+                    hits.append(f"{f.relative_to(ROOT)}:{i}")
+                    break
 
     return hits
 
 
 def check_not_implemented():
-    """Scan src/js/ for console.log('not implemented') patterns."""
+    """Scan source files for not-implemented patterns based on project type."""
+    profile = _get_scan_profile()
     files = _js_files()
     hits = []
+    comment_prefix = profile["comment_line"]
 
     for f in files:
         try:
@@ -149,10 +330,12 @@ def check_not_implemented():
         lines = raw.splitlines()
         for i, line in enumerate(lines, start=1):
             stripped = line.strip()
-            if stripped.startswith("//"):
+            if stripped.startswith(comment_prefix) or stripped.startswith("*"):
                 continue
-            if re.search(r"console\.log\s*\(\s*['\"]not implemented['\"]", stripped, re.IGNORECASE):
-                hits.append(f"{f.relative_to(ROOT)}:{i}")
+            for pattern in profile["not_impl_patterns"]:
+                if re.search(pattern, stripped, re.IGNORECASE):
+                    hits.append(f"{f.relative_to(ROOT)}:{i}")
+                    break
 
     return hits
 

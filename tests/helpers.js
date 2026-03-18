@@ -22,11 +22,20 @@ function getConfig() {
 
 /**
  * Build the app URL path from config.appPrefix + STATE.md version.
- * Example: appPrefix "my-app" + version "1.2.3" => "/my-app-v1.2.3"
- * Falls back to "/" if neither is available.
+ * Supports two route modes via config.routeMode:
+ *   - "hash" (default): hash-based routing, path = /prefix-vX.Y.Z
+ *   - "path": path-based routing (Next.js, Vite), path = /
+ * Example (hash): appPrefix "my-app" + version "1.2.3" => "/my-app-v1.2.3"
+ * Example (path): returns "/" regardless of prefix/version.
+ * Falls back to "/" if neither prefix nor version is available.
  */
 function getAppPath() {
   const config = getConfig();
+  const routeMode = config.routeMode || 'hash';
+
+  // Path-based routing (Next.js, Vite) — app serves from root
+  if (routeMode === 'path') return '/';
+
   const prefix = config.appPrefix || '';
 
   // Try to extract version from STATE.md (looks for "v1.2.3" pattern)

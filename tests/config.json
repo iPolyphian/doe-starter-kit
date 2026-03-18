@@ -2,6 +2,7 @@
   "buildCommand": "",
   "testTimeout": 30,
   "projectType": "html-app",
+  "routeMode": "hash",
   "dependencies": [],
   "appPrefix": "",
   "routes": [],

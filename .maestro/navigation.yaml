@@ -1,0 +1,15 @@
+# DOE Quality Stack — Navigation Flow
+# Taps through main screens to verify navigation works.
+# Customize the tap targets below to match your app's navigation.
+# Routes are driven by tests/config.json if available.
+appId: ${APP_ID}
+---
+- launchApp
+- assertVisible:
+    text: ".*"
+    optional: true
+# Add navigation steps for your app:
+# - tapOn: "Home"
+# - assertVisible: "Home Screen"
+# - tapOn: "Settings"
+# - assertVisible: "Settings Screen"

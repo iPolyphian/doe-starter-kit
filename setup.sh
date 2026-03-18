@@ -121,7 +121,65 @@ if [ -d "$SCRIPT_DIR/.git" ] || git -C "$SCRIPT_DIR" rev-parse --git-dir > /dev/
     echo "✓ Git hooks activated"
 fi
 
-# 7. Set DOE Role in STATE.md
+# 7. Copy Quality Stack files (only if not already present in project)
+# Execution scripts for test orchestration, health checks, and verification
+QS_SCRIPTS="run_test_suite.py health_check.py verify_tests.py generate_test_checklist.py"
+QS_SCRIPT_COUNT=0
+if [ -d "$SCRIPT_DIR/execution" ]; then
+    for script in $QS_SCRIPTS; do
+        if [ -f "$SCRIPT_DIR/execution/$script" ] && [ ! -f "execution/$script" ]; then
+            mkdir -p execution
+            cp "$SCRIPT_DIR/execution/$script" "execution/$script"
+            QS_SCRIPT_COUNT=$((QS_SCRIPT_COUNT + 1))
+        fi
+    done
+fi
+
+# Test infrastructure: config, helpers, specs, baselines, playwright config
+if [ -d "$SCRIPT_DIR/tests" ]; then
+    # tests/config.json — only if missing (preserves project customisations)
+    if [ -f "$SCRIPT_DIR/tests/config.json" ] && [ ! -f "tests/config.json" ]; then
+        mkdir -p tests
+        cp "$SCRIPT_DIR/tests/config.json" "tests/config.json"
+        QS_SCRIPT_COUNT=$((QS_SCRIPT_COUNT + 1))
+    fi
+    # tests/helpers.js
+    if [ -f "$SCRIPT_DIR/tests/helpers.js" ] && [ ! -f "tests/helpers.js" ]; then
+        mkdir -p tests
+        cp "$SCRIPT_DIR/tests/helpers.js" "tests/helpers.js"
+        QS_SCRIPT_COUNT=$((QS_SCRIPT_COUNT + 1))
+    fi
+    # tests/*.spec.js — template specs
+    for f in "$SCRIPT_DIR"/tests/*.spec.js; do
+        [ -f "$f" ] || continue
+        fname=$(basename "$f")
+        if [ ! -f "tests/$fname" ]; then
+            mkdir -p tests
+            cp "$f" "tests/$fname"
+            QS_SCRIPT_COUNT=$((QS_SCRIPT_COUNT + 1))
+        fi
+    done
+    # tests/baselines/
+    if [ -d "$SCRIPT_DIR/tests/baselines" ] && [ ! -d "tests/baselines" ]; then
+        mkdir -p tests/baselines
+        cp "$SCRIPT_DIR"/tests/baselines/* tests/baselines/ 2>/dev/null
+        QS_SCRIPT_COUNT=$((QS_SCRIPT_COUNT + 1))
+    fi
+fi
+
+# playwright.config.js
+if [ -f "$SCRIPT_DIR/playwright.config.js" ] && [ ! -f "playwright.config.js" ]; then
+    cp "$SCRIPT_DIR/playwright.config.js" "playwright.config.js"
+    QS_SCRIPT_COUNT=$((QS_SCRIPT_COUNT + 1))
+fi
+
+if [ "$QS_SCRIPT_COUNT" -gt 0 ]; then
+    echo "✓ $QS_SCRIPT_COUNT Quality Stack files installed"
+else
+    echo "✓ Quality Stack files already present (not overwritten)"
+fi
+
+# 8. Set DOE Role in STATE.md
 STATE_FILE="$SCRIPT_DIR/STATE.md"
 if [ -f "$STATE_FILE" ] && grep -q "DOE Role:" "$STATE_FILE"; then
     echo ""
@@ -138,7 +196,7 @@ if [ -f "$STATE_FILE" ] && grep -q "DOE Role:" "$STATE_FILE"; then
     fi
 fi
 
-# 8. Summary
+# 9. Summary
 echo ""
 echo "✓ $COMMAND_COUNT commands installed to ~/.claude/commands/"
 echo "✓ $HOOK_COUNT hooks installed to ~/.claude/hooks/"
