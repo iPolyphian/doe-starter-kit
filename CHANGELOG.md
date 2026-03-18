@@ -7,6 +7,14 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.41.2] — 2026-03-18
+
+### Changed
+- **`/report-doe-bug` enhanced issue template** — added Component field (searchable by DOE command/script), Error Output section (sanitised traceback), What Was Tried section, User's Description section, Project Type in environment table.
+- **Duplicate escalation** — structured duplicate comment format with version/severity/description. Adds +1 reaction to issues for sorting by most-affected. Auto-escalates priority labels: 2+ duplicate reports → `priority:high`, 5+ → `priority:critical`.
+- **Simplified project type question** — "web app or mobile app?" instead of framework-specific options. Labels: `project:web` / `project:mobile`.
+- **Draft card** — now shows Component, Error Output, and What Was Tried sections in the preview.
+
 ## [v1.41.1] — 2026-03-18
 
 ### Changed

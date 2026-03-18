@@ -35,9 +35,11 @@ Parse the JSON output. Present the environment in a bordered card:
 └──────────────────────────────────────────────────┘
 ```
 
-**Project type:** Ask: "What type of project are you working on? (a) Static HTML, (b) Next.js/Vite/React, (c) React Native/Expo, (d) Flutter, (e) Other"
+**Project type:** Ask: "Are you working on a web app or a mobile app?"
 
-Wait for their response. Map to labels: a = `project:html`, b = `project:web-framework`, c = `project:react-native`, d = `project:flutter`, e = `project:other`. Also note the project type for the issue body — it helps narrow which DOE components are involved (e.g. Playwright vs Maestro, serve vs dev server).
+If the user says both, follow up: "Which side were you on when this happened -- web or mobile?"
+
+Wait for their response. Map to labels: web = `project:web`, mobile = `project:mobile`. This helps narrow which DOE components are involved (e.g. Playwright/serve for web, Maestro for mobile).
 
 **Severity:** Ask: "How much did this block you? (a) Completely blocked, (b) Found a workaround, (c) Minor annoyance"
 
@@ -60,22 +62,25 @@ Parse the JSON output. Present the result in a bordered card:
 **If up to date (is_behind = false):**
 ```
 ┌──────────────────────────────────────────────────┐
-│  VERSION CHECK                            PASSED  │
+│  DOE FRAMEWORK VERSION                    PASSED  │
 ├──────────────────────────────────────────────────┤
-│  Local: v1.41.0  Latest: v1.41.0                  │
-│  You are on the latest version.                   │
+│  Your version:    v1.41.0                         │
+│  Latest version:  v1.41.0                         │
+│  You are up to date.                              │
 └──────────────────────────────────────────────────┘
 ```
 
 **If behind and fix found:**
 ```
 ┌──────────────────────────────────────────────────┐
-│  VERSION CHECK                       FIX FOUND    │
+│  DOE FRAMEWORK VERSION               FIX FOUND   │
 ├──────────────────────────────────────────────────┤
-│  Local: v1.39.0  Latest: v1.41.0                  │
-│  This looks like it was fixed in v1.40.0:         │
+│  Your version:    v1.39.0                         │
+│  Latest version:  v1.41.0                         │
+│  You are 2 updates behind.                        │
 │                                                   │
-│  v1.40.0 -- [relevant changelog entry]            │
+│  This was fixed in v1.40.0:                       │
+│  [relevant changelog entry]                       │
 │                                                   │
 │  Run /pull-doe to update your DOE kit.            │
 └──────────────────────────────────────────────────┘
@@ -152,7 +157,23 @@ If matches are found, present in a bordered card:
 └──────────────────────────────────────────────────┘
 ```
 
-- If the user picks an issue number: add their context as a comment using `--add-comment`, then stop.
+- If the user picks an issue number: build a structured duplicate comment using the `DUPLICATE_COMMENT_TEMPLATE` format (version, project type, severity, their description, environment). Then run `--add-comment` which will: post the comment, add a +1 reaction (for sorting), and auto-escalate priority labels if enough duplicates exist (2+ → `priority:high`, 5+ → `priority:critical`). Present the result:
+
+```
+┌──────────────────────────────────────────────────┐
+│  ADDED TO EXISTING ISSUE                          │
+├──────────────────────────────────────────────────┤
+│  Issue #N -- [title]                              │
+│  Your context has been added as a comment.        │
+│  Total reports: N users affected.                 │
+│  Priority: [escalated to high / unchanged]        │
+│                                                   │
+│  You will get updates via GitHub notifications.   │
+└──────────────────────────────────────────────────┘
+```
+
+Then stop.
+
 - If the user says "new" or it's different: continue to Phase 5.
 
 If no matches or search fails: continue to Phase 5.
@@ -168,11 +189,14 @@ Body: Use this structure:
 ## Summary
 [2-3 sentence description combining user's account and Claude's reconstruction]
 
+## Component
+`[command or script that failed — e.g. /wrap → execution/wrap_stats.py]`
+
 ## Environment
 | Field | Value |
 |-------|-------|
 | DOE Kit Version | [from --environment] |
-| Project Type | [from user response — html/web-framework/react-native/flutter/other] |
+| Project Type | [web / mobile] |
 | OS | [os + version] |
 | Node | [version] |
 | Python | [version] |
@@ -181,9 +205,17 @@ Body: Use this structure:
 ## Steps to Reproduce
 [Numbered list of steps to reproduce the issue]
 
+## Error Output
+```
+[Sanitised error message or traceback — the actual text the user saw]
+```
+
 ## Expected vs Actual
 **Expected:** [what should have happened]
 **Actual:** [what actually happened]
+
+## What Was Tried
+[What the user or Claude attempted to fix/work around the issue. "Nothing" if they came straight to report-doe-bug.]
 
 ## Claude's Analysis
 [Claude's reconstruction of what went wrong technically — which component failed and why]
@@ -215,9 +247,10 @@ This strips API keys, secrets, absolute paths, and email addresses. Review the s
 ┌──────────────────────────────────────────────────────────────┐
 │  DRAFT ISSUE                                                  │
 ├──────────────────────────────────────────────────────────────┤
-│  TITLE   [/snagging] crashes when no manual items exist       │
-│  LABELS  bug, user-reported, v1.41.0, severity:blocking,      │
-│          project:html                                         │
+│  TITLE      [/snagging] crashes when no manual items exist    │
+│  COMPONENT  /snagging -> generate_test_checklist.py           │
+│  LABELS     bug, user-reported, v1.41.0, severity:blocking,   │
+│             project:web                                       │
 │                                                               │
 │  SUMMARY                                                      │
 │  [2-3 sentence summary]                                       │
@@ -226,8 +259,14 @@ This strips API keys, secrets, absolute paths, and email addresses. Review the s
 │  1. [step]                                                    │
 │  2. [step]                                                    │
 │                                                               │
+│  ERROR OUTPUT                                                 │
+│  [Sanitised traceback or error message]                       │
+│                                                               │
 │  EXPECTED: [what should happen]                               │
 │  ACTUAL:   [what happened]                                    │
+│                                                               │
+│  WHAT WAS TRIED                                               │
+│  [Fix attempts or "Nothing -- reported immediately"]          │
 │                                                               │
 │  CLAUDE'S ANALYSIS                                            │
 │  [Technical reconstruction]                                   │

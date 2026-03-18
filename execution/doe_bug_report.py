@@ -447,10 +447,14 @@ def sanitise(text):
 ISSUE_TEMPLATE = """## Summary
 {summary}
 
+## Component
+`{component}`
+
 ## Environment
 | Field | Value |
 |-------|-------|
 | DOE Kit Version | {doe_version} |
+| Project Type | {project_type} |
 | OS | {os} {os_version} |
 | Node | {node_version} |
 | Python | {python_version} |
@@ -459,12 +463,23 @@ ISSUE_TEMPLATE = """## Summary
 ## Steps to Reproduce
 {steps}
 
+## Error Output
+```
+{error_output}
+```
+
 ## Expected vs Actual
 **Expected:** {expected}
 **Actual:** {actual}
 
+## What Was Tried
+{what_was_tried}
+
 ## Claude's Analysis
 {claude_analysis}
+
+## User's Description
+{user_description}
 
 ## Severity
 {severity}
@@ -473,7 +488,18 @@ ISSUE_TEMPLATE = """## Summary
 {reproducibility}
 
 ---
-*Filed via `/report-doe-bug`*"""
+*Filed via `/report-doe-bug` from DOE Kit {doe_version}*"""
+
+DUPLICATE_COMMENT_TEMPLATE = """### Additional report
+
+**User's version:** {doe_version}
+**Project type:** {project_type}
+**Severity:** {severity}
+**Their description:** {user_description}
+**Environment:** {os}, Python {python_version}, Node {node_version}
+
+---
+*+1 via `/report-doe-bug`*"""
 
 
 def file_issue(title, body, labels):
@@ -561,15 +587,24 @@ def _write_local_fallback(title, body, labels):
 # ---------------------------------------------------------------------------
 
 def add_comment(issue_number, body):
-    """Add a comment to an existing GitHub issue.
+    """Add a structured duplicate comment, reaction, and auto-escalate priority.
 
-    Used when a duplicate is found and the user wants to add their context.
+    When a duplicate is found:
+    1. Post the structured comment
+    2. Add a +1 reaction (for sorting by most-affected)
+    3. Count existing comments and escalate priority labels:
+       - 2+ duplicate comments → priority:high
+       - 5+ duplicate comments → priority:critical
     """
     result = {
         "commented": False,
+        "reaction_added": False,
+        "priority_escalated": None,
+        "total_reports": 0,
         "error": None,
     }
 
+    # 1. Post the comment
     cmd = (
         f'gh issue comment {issue_number} --repo {UPSTREAM_REPO} '
         f'--body "{body}"'
@@ -579,8 +614,63 @@ def add_comment(issue_number, body):
     if rc != 0:
         result["error"] = f"Failed to add comment to issue #{issue_number}"
         return result
-
     result["commented"] = True
+
+    # 2. Add +1 reaction for sorting
+    reaction_cmd = (
+        f'gh api repos/{UPSTREAM_REPO}/issues/{issue_number}/reactions '
+        f'-f content="+1" --silent'
+    )
+    _, rc = _run(reaction_cmd, timeout=15)
+    result["reaction_added"] = (rc == 0)
+
+    # 3. Count duplicate comments and auto-escalate priority
+    count_cmd = (
+        f'gh api repos/{UPSTREAM_REPO}/issues/{issue_number}/comments '
+        f'--jq "length"'
+    )
+    count_str, rc = _run(count_cmd, timeout=15)
+    if rc == 0 and count_str.strip().isdigit():
+        comment_count = int(count_str.strip())
+        # Count comments that contain our marker (duplicate reports)
+        report_cmd = (
+            f'gh api repos/{UPSTREAM_REPO}/issues/{issue_number}/comments '
+            f'--jq \'[.[] | select(.body | contains("+1 via"))] | length\''
+        )
+        report_str, rc2 = _run(report_cmd, timeout=15)
+        if rc2 == 0 and report_str.strip().isdigit():
+            report_count = int(report_str.strip())
+        else:
+            report_count = comment_count  # fallback: treat all as reports
+
+        # +1 for the original issue author
+        result["total_reports"] = report_count + 1
+
+        # Escalate priority labels
+        new_priority = None
+        if report_count >= 5:
+            new_priority = "priority:critical"
+        elif report_count >= 2:
+            new_priority = "priority:high"
+
+        if new_priority:
+            # Remove old priority labels first
+            for old in ["priority:high", "priority:critical"]:
+                if old != new_priority:
+                    _run(
+                        f'gh issue edit {issue_number} --repo {UPSTREAM_REPO} '
+                        f'--remove-label "{old}"',
+                        timeout=15,
+                    )
+            # Add new priority label
+            _, rc = _run(
+                f'gh issue edit {issue_number} --repo {UPSTREAM_REPO} '
+                f'--add-label "{new_priority}"',
+                timeout=15,
+            )
+            if rc == 0:
+                result["priority_escalated"] = new_priority
+
     return result
 
 
