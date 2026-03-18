@@ -12,6 +12,8 @@ Usage:
   python3 execution/verify.py --self-test          # run internal tests
   python3 execution/verify.py --check-step N       # verify step N from todo.md
   python3 execution/verify.py --check-criteria 'file: foo.txt exists'  # verify one criterion
+  python3 execution/verify.py --regression         # run full regression suite
+  python3 execution/verify.py --deposit 'file: foo.txt exists' --feature 'My Feature'  # deposit criterion
 """
 
 import json
@@ -440,8 +442,154 @@ def main():
         print(f"[{result['status']}] {result['detail']}")
         sys.exit(0 if result["status"] == "PASS" else 1)
 
+    if "--regression" in sys.argv:
+        summary = run_regression_suite()
+        total = summary["total"]
+        passed = summary["passed"]
+        failed = summary["failed"]
+        if total == 0:
+            print("Regression suite is empty. Use --deposit to add criteria.")
+            sys.exit(0)
+        print(f"Regression suite: {total} criteria")
+        print(f"  Passed: {passed}  Failed: {failed}")
+        if failed > 0:
+            print("\nFailures:")
+            for r in summary["results"]:
+                if r["status"] != "PASS":
+                    feature_tag = f" [{r['feature']}]" if r["feature"] else ""
+                    print(f"  [FAIL]{feature_tag} {r['verify']}")
+                    if r["detail"]:
+                        print(f"        {r['detail']}")
+        sys.exit(1 if failed > 0 else 0)
+
+    if "--deposit" in sys.argv:
+        idx = sys.argv.index("--deposit")
+        if idx + 1 >= len(sys.argv):
+            print("Usage: --deposit '<criterion>' [--feature 'Feature Name']", file=sys.stderr)
+            sys.exit(2)
+        criterion_text = sys.argv[idx + 1]
+        feature_name = None
+        if "--feature" in sys.argv:
+            fidx = sys.argv.index("--feature")
+            if fidx + 1 < len(sys.argv):
+                feature_name = sys.argv[fidx + 1]
+        result = deposit_to_suite(criterion_text, feature_name=feature_name)
+        print(result["detail"])
+        sys.exit(0)
+
     print(__doc__)
     sys.exit(0)
+
+
+# ---------------------------------------------------------------------------
+# Regression suite accumulation
+# ---------------------------------------------------------------------------
+
+SUITE_PATH = ROOT / "tests" / "suite.json"
+
+
+def _load_suite():
+    """Load tests/suite.json, returning an empty list if missing or empty."""
+    if not SUITE_PATH.exists():
+        return []
+    try:
+        with open(SUITE_PATH) as f:
+            data = json.load(f)
+        if isinstance(data, list):
+            return data
+        return []
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+def _save_suite(entries):
+    """Save entries list to tests/suite.json."""
+    SUITE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(SUITE_PATH, "w") as f:
+        json.dump(entries, f, indent=2)
+
+
+def deposit_to_suite(criterion_text, feature_name=None):
+    """Deposit a passing criterion into tests/suite.json.
+
+    Args:
+        criterion_text: the Verify: pattern string (e.g. 'file: foo.txt exists').
+        feature_name:   optional human label for the originating feature.
+
+    Returns:
+        {"deposited": bool, "detail": str}
+          deposited=True  if newly added
+          deposited=False if already present (dedup by verify text)
+    """
+    from datetime import datetime, timezone
+
+    criterion_text = criterion_text.strip()
+    entries = _load_suite()
+
+    # Dedup by exact verify text
+    for entry in entries:
+        if entry.get("verify", "") == criterion_text:
+            return {"deposited": False, "detail": f"Already in suite: {criterion_text}"}
+
+    new_entry = {
+        "verify": criterion_text,
+        "feature": feature_name or "",
+        "added": datetime.now(timezone.utc).isoformat(),
+    }
+    entries.append(new_entry)
+    _save_suite(entries)
+    return {"deposited": True, "detail": f"Deposited: {criterion_text}"}
+
+
+def run_regression_suite(working_dir=None):
+    """Run all criteria in tests/suite.json.
+
+    Args:
+        working_dir: optional path for resolving relative file paths.
+
+    Returns:
+        {
+          "total": int,
+          "passed": int,
+          "failed": int,
+          "results": [{"verify": str, "feature": str, "status": str, "detail": str}, ...]
+        }
+    """
+    entries = _load_suite()
+    if not entries:
+        return {"total": 0, "passed": 0, "failed": 0, "results": []}
+
+    results = []
+    passed = 0
+    failed = 0
+
+    for entry in entries:
+        verify_text = entry.get("verify", "")
+        feature = entry.get("feature", "")
+        if not verify_text:
+            results.append({"verify": verify_text, "feature": feature, "status": "FAIL", "detail": "Empty verify pattern"})
+            failed += 1
+            continue
+
+        r = run_criterion(verify_text, working_dir=working_dir)
+        status = r["status"]
+        results.append({
+            "verify": verify_text,
+            "feature": feature,
+            "status": status,
+            "detail": r.get("detail", ""),
+        })
+        if status == "PASS":
+            passed += 1
+        else:
+            failed += 1
+
+    return {
+        "total": len(entries),
+        "passed": passed,
+        "failed": failed,
+        "results": results,
+    }
 
 
 if __name__ == "__main__":
