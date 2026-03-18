@@ -66,6 +66,22 @@ These files have universal structure but need project-specific content.
 
 Keep universal checks (`@register("universal")`), add your own project checks.
 
+### tests/config.json — Quality Stack configuration
+
+**Structure is 100% universal.** Fill in project-specific values:
+
+- `appPrefix` — your app's HTML filename prefix (e.g. `"my-app"` for `my-app-v1.0.0.html`). If empty, auto-detected from STATE.md.
+- `routes` — array of hash routes to test. Each entry: `{"hash": "dashboard", "pageId": "page-dashboard", "label": "Dashboard"}`. Leave empty for single-page apps.
+- `initScript` — JS to run before each test (e.g. `"localStorage.setItem('role', 'admin');"`)
+- `buildCommand` — your build script (e.g. `"python3 execution/build.py"`)
+- `projectType` — `"html-app"` for static HTML projects
+
+**First-time setup:** Run `python3 execution/run_test_suite.py --bootstrap` to install Playwright, axe-core, and create initial baselines. Then run `/snagging` to see automated results.
+
+### tests/*.spec.js — Test specs
+
+Template specs work out-of-the-box for basic page load, accessibility, and visual regression testing. For project-specific tests (custom routes, localStorage setup, module-specific assertions), edit the specs directly. They read config from `tests/config.json`.
+
 ### tasks/todo.md
 
 **Structure is 100% universal.** The format rules in the HTML comment define versioning, step format, completion timestamps, and retro process. Clear the task content and start fresh.
@@ -103,6 +119,8 @@ Replace the content but keep the concept — a single doc that maps every file, 
 [ ] Clear STATE.md, learnings.md, tasks/todo.md, tasks/archive.md content
 [ ] If using audit_claims.py, add project-specific checks with @register("yourproject")
 [ ] Copy universal-claude-md-template.md to ~/.claude/CLAUDE.md (if you don't have one)
+[ ] Run: python3 execution/run_test_suite.py --bootstrap (installs Quality Stack)
+[ ] Edit tests/config.json — set appPrefix, routes, initScript for your project
 [ ] Run /stand-up to start your first session
 ```
 

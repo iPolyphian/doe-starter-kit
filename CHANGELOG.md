@@ -7,6 +7,19 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.40.0] — 2026-03-18
+
+### Added
+- **Quality Stack** — full testing infrastructure now ships with the starter kit. Includes `run_test_suite.py` (orchestrator with server lifecycle, parallel Playwright + Lighthouse), `health_check.py` (stub/TODO/empty function detection), `verify_tests.py` (Playwright wrapper), and `playwright.config.js`.
+- **Template test specs** — generic `app.spec.js`, `accessibility.spec.js`, `visual.spec.js` that auto-discover pages from `tests/config.json`. Shared `helpers.js` for config-driven app path resolution.
+- **Bootstrap command** — `python3 execution/run_test_suite.py --bootstrap` installs npm deps, Playwright browser, and creates initial baselines in one step.
+- **Code trace in snagging** — `/snagging` now runs code trace automatically (no more yes/no prompt). Results appear in the automated summary section via new `--code-trace` flag on `generate_test_checklist.py`.
+- **Enhanced verify.py** — `--regression` and `--deposit` flags for regression suite accumulation.
+- **Config-driven portability** — `tests/config.json` extended with `appPrefix`, `routes`, `initScript` fields. All scripts read project-specific values from config instead of hardcoding.
+
+### Changed
+- `generate_test_checklist.py` renders automated results section when either test suite OR code trace data is available (previously required test suite only).
+
 ## [v1.39.5] — 2026-03-17
 
 ### Fixed
