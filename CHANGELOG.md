@@ -7,6 +7,11 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## [v1.41.1] — 2026-03-18
+
+### Changed
+- **`/report-doe-bug` UX improvements** — bordered output cards for all phases (environment, version check, user error, duplicates, draft preview, result). Questions asked one at a time instead of batched. Added project type question (Static HTML / Next.js / React Native / Flutter / Other) with `project:` label for backlog filtering.
+
 ## [v1.41.0] — 2026-03-18
 
 ### Added
