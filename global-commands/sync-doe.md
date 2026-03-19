@@ -12,9 +12,11 @@ Then read directives/starter-kit-sync.md and follow it precisely. The directive 
 8. Show me the exact edits before applying — wait for my approval
 9. Verify: grep for project-specific references — must return zero results
 10. Update CHANGELOG.md with what changed, bump the version (patch/minor/major)
-11. Commit to the starter kit repo with message: "v[X.Y.Z]: Sync from [project] — [summary]"
+11. Create a sync branch in the starter kit: `cd ~/doe-starter-kit && git checkout -b sync/[project]-v[X.Y.Z]`
 11a. Run `python3 ~/doe-starter-kit/execution/stamp_tutorial_version.py v[X.Y.Z]` to stamp tutorial footers before committing.
-12. Tag the version, push, push tags, create GitHub release
+11b. Commit to the sync branch with message: "v[X.Y.Z]: Sync from [project] — [summary]"
+11c. Push the sync branch: `git push -u origin sync/[project]-v[X.Y.Z]`
+12. Create a PR on the starter kit repo using `gh pr create --title "v[X.Y.Z]: Sync from [project]" --body "[summary of changes]"`. After PR is merged (manually or via auto-merge), tag the version, push tags, create GitHub release. Then switch back to main: `cd ~/doe-starter-kit && git checkout main && git pull`
 13. Update STATE.md's "DOE Starter Kit" line to the new version (e.g. `v1.24.1 · ~/doe-starter-kit · synced`)
 
 To pull kit updates INTO this project (reverse direction), use `/pull-doe`.

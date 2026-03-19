@@ -2,6 +2,8 @@ As your very first action, start the session clock: run `mkdir -p .tmp && date -
 
 Read CLAUDE.md, tasks/todo.md, STATE.md, and learnings.md.
 
+**Branch check:** Run `git branch --show-current` to check the current branch. If on `main`, create a feature branch for the active feature: `git checkout -b feature/<feature-slug>` (derive the slug from the feature heading in todo.md ## Current — lowercase, hyphens, no version tag, e.g. "PR Workflow Migration" becomes "feature/pr-workflow-migration"). Push the branch: `git push -u origin feature/<feature-slug>`. If already on a feature branch, continue on it. Show the branch name in the PICKING UP line of the kick-off card.
+
 **Curation check:** Read `.claude/stats.json` → `lifetime.totalSessions` and STATE.md → `## Curation` → `next-curation`. If `totalSessions >= next-curation` value (e.g. `session-200` means 200), announce "Learnings curation due (session #N)" in the kick-off card and trigger the curation protocol (see CLAUDE.md Self-Annealing section) before starting any feature work.
 
 **DOE Kit check:** If `~/doe-starter-kit` exists, run `cd ~/doe-starter-kit && git describe --tags --abbrev=0 2>/dev/null` to get the current kit version. Check two things: (1) Is the kit tag newer than STATE.md's "DOE Starter Kit" version? (inbound). (2) Do any key syncable files differ? (outbound). Diff key files using these path mappings: ~/.claude/commands/*.md against ~/doe-starter-kit/global-commands/*.md, .githooks/* against ~/doe-starter-kit/.githooks/*, .claude/hooks/*.py against ~/doe-starter-kit/.claude/hooks/*.py. Count how many have changes. **For CLAUDE.md**, do a smart diff: only flag if universal sections (Who We Are, Operating Rules, Guardrails, Code Hygiene, Self-Annealing) differ between kit and project. Ignore project-specific sections (Directory Structure, Progressive Disclosure triggers, project-specific additions). **Classify each differing file as `u` (user-facing) or `c` (creator-facing).** User-facing: slash commands, hooks, CLAUDE.md universal sections. Creator-facing: setup.sh, tutorials, README, version scripts. If either condition is true, show `*` with u/c counts. If the directory doesn't exist, skip the DOE Kit line entirely.
@@ -14,6 +16,7 @@ Show a bordered kick-off card, then immediately pick up the next incomplete step
 ├──────────────────────────────────────────────────┤
 │  FEATURE    [active feature] [APP/INFRA] vX.Y.x   │
 │  PROGRESS   ██████░░░░ N/M steps                  │
+│  BRANCH     feature/xxx (or main)                  │
 │  DOE KIT    vX.Y.Z [synced / * (Nu Mc)]            │
 │                                                   │
 │  PICKING UP Step N -- [step description]          │
@@ -30,6 +33,7 @@ Card rules:
 - MODEL ROW: Final row of the card, separated by `├──┤`. Shows `Model: [name] -- Thinking: [level]`. IMPORTANT: This line is always shorter than other content lines. You MUST pad it with trailing spaces so the right `│` is at the exact same character position as every other `│` in the card. Count the inner width of the longest line, then pad the model row to match. No emojis (they break alignment). You know your model ID from your system prompt (look for "The exact model ID is..."). Display names: `claude-opus-4-6` → "Opus 4.6", `claude-sonnet-4-6` → "Sonnet 4.6", `claude-haiku-4-5` → "Haiku 4.5". For thinking level, report your reasoning effort: ≤33 → "low", 34-66 → "medium", ≥67 → "high". If uncertain, show "default". This helps the user decide if they need to switch models before starting work.
 - FEATURE: from STATE.md "Active feature" line. If no active feature, show "No active feature".
 - PROGRESS: count [x] and [ ] steps for the current feature in todo.md ## Current. Bar uses `█` for done, `░` for remaining, scaled to 10 characters. If no current feature, omit this line.
+- BRANCH: Run `git branch --show-current`. Show the current branch name (e.g. `feature/pr-workflow-migration` or `main`).
 - DOE KIT: `vX.Y.Z` if synced. `vX.Y.Z * (Nu Mc)` if either the kit tag is newer or syncable files differ. `u` = user-facing (commands, hooks, rules), `c` = creator-facing (kit infra, tutorials, setup). Omit entirely if `~/doe-starter-kit` doesn't exist.
 - PICKING UP: the next incomplete step (first `[ ]` line) from todo.md ## Current. Show step number and short description. If all steps complete, show "All steps complete -- ready for retro". If no current feature, omit this line.
 - SUMMARY: Immediately after PICKING UP, add 1-2 lines of plain English explaining what you are about to do for this step. Read the step's plan file if one is referenced, or use the step description and todo.md context. Keep it concrete and jargon-free -- e.g. "Creating the reverse sync command so kit updates can flow into projects safely." Not a restatement of the step name -- explain the actual work.

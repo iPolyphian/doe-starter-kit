@@ -23,10 +23,12 @@ Show a bordered kick-off card, then present a plan and wait for sign-off:
 │  STAND-UP · HH:MM - DD/MM/YY    [dir] vX.Y.Z     │
 ├──────────────────────────────────────────────────┤
 │  FEATURE    [active feature] [APP/INFRA] vX.Y.x   │
+│  BRANCH     feature/xxx (or main)                  │
 │  PROGRESS   ██████░░░░ N/M steps                  │
 │  BLOCKERS   [from STATE.md blockers section]       │
 │    !! [each blocker on its own line]               │
 │  DOE KIT    vX.Y.Z [synced / * pull (Nu Mc)]       │
+│  OPEN PRS   N open (list titles briefly)           │
 │  TEST HEALTH [regression N/N, health N pass M warn] │
 │  PIPELINE   N in Up Next, M in Queue              │
 │  SIGN-OFF   N features (M manual items pending)   │
@@ -50,8 +52,10 @@ Card rules:
 - MODEL ROW: Final row of the card, separated by `├──┤`. Shows `Model: [name] · Thinking: [level]`. IMPORTANT: This line is always shorter than other content lines. You MUST pad it with trailing spaces so the right `│` is at the exact same character position as every other `│` in the card. Count the inner width of the longest line, then pad the model row to match. No emojis (they break alignment). You know your model ID from your system prompt (look for "The exact model ID is..."). Display names: `claude-opus-4-6` → "Opus 4.6", `claude-sonnet-4-6` → "Sonnet 4.6", `claude-haiku-4-5` → "Haiku 4.5". For thinking level, report your reasoning effort: ≤33 → "low", 34-66 → "medium", ≥67 → "high". If uncertain, show "default". This helps the user decide if they need to switch models before starting work.
 - PROJECT: Right-aligned on the header row, same line as the date. Show `[dir name] vX.Y.Z` (directory name + version from STATE.md "Current app version"). If no version in STATE.md, omit the version. Build the header as: left = `STAND-UP -- HH:MM - DD/MM/YY`, right = `[dir] vX.Y.Z`, then right-align within the line width.
 - FEATURE: from STATE.md "Active feature" line. If no active feature, show "No active feature".
+- BRANCH: Run `git branch --show-current`. Show the current branch name (e.g. `feature/pr-workflow-migration` or `main`).
 - PROGRESS: count [x] and [ ] steps for the current feature in todo.md ## Current. Bar uses █ for done, ░ for remaining, scaled to 10 characters. If no current feature, omit this line.
 - DOE KIT: `vX.Y.Z synced` if everything matches. `vX.Y.Z * push (Nu Mc)` if project has outbound changes to push to the starter kit via `/sync-doe`. `vX.Y.Z * pull (Nu Mc)` if the kit has inbound updates to pull via `/pull-doe`. `vX.Y.Z * push+pull (Nu Mc)` if both directions need syncing. `u` = user-facing (commands, hooks, rules), `c` = creator-facing (kit infra, tutorials, setup). Omit entirely if `~/doe-starter-kit` doesn't exist.
+- OPEN PRS: Run `gh pr list --state open --json number,title --jq '.[] | "#\(.number) \(.title)"' 2>/dev/null`. Count open PRs. If none, show "None". If 1-3, show count and titles. If 4+, show count only.
 - TEST HEALTH: If `tests/suite.json` exists and is non-empty, run `python3 execution/verify.py --regression` silently and count pass/fail. If `execution/health_check.py` exists, run `python3 execution/health_check.py --quick --json` and count results. Show `TEST HEALTH   Regression N/N, Health N pass M warn`. If the regression suite is empty, show `TEST HEALTH   No regression tests yet`. If neither exists, omit entirely. This surfaces test infrastructure status at session start.
 - SIGN-OFF: Parse `## Awaiting Sign-off` in todo.md. Count `###` headings (features) and `[ ] [manual]` lines (pending manual items). Show `SIGN-OFF   N features (M manual items pending)`. If the section is empty or has no features, omit entirely.
 - PIPELINE: Compare ROADMAP.md `## Up Next` item count against todo.md `## Queue` item count. Count feature headings (lines starting with `###`) in each section. If Up Next has more items than Queue, show `PIPELINE   N in Up Next, M in Queue -- scope to promote`. If counts match (including both being 0), show `PIPELINE   Synced (N items)`. This nudges the user to scope and promote features without auto-syncing. Omit if ROADMAP.md doesn't exist.
@@ -88,6 +92,7 @@ Show a bordered status card:
 │  STAND-UP · DD/MM/YY                              │
 ├──────────────────────────────────────────────────┤
 │  WORKING ON   [feature] [APP/INFRA] vX.Y.x        │
+│  BRANCH       feature/xxx (or main)               │
 │  PHASE GOAL   [what done looks like]              │
 │  PROGRESS     ██████░░░░ N/M steps (X%)           │
 │  NEXT STEP    [next uncompleted step from todo]   │
@@ -101,6 +106,7 @@ Show a bordered status card:
 │  MOMENTUM     [On track / Ahead / Behind] — why   │
 │  QUEUE        [next feature or "Empty"]           │
 │  SIGN-OFF     N features (M manual items pending) │
+│  OPEN PRS     N open (list titles briefly)        │
 ├──────────────────────────────────────────────────┤
 │  Model: [model] · Thinking: [level]              │
 └──────────────────────────────────────────────────┘
@@ -109,6 +115,7 @@ Show a bordered status card:
 Card rules:
 - MODEL ROW: same as kick-off mode — final row with `Model: [name] · Thinking: [level]`, padded to match the card's full width.
 - WORKING ON: from todo.md ## Current heading — feature name, type tag [APP/INFRA], and version range. If no current feature, show "No active feature" and skip PROGRESS, PHASE GOAL, and SINCE LAST MILESTONE sections.
+- BRANCH: Run `git branch --show-current`. Show the current branch name (e.g. `feature/pr-workflow-migration` or `main`).
 - PHASE GOAL: read the feature description under ## Current in todo.md. If a plan file is referenced (e.g. "Plan: .claude/plans/..."), read it and summarise what "done" looks like for this feature in one sentence. If no plan file, summarise from the step list.
 - PROGRESS: count [x] and [ ] steps for the current feature. Bar uses █ for done, ░ for remaining, scaled to 10 characters. Show "N/M steps (X%)" where X is the percentage complete.
 - NEXT STEP: find the first uncompleted step (line starting with `[ ]`) for the current feature in todo.md. Show the step number and description (e.g. "Step 4 — /agent-status command"). If all steps are complete, show "All steps complete — ready for retro".
@@ -116,5 +123,6 @@ Card rules:
 - MOMENTUM: assess based on completed vs remaining steps and time context. More than half done → "On track". All done except housekeeping → "Ahead". Zero steps done and the feature has been in ## Current for 2+ sessions (check STATE.md ## Last Session for evidence of prior sessions working on this feature) → "Behind". Add a brief reason after the dash explaining the assessment.
 - QUEUE: first feature heading from ## Queue in todo.md. Show name + type tag, or "Empty" if nothing queued.
 - SIGN-OFF: same as kick-off mode -- parse `## Awaiting Sign-off` in todo.md, count features and `[ ] [manual]` items. Show `SIGN-OFF   N features (M manual items pending)`. Omit if section is empty.
+- OPEN PRS: Run `gh pr list --state open --json number,title --jq '.[] | "#\(.number) \(.title)"' 2>/dev/null`. Count open PRs. If none, show "None". If 1-3, show count and titles. If 4+, show count only.
 - BORDER: Fixed width — always 60 `─` characters between `│` borders (62 total per line). All content lines: `│` + 2 spaces + content + trailing spaces + `│` = 62 chars. If content would exceed 56 characters, truncate with `…`. Never dynamically size — the box is always the same width. **Generate boxes programmatically** — define a `line(content)` helper: `f"│  {content}".ljust(W + 1) + "│"` where W is the inner width. ALL rows including headers MUST use this helper — never construct `f"│{...}│"` manually. For headers with right-aligned text: build the inner content string first (e.g. `f"{left}{right:>{W - 2 - len(left)}}"`) then pass through `line()`. Never hand-pad bordered output. Use Unicode box-drawing characters for borders (`┌─┐`, `├─┤`, `└─┘`, `│`). Content inside borders must be ASCII-only (no emojis, no `·`, `✓`, `⚠️`, `—`, `…`) — use `--` for separators, commas for lists. Exception: progress bar uses `█` (done) and `░` (remaining) — these render at fixed width in terminals.
 - This is READ-ONLY. Do not start the session clock. Do not modify any files. Do not execute anything (except the box-generation snippet).

@@ -6,6 +6,7 @@ Before ending this session, complete all steps in order.
 2. **Update tasks/todo.md** — Make sure all completed steps have timestamps. Move any completed features to Done if needed.
 3. **Check for learnings** — If anything failed and was fixed, or a useful pattern was discovered, log it to learnings.md or ~/.claude/CLAUDE.md.
 4. **Commit and push** — Make sure all work is committed and pushed. Run `git status` to check for uncommitted changes, commit them if any, then `git push` to sync with remote. No uncommitted or unpushed changes should remain.
+4b. **Check pull request state** — Run `gh pr list --state open --json number,title 2>/dev/null` to check for open PRs. If on a feature branch and the feature is complete, note that a PR should be created. Record the branch name and open PR count for the checks section.
 5. **Clean up session timer** — Run `rm -f .tmp/.session-start` to delete the session timer file.
 6. **DOE Kit sync check** — If `~/doe-starter-kit` exists, first check STATE.md for `DOE Role`. Then:
    - **Always check inbound:** Is the kit tag newer than STATE.md's "DOE Starter Kit" version? If yes, flag for `/pull-doe`.
@@ -126,7 +127,8 @@ Using the stats JSON from Step 2, compose a JSON object with this schema. You mu
   ],
   "checks": {
     "audit": {"pass": N, "warn": N, "fail": N, "details": ["detail string if warn/fail"]},
-    "doeKit": {"version": "vX.Y.Z", "synced": true|false, "userCount": 0, "creatorCount": 0}
+    "doeKit": {"version": "vX.Y.Z", "synced": true|false, "userCount": 0, "creatorCount": 0},
+    "pullRequests": {"open": N, "merged": N, "branch": "current-branch-name"}
   },
   "awaitingSignOff": [
     {

@@ -12,7 +12,7 @@ Run `python3 ~/.claude/scripts/multi_agent.py --dashboard --json` and parse the 
 │  /agent-status --plan      Create a wave from todo.md features         │
 │  /agent-status --preview   Preview an existing wave before launching   │
 │  /agent-status --launch    Start the wave                              │
-│  /agent-status --merge     Merge completed tasks to master             │
+│  /agent-status --merge     Merge completed tasks to main             │
 │  /agent-status --reclaim   Reclaim tasks from stale terminals          │
 │  /agent-status --abort     Cancel the active wave                      │
 │  /agent-status --watch     Auto-refresh dashboard every 30s            │

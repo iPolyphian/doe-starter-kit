@@ -71,10 +71,10 @@ Parse the JSON output. If `tasksCompleted + tasksFailed == totalTasks` (i.e. no 
 
 Show:
 ```
-All [N] tasks complete. Merge to master now? (yes/no)
+All [N] tasks complete. Merge to main now? (yes/no)
 ```
 
-- **"yes"** → Run `python3 ~/.claude/scripts/multi_agent.py --merge --parent-pid $PPID` to merge all completed worktrees back to master in the defined merge order. Show the merge output.
+- **"yes"** → Run `python3 ~/.claude/scripts/multi_agent.py --merge --parent-pid $PPID` to merge all completed worktrees back to main in the defined merge order. Show the merge output.
 - **"no"** → Show: `OK — run /agent-status whenever you're ready to merge.`
 
 If tasks are still in progress, show a brief status instead:

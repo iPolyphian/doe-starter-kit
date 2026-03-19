@@ -16,7 +16,7 @@ A saved snapshot of your project at a specific point in time. Each commit has a 
 
 ### Branch
 
-A parallel version of your project. The main branch (usually called `main` or `master`) is the primary version. You can create other branches to work on features without affecting the main version, then merge them back when the work is done. DOE typically works on a single branch for simplicity.
+A parallel version of your project. The main branch (usually called `main`, or `master` in older repos) is the primary version. You can create other branches to work on features without affecting the main version, then merge them back when the work is done. DOE typically works on a single branch for simplicity.
 
 ### Push / Pull
 

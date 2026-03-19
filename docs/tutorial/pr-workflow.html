@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi-Agent Workflows — DOE Starter Kit</title>
+  <title>PR Workflow — DOE Starter Kit</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -287,6 +287,7 @@
       gap: 16px;
       margin-bottom: 24px;
     }
+    .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
 
     .m-card {
       border: 1px solid var(--border);
@@ -376,6 +377,13 @@
     .t-comment { color: #64748B; }
     .t-prompt  { color: #F59E0B; }
     .t-cmd     { color: #6EE7B7; }
+    .t-out     { color: #94A3B8; }
+    .t-label   { color: #818CF8; }
+    .t-value   { color: #F1F5F9; }
+    .t-green   { color: #6EE7B7; }
+    .t-amber   { color: #FCD34D; }
+    .t-dim     { color: #475569; }
+    .t-border  { color: #334155; }
 
     /* ── Callout ── */
     .callout {
@@ -460,26 +468,20 @@
     }
     .step a { color: var(--accent); }
 
-    /* ── Plain English box ── */
-    .plain-english {
-      background: linear-gradient(135deg, var(--accent-light), var(--bg-card));
-      border: 1px solid var(--accent);
-      border-radius: var(--radius-lg);
-      padding: 20px 24px;
-      margin: 24px 0;
+    /* ── Code block ── */
+    .code-block {
+      background: var(--bg-code);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 12px 0 16px;
+      overflow-x: auto;
     }
-    .plain-english h4 {
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--accent);
-      margin-bottom: 8px;
-    }
-    .plain-english p {
-      color: var(--text-secondary);
-      font-size: 14px;
+    .code-block pre {
       margin: 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      color: #CBD5E1;
     }
 
     /* ── Pagination ── */
@@ -529,6 +531,109 @@
       text-align: center;
     }
 
+    /* ── PR Flow Diagram ── */
+    .pr-flow {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+      padding: 28px 24px;
+      margin: 28px 0 36px;
+      box-shadow: var(--shadow-card);
+    }
+    .pr-flow-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .pr-flow-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .pr-flow-row:last-child { margin-bottom: 0; }
+    .pf-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .pf-block.muted {
+      background: var(--border);
+      color: var(--text-secondary);
+      font-family: var(--font);
+      font-weight: 500;
+    }
+    .pf-block.green { background: #059669; }
+    .pf-block.amber { background: #D97706; }
+    .pf-block.rose  { background: #E11D48; }
+    [data-theme="dark"] .pf-block { background: #4F46E5; }
+    [data-theme="dark"] .pf-block.green { background: #047857; }
+    [data-theme="dark"] .pf-block.amber { background: #B45309; }
+    [data-theme="dark"] .pf-block.rose  { background: #BE123C; }
+    [data-theme="dark"] .pf-block.muted { background: #1E293B; color: var(--text-secondary); }
+    .pf-arrow {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .pf-break {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .pf-break-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      border-style: dashed;
+      border-width: 0 0 1px 0;
+    }
+    .pf-break-label {
+      font-size: 11px;
+      font-style: italic;
+      white-space: nowrap;
+    }
+    .pf-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      justify-content: center;
+    }
+    .pf-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .pf-legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .pf-legend-dot.branch { background: var(--accent); }
+    .pf-legend-dot.ci     { background: #D97706; }
+    .pf-legend-dot.gate   { background: #E11D48; }
+    .pf-legend-dot.merge  { background: #059669; }
+
     /* ── Responsive ── */
     @media (max-width: 900px) {
       .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
@@ -539,6 +644,13 @@
 
     @media (max-width: 600px) {
       .card-grid { grid-template-columns: 1fr; }
+      .card-grid.cols-3 { grid-template-columns: 1fr; }
+      .pr-flow-row { gap: 4px; }
+      .pf-block { font-size: 11px; padding: 4px 9px; }
+    }
+
+    @media (min-width: 601px) and (max-width: 900px) {
+      .card-grid.cols-3 { grid-template-columns: 1fr 1fr; }
     }
 
     /* ── Right-side TOC ── */
@@ -637,8 +749,9 @@
           <div class="sidebar-section-title">Workflows</div>
           <a class="sidebar-link" href="daily-flow.html">A Day with DOE</a>
           <a class="sidebar-link" href="workflows.html">Feature Lifecycle</a>
-          <a class="sidebar-link nested" href="workflows.html#planning">Planning &amp; Prompts</a>
-          <a class="sidebar-link active" href="multi-agent.html">Multi-Agent</a>
+          <a class="sidebar-link active" href="pr-workflow.html">PR Workflow</a>
+          <a class="sidebar-link" href="workflows.html#planning">Planning &amp; Prompts</a>
+          <a class="sidebar-link" href="multi-agent.html">Multi-Agent</a>
         </div>
 
         <div class="sidebar-section">
@@ -663,213 +776,369 @@
     <div class="content-area">
       <div class="content">
 
-        <h1>Multi-Agent Workflows</h1>
-        <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">Run parallel Claude sessions to build faster.</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">Workflows</p>
+        <h1>PR Workflow</h1>
+        <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">
+          How features move from your branch to production through Pull Requests, CI checks, and snagging gates.
+        </p>
 
-        <!-- ── What Are Waves ── -->
-        <h2 id="waves">What Are Waves</h2>
+        <!-- ── Section 1: What is a PR Workflow? ── -->
+        <h2 id="what-is-pr">What is a PR Workflow?</h2>
 
-        <div class="plain-english">
-          <h4>In Plain English</h4>
-          <p>A wave is like having multiple Claude assistants working simultaneously &mdash; each in their own terminal, each on a different task. A coordinator manages the work from a separate terminal. When everyone&rsquo;s done, the coordinator merges the results back together.</p>
-        </div>
+        <p>
+          When you build a new feature, you do not work directly on the main copy of your project. Instead, you create
+          a <strong>feature branch</strong> &mdash; a parallel copy of your project where you can build, experiment, and
+          make mistakes without affecting the stable version that everyone relies on.
+        </p>
 
-        <p>Waves split independent tasks across terminals. Each agent gets an isolated copy of the code (a &ldquo;worktree&rdquo;), works on its task without affecting the others, and the coordinator brings all the changes back together when everyone finishes. Think of it as a team of builders working on different rooms of the same house &mdash; they don&rsquo;t need to share tools or get in each other&rsquo;s way.</p>
+        <p>
+          Once your feature is complete, you open a <strong>Pull Request</strong> (often shortened to PR). A Pull Request
+          is a proposal to merge your changes from the feature branch back into the main branch. It is a formal checkpoint:
+          "Here is what I built. Is it ready to go live?"
+        </p>
 
-        <p>The key requirement is <strong>independence</strong>. Each task in a wave must touch different files. If two tasks need to edit the same file, they can&rsquo;t run in parallel &mdash; one must finish before the other starts.</p>
-
-        <!-- ── When to Use Waves vs Single Session ── -->
-        <h2 id="when">When to Use Waves vs Single Session</h2>
-
-        <div class="card-grid">
-          <div class="m-card">
-            <div class="card-icon amber">&#9881;</div>
-            <h4>Use a Single Session When</h4>
-            <p>Tasks depend on each other. You&rsquo;re exploring or designing. There are fewer than 3 tasks. Tasks share the same files.</p>
-          </div>
-          <div class="m-card">
-            <div class="card-icon indigo">&#9889;</div>
-            <h4>Use Waves When</h4>
-            <p>You have 3+ independent tasks. Tasks touch different files. You want to finish faster. Each task has clear contracts.</p>
-          </div>
-        </div>
+        <p>
+          Before the merge happens, <strong>Continuous Integration</strong> (CI) runs automatically. CI is a set of
+          automated checks &mdash; linting, testing, performance audits &mdash; that verify your code meets the project's
+          quality standards. If any check fails, you fix the issue on your branch, push again, and CI re-runs. The main
+          branch never sees broken code.
+        </p>
 
         <div class="callout tip">
-          <span class="callout-icon">&#9432;</span>
+          <span class="callout-icon">i</span>
           <div class="callout-body">
-            <strong>Rule of thumb:</strong> If you can draw clear lines between which files each task touches and none of them overlap, waves will speed things up. If you&rsquo;re not sure, start with a single session &mdash; you can always parallelise later once the plan is clearer.
+            <strong>Think of it like an airlock.</strong> Your feature branch is the outer chamber. CI and snagging
+            are the pressure checks. Only when everything passes does the inner door (main) open.
           </div>
         </div>
 
-        <!-- ── How /agent-launch Works ── -->
-        <h2 id="launch">How /agent-launch Works</h2>
+        <!-- ── Section 2: The DOE PR Cycle ── -->
+        <h2 id="pr-cycle">The DOE PR Cycle</h2>
 
-        <p>From your coordinator terminal, run <code>/agent-launch</code>. Claude analyses your <code>todo.md</code> to find tasks that can run in parallel, then shows you what it found.</p>
+        <p>
+          Here is the full cycle from starting a feature to merging it into main. Every DOE project follows this pattern.
+        </p>
 
-        <div class="terminal">
-          <div class="terminal-header">
-            <span class="terminal-dot red"></span>
-            <span class="terminal-dot yellow"></span>
-            <span class="terminal-dot green"></span>
-            <span class="terminal-title">Coordinator Terminal</span>
+        <!-- Flow diagram -->
+        <div class="pr-flow">
+          <div class="pr-flow-title">PR Lifecycle</div>
+          <div class="pr-flow-row">
+            <span class="pf-block">/crack-on</span>
+            <span class="pf-arrow">&rarr;</span>
+            <span class="pf-block">create branch</span>
+            <span class="pf-arrow">&rarr;</span>
+            <span class="pf-block">build + commit</span>
+            <span class="pf-arrow">&rarr;</span>
+            <span class="pf-block">push</span>
           </div>
-          <pre><span class="t-prompt">$</span> <span class="t-cmd">claude</span>
-<span class="t-prompt">&gt;</span> <span class="t-cmd">/agent-launch</span>
-
-Wave Setup
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Tasks eligible for parallel work:
-  1. Step 3: Add search component    <span class="t-comment">[owns: src/js/search.js, src/styles/search.css]</span>
-  2. Step 4: Add filter sidebar       <span class="t-comment">[owns: src/js/filters.js, src/styles/filters.css]</span>
-  3. Step 5: Add sort controls        <span class="t-comment">[owns: src/js/sort.js]</span>
-
-Shared files (coordinator only): todo.md, CLAUDE.md, learnings.md
-
-Launch 3 agents? [y/n]</pre>
-        </div>
-
-        <p>Each agent gets its own terminal and its own <strong>worktree</strong> &mdash; an isolated copy of the codebase where it can make changes without interfering with other agents. The coordinator terminal stays open for monitoring progress.</p>
-
-        <p>The <code>[owns: ...]</code> tags in each task tell the system which files that agent is allowed to edit. This is the contract that prevents conflicts &mdash; no two agents can own the same file.</p>
-
-        <!-- ── How /agent-status Works ── -->
-        <h2 id="status">How /agent-status Works</h2>
-
-        <p>While agents are working, check progress from the coordinator terminal with <code>/agent-status</code>.</p>
-
-        <div class="terminal">
-          <div class="terminal-header">
-            <span class="terminal-dot red"></span>
-            <span class="terminal-dot yellow"></span>
-            <span class="terminal-dot green"></span>
-            <span class="terminal-title">Coordinator Terminal</span>
+          <div class="pf-break">
+            <div class="pf-break-line"></div>
+            <span class="pf-break-label">feature complete</span>
+            <div class="pf-break-line"></div>
           </div>
-          <pre><span class="t-prompt">&gt;</span> <span class="t-cmd">/agent-status</span>
-
-Wave Status &mdash; wave-20260315-1430
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Agent 1: Step 3 (search)     <span style="color:#22C55E;">██████████</span> Complete
-  Agent 2: Step 4 (filters)    <span style="color:#3B82F6;">██████</span><span style="color:#475569;">░░░░</span> In Progress (60%)
-  Agent 3: Step 5 (sort)       <span style="color:#F59E0B;">████████</span><span style="color:#475569;">░░</span> Verifying...
-
-  Elapsed: 12m    Shared file conflicts: 0</pre>
+          <div class="pr-flow-row">
+            <span class="pf-block amber">gh pr create</span>
+            <span class="pf-arrow">&rarr;</span>
+            <span class="pf-block amber">CI runs</span>
+            <span class="pf-arrow">&rarr;</span>
+            <span class="pf-block rose">snagging</span>
+            <span class="pf-arrow">&rarr;</span>
+            <span class="pf-block green">merge to main</span>
+          </div>
+          <div class="pf-legend">
+            <div class="pf-legend-item"><span class="pf-legend-dot branch"></span> Build phase</div>
+            <div class="pf-legend-item"><span class="pf-legend-dot ci"></span> Review phase</div>
+            <div class="pf-legend-item"><span class="pf-legend-dot gate"></span> Quality gate</div>
+            <div class="pf-legend-item"><span class="pf-legend-dot merge"></span> Merge</div>
+          </div>
         </div>
-
-        <p>The dashboard shows each agent&rsquo;s progress, how long the wave has been running, and whether any shared file conflicts have been detected. You can run <code>/agent-status</code> as often as you like &mdash; it&rsquo;s a read-only check.</p>
-
-        <!-- ── Worked Example ── -->
-        <h2 id="example">Worked Example: Building 3 Independent UI Components</h2>
-
-        <p>You&rsquo;re building an app and your <code>todo.md</code> has three steps ready to build, each touching different files. Here&rsquo;s how a wave plays out from start to finish.</p>
 
         <ol class="steps">
           <li class="step">
             <div class="step-number">1</div>
-            <h4>Identify parallel tasks in todo.md</h4>
-            <p>Three steps are in the Queue, each with an <code>[owns: ...]</code> block listing different files. No overlap means they can run simultaneously.</p>
+            <h4>Start with <code>/crack-on</code></h4>
+            <p>
+              The session command creates a feature branch from main. Your branch name follows the convention
+              <code>feature/feature-name</code>. From this point, all your work happens on the branch &mdash;
+              main stays untouched.
+            </p>
           </li>
           <li class="step">
             <div class="step-number">2</div>
-            <h4>Open coordinator terminal, run <code>/agent-launch</code></h4>
-            <p>Claude shows the three eligible tasks and asks for confirmation. You say yes. Three new terminal windows open automatically.</p>
+            <h4>Build step by step</h4>
+            <p>
+              Work through your todo.md steps. Each step gets its own commit and push. This gives you a clear history
+              and makes it easy to revert a single step if something goes wrong.
+            </p>
           </li>
           <li class="step">
             <div class="step-number">3</div>
-            <h4>Agents work independently</h4>
-            <p>Each agent reads its task&rsquo;s contract from <code>todo.md</code>, builds the feature, runs the <code>[auto]</code> verification criteria, and commits when done. They don&rsquo;t see each other&rsquo;s work.</p>
+            <h4>Open a Pull Request</h4>
+            <p>
+              At feature completion (the retro step), a Pull Request is created via <code>gh pr create</code>.
+              The PR description summarises what changed, links to the plan, and lists any manual verification items.
+            </p>
           </li>
           <li class="step">
             <div class="step-number">4</div>
-            <h4>Monitor with <code>/agent-status</code></h4>
-            <p>From the coordinator terminal, check progress at any time. You&rsquo;ll see which agents are done, which are still building, and whether any issues have come up.</p>
+            <h4>CI runs automatically</h4>
+            <p>
+              As soon as the PR is created, Continuous Integration kicks in. It runs ESLint (code quality),
+              Playwright (browser tests), and Lighthouse (performance audits). All three must pass.
+            </p>
           </li>
           <li class="step">
             <div class="step-number">5</div>
-            <h4>Agents complete &mdash; coordinator merges</h4>
-            <p>When all agents are done, run <code>--complete</code> to verify each agent&rsquo;s work. Each agent creates a pull request from their feature branch, then <code>--merge</code> brings all changes back into the main branch. Three features built in the time it takes to build one.</p>
+            <h4>Snagging checklist</h4>
+            <p>
+              The snagging checklist verifies manual items that automated tests cannot cover &mdash; visual
+              layout, interaction feel, print rendering. This is the final quality gate before merge.
+            </p>
+          </li>
+          <li class="step">
+            <div class="step-number">6</div>
+            <h4>Merge to main</h4>
+            <p>
+              When CI passes and snagging is complete, the PR merges. The feature branch is deleted.
+              Main is always stable, always deployable.
+            </p>
           </li>
         </ol>
 
-        <!-- ── The Merge Process ── -->
-        <h2 id="merge">The Merge Process</h2>
+        <!-- ── Section 3: Feature Branches ── -->
+        <h2 id="feature-branches">Feature Branches</h2>
 
-        <p>When agents finish their work, the coordinator brings everything together in two steps.</p>
+        <p>
+          A feature branch is a copy of your project that diverges from main at a specific point in time. You
+          build your feature on this copy, and when it is ready, you propose merging it back. While you work on
+          your branch, main remains exactly as it was &mdash; stable and unaffected.
+        </p>
 
-        <h3>Step 1: Verify with <code>--complete</code></h3>
-        <p>Run <code>--complete</code> from the coordinator terminal. This re-runs each agent&rsquo;s contract criteria to confirm everything still passes. If an agent&rsquo;s work fails verification, you&rsquo;ll see which criteria failed and can fix them before merging.</p>
+        <h3>Naming convention</h3>
 
-        <h3>Step 2: Merge with <code>--merge</code></h3>
-        <p>Once all agents pass verification, run <code>--merge</code> to bring their changes into the main branch. The coordinator then updates shared files &mdash; marking steps complete in <code>todo.md</code>, recording any learnings, and updating <code>STATE.md</code>.</p>
+        <p>
+          DOE uses the pattern <code>feature/feature-name</code>. The name should be short and descriptive:
+        </p>
 
         <div class="terminal">
           <div class="terminal-header">
             <span class="terminal-dot red"></span>
             <span class="terminal-dot yellow"></span>
             <span class="terminal-dot green"></span>
-            <span class="terminal-title">Coordinator Terminal</span>
+            <span class="terminal-title">Terminal</span>
           </div>
-          <pre><span class="t-prompt">&gt;</span> <span class="t-cmd">--complete</span>
+          <pre><span class="t-comment"># Good branch names</span>
+<span class="t-cmd">feature/quality-stack</span>
+<span class="t-cmd">feature/pr-workflow-migration</span>
+<span class="t-cmd">feature/census-import</span>
 
-Verifying agent work...
-  Agent 1 (search):   4/4 criteria pass
-  Agent 2 (filters):  5/5 criteria pass
-  Agent 3 (sort):     3/3 criteria pass
-
-All agents verified. Ready to merge.
-
-<span class="t-prompt">&gt;</span> <span class="t-cmd">--merge</span>
-
-Merging wave-20260315-1430...
-  Merging agent-1 (search)...     done
-  Merging agent-2 (filters)...    done
-  Merging agent-3 (sort)...       done
-
-Cleaning up worktrees...          done
-Updating todo.md...               done
-
-Wave complete. 3 steps merged successfully.</pre>
+<span class="t-comment"># Avoid vague names</span>
+<span class="t-dim">feature/updates</span>        <span class="t-comment"># too vague</span>
+<span class="t-dim">feature/fix</span>            <span class="t-comment"># what fix?</span></pre>
         </div>
 
-        <h3>Shared file rules</h3>
-        <p>During a wave, agents <strong>must not</strong> edit shared files. These include:</p>
+        <h3>Why branches protect main</h3>
+
+        <p>
+          Without branches, every commit goes directly to main. If you are halfway through a feature and
+          something breaks, main is broken for everyone. With a feature branch, broken code stays on your
+          branch until you fix it. Main only receives complete, tested features.
+        </p>
+
+        <div class="callout info">
+          <span class="callout-icon">i</span>
+          <div class="callout-body">
+            <strong>One feature, one branch.</strong> Never build two unrelated features on the same branch.
+            If one feature has problems, it blocks the other from merging.
+          </div>
+        </div>
+
+        <!-- ── Section 4: Continuous Integration ── -->
+        <h2 id="ci">Continuous Integration</h2>
+
+        <p>
+          Continuous Integration (CI) is a system that automatically runs your project's test suite every time
+          you push code or open a Pull Request. You do not run these checks manually &mdash; CI does it for you,
+          every time, consistently.
+        </p>
+
+        <h3>The three checks</h3>
+
+        <div class="card-grid cols-3">
+          <div class="m-card">
+            <div class="card-icon amber">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <h4>ESLint</h4>
+            <p>Checks code quality and style. Catches unused variables, missing semicolons, and potential bugs before they reach production.</p>
+          </div>
+          <div class="m-card">
+            <div class="card-icon blue">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+            </div>
+            <h4>Playwright</h4>
+            <p>Runs browser tests that click through your application, verifying that pages load, buttons work, and content appears correctly.</p>
+          </div>
+          <div class="m-card">
+            <div class="card-icon green">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <h4>Lighthouse</h4>
+            <p>Audits performance, accessibility, and best practices. Ensures your pages load fast and work for all users, including those with disabilities.</p>
+          </div>
+        </div>
+
+        <h3>When CI fails</h3>
+
+        <p>
+          If any check fails, the PR is blocked from merging. This is intentional &mdash; it prevents broken code
+          from reaching main. The fix is straightforward:
+        </p>
+
+        <ol>
+          <li>Read the CI error output to understand what failed</li>
+          <li>Fix the issue on your feature branch</li>
+          <li>Commit and push the fix</li>
+          <li>CI re-runs automatically on the new push</li>
+        </ol>
+
+        <div class="terminal">
+          <div class="terminal-header">
+            <span class="terminal-dot red"></span>
+            <span class="terminal-dot yellow"></span>
+            <span class="terminal-dot green"></span>
+            <span class="terminal-title">CI output</span>
+          </div>
+          <pre><span class="t-comment"># CI fails on ESLint</span>
+<span class="t-out">ESLint: 1 error</span>
+<span class="t-out">  src/app.js:42  'unusedVar' is defined but never used</span>
+
+<span class="t-comment"># Fix the issue, commit, push</span>
+<span class="t-prompt">$</span> <span class="t-cmd">git add src/app.js</span>
+<span class="t-prompt">$</span> <span class="t-cmd">git commit -m "Remove unused variable"</span>
+<span class="t-prompt">$</span> <span class="t-cmd">git push</span>
+
+<span class="t-comment"># CI re-runs automatically</span>
+<span class="t-green">All checks passed</span></pre>
+        </div>
+
+        <!-- ── Section 5: Snagging as Pre-Merge Gate ── -->
+        <h2 id="snagging">Snagging as Pre-Merge Gate</h2>
+
+        <p>
+          Automated tests catch a lot, but some things need human eyes. Does the layout look right on mobile?
+          Does the colour scheme work in dark mode? Does the print stylesheet produce clean output? These are
+          snagging items &mdash; manual verification checks that run before merge.
+        </p>
+
+        <p>
+          The snagging checklist is generated automatically at feature completion. It combines two types of items:
+        </p>
+
         <ul>
-          <li><code>todo.md</code> &mdash; task tracking (coordinator updates after merge)</li>
-          <li><code>CLAUDE.md</code> &mdash; project instructions</li>
-          <li><code>learnings.md</code> &mdash; institutional memory</li>
-          <li><code>STATE.md</code> &mdash; session state</li>
+          <li><strong>Automated results:</strong> Pass/fail tiles showing the outcome of each CI check (ESLint, Playwright, Lighthouse). These are pre-filled &mdash; you do not need to re-run them.</li>
+          <li><strong>Manual verification items:</strong> Checks that require a human to look at the result. Visual layout, interaction behaviour, content accuracy. You tick these off one by one.</li>
         </ul>
-        <p>The coordinator is the only one who touches these files, and only after the merge is complete. This rule prevents merge conflicts and keeps the project&rsquo;s single source of truth intact.</p>
 
-        <!-- ── Common Pitfalls ── -->
-        <h2 id="pitfalls">Common Pitfalls</h2>
+        <h3>Chrome visual verification</h3>
+
+        <p>
+          For visual checks, DOE provides the <code>/chrome</code> command. This opens the affected pages in Chrome
+          so you can inspect them directly. No screenshots to compare &mdash; you look at the real rendered output
+          and confirm it matches your expectations.
+        </p>
 
         <div class="callout warn">
-          <span class="callout-icon">&#9888;</span>
+          <span class="callout-icon">!</span>
           <div class="callout-body">
-            <strong>Editing shared files from an agent.</strong> If an agent edits <code>todo.md</code>, <code>learnings.md</code>, or other shared files, the merge will conflict. The coordinator handles all shared file updates after the wave completes.
+            <strong>Do not skip snagging.</strong> Automated tests verify behaviour, but snagging verifies the
+            experience. A page can pass every test and still look wrong. The snagging checklist is the last line
+            of defence before your users see the result.
           </div>
         </div>
 
-        <div class="callout warn">
-          <span class="callout-icon">&#9888;</span>
+        <!-- ── Section 6: The Merge ── -->
+        <h2 id="merge">The Merge</h2>
+
+        <p>
+          When all CI checks pass and every snagging item is ticked off, the PR is ready to merge. Here is what
+          happens:
+        </p>
+
+        <ol>
+          <li>The feature branch's commits are merged into main</li>
+          <li>The feature branch is deleted (it has served its purpose)</li>
+          <li>Main now contains the new feature, fully tested and verified</li>
+          <li>Anyone pulling from main gets the new feature immediately</li>
+        </ol>
+
+        <p>
+          The key principle: <strong>main is always stable</strong>. Every commit on main has passed CI and snagging.
+          You can deploy main at any time with confidence.
+        </p>
+
+        <div class="terminal">
+          <div class="terminal-header">
+            <span class="terminal-dot red"></span>
+            <span class="terminal-dot yellow"></span>
+            <span class="terminal-dot green"></span>
+            <span class="terminal-title">Terminal</span>
+          </div>
+          <pre><span class="t-comment"># PR merge via GitHub CLI</span>
+<span class="t-prompt">$</span> <span class="t-cmd">gh pr merge --squash --delete-branch</span>
+
+<span class="t-green">Merged PR #42: Add quality stack</span>
+<span class="t-green">Deleted branch feature/quality-stack</span>
+
+<span class="t-comment"># Switch back to main and pull</span>
+<span class="t-prompt">$</span> <span class="t-cmd">git checkout main && git pull</span>
+<span class="t-out">Already up to date.</span></pre>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-icon">i</span>
           <div class="callout-body">
-            <strong>Tasks that depend on each other.</strong> If Step 4 needs the output of Step 3 (imports a module it creates, reads a file it generates), they cannot run in parallel. Finish Step 3 first, then launch Step 4. Dependencies must be sequential.
+            <strong>Squash merges keep history clean.</strong> Instead of adding every individual commit from
+            your feature branch, a squash merge combines them into a single commit on main. The detailed
+            history is preserved in the PR itself.
           </div>
         </div>
 
-        <div class="callout warn">
-          <span class="callout-icon">&#9888;</span>
-          <div class="callout-body">
-            <strong>Too many agents at once.</strong> Each agent uses its own terminal and memory. Running 6+ agents on a laptop will slow everything down. The sweet spot is 3&ndash;4 agents for most machines.
-          </div>
-        </div>
+        <!-- ── Section 7: For Teams / Multi-Agent ── -->
+        <h2 id="teams">For Teams and Multi-Agent Workflows</h2>
 
-        <div class="callout warn">
-          <span class="callout-icon">&#9888;</span>
-          <div class="callout-body">
-            <strong>Forgetting to verify before merge.</strong> Always run <code>--complete</code> before <code>--merge</code>. Merging unverified work can introduce bugs that are harder to track down after the worktrees are cleaned up.
+        <p>
+          The PR workflow scales naturally to teams and multi-agent setups. The principle is simple: each
+          developer or agent gets their own feature branch. No two people work on the same branch at the
+          same time.
+        </p>
+
+        <p>
+          This works because DOE tasks are designed to own distinct files. When Task A owns
+          <code>src/dashboard.js</code> and Task B owns <code>src/settings.js</code>, their branches
+          cannot conflict. Each PR merges cleanly because the changes do not overlap.
+        </p>
+
+        <p>
+          PRs merge sequentially &mdash; one at a time. If two PRs are ready simultaneously, the first
+          merges, and the second rebases on the updated main before merging. This guarantees that main
+          is always in a consistent state.
+        </p>
+
+        <div class="card-grid">
+          <div class="m-card">
+            <div class="card-icon indigo">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <h4>Solo developer</h4>
+            <p>One feature branch at a time. Build, PR, merge, repeat. The simplest case.</p>
+          </div>
+          <div class="m-card">
+            <div class="card-icon green">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 01-9 9"/></svg>
+            </div>
+            <h4>Multi-agent wave</h4>
+            <p>Multiple agents on parallel branches. Each owns distinct files. PRs merge sequentially after CI and snagging pass.</p>
           </div>
         </div>
 
@@ -879,9 +1148,9 @@ Wave complete. 3 steps merged successfully.</pre>
             <div class="pg-label">Previous</div>
             <div class="pg-title">&larr; Feature Lifecycle</div>
           </a>
-          <a href="example-apps.html" class="next">
+          <a href="multi-agent.html" class="next">
             <div class="pg-label">Next</div>
-            <div class="pg-title">Example Apps &rarr;</div>
+            <div class="pg-title">Multi-Agent &rarr;</div>
           </a>
         </div>
 
@@ -892,13 +1161,13 @@ Wave complete. 3 steps merged successfully.</pre>
 
     <nav class="toc">
       <div class="toc-title">On this page</div>
-      <a href="#waves" class="toc-link">What Are Waves</a>
-      <a href="#when" class="toc-link">When to Use Waves</a>
-      <a href="#launch" class="toc-link">How /agent-launch Works</a>
-      <a href="#status" class="toc-link">How /agent-status Works</a>
-      <a href="#example" class="toc-link">Worked Example</a>
-      <a href="#merge" class="toc-link">The Merge Process</a>
-      <a href="#pitfalls" class="toc-link">Common Pitfalls</a>
+      <a href="#what-is-pr" class="toc-link">What is a PR Workflow?</a>
+      <a href="#pr-cycle" class="toc-link">The DOE PR Cycle</a>
+      <a href="#feature-branches" class="toc-link">Feature Branches</a>
+      <a href="#ci" class="toc-link">Continuous Integration</a>
+      <a href="#snagging" class="toc-link">Snagging as Pre-Merge Gate</a>
+      <a href="#merge" class="toc-link">The Merge</a>
+      <a href="#teams" class="toc-link">Teams &amp; Multi-Agent</a>
     </nav>
 
   </div><!-- /layout -->

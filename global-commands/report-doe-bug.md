@@ -31,7 +31,7 @@ Parse the JSON output. Present the environment in a bordered card:
 │  Node        v18.16.0                             │
 │  Python      3.9.6                                │
 │  Shell       /bin/zsh                             │
-│  Branch      master                               │
+│  Branch      main                               │
 └──────────────────────────────────────────────────┘
 ```
 

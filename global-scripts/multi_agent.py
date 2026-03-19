@@ -68,7 +68,7 @@ def get_session_id():
 
 
 def _detect_default_branch():
-    """Auto-detect the default branch (master or main)."""
+    """Auto-detect the default branch (main or master)."""
     # Try remote HEAD first
     result = subprocess.run(
         ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
@@ -77,12 +77,12 @@ def _detect_default_branch():
     if result.returncode == 0:
         # refs/remotes/origin/main -> main
         return result.stdout.strip().split("/")[-1]
-    # Fallback: check if master exists, else main
+    # Fallback: check if main exists, else master
     result = subprocess.run(
-        ["git", "rev-parse", "--verify", "master"],
+        ["git", "rev-parse", "--verify", "main"],
         cwd=PROJECT_ROOT, capture_output=True, text=True,
     )
-    return "master" if result.returncode == 0 else "main"
+    return "main" if result.returncode == 0 else "master"
 
 
 def _compute_duration(start_iso, end_iso):
@@ -522,7 +522,7 @@ def cmd_claim(as_json=False, parent_pid=None):
             print(f"  Reads: {', '.join(claimed_task['reads'])}")
         print()
         print("  Reminders:")
-        print("  - Do NOT edit shared files on master (todo.md, CLAUDE.md, learnings.md)")
+        print("  - Do NOT edit shared files on main (todo.md, CLAUDE.md, learnings.md)")
         print("  - Run /agent-verify before --complete to check contract criteria")
         print("  - Use --complete <taskId> when done (runs verification gate)")
 
@@ -1066,7 +1066,7 @@ def _check_governed_docs_staleness():
 # ══════════════════════════════════════════════════════════════
 
 def cmd_merge(as_json=False):
-    """Merge completed tasks back to master sequentially."""
+    """Merge completed tasks back to the default branch sequentially."""
     wave_path, wave_data = find_active_wave()
     if not wave_data:
         print("ERROR: No active wave found")
@@ -1108,7 +1108,7 @@ def cmd_merge(as_json=False):
         print(msg)
         sys.exit(0)
 
-    # Ensure we're on master
+    # Ensure we're on the default branch
     current_branch = subprocess.run(
         ["git", "rev-parse", "--abbrev-ref", "HEAD"],
         cwd=PROJECT_ROOT,
@@ -2378,7 +2378,7 @@ def main():
     group.add_argument("--reclaim", action="store_true",
                        help="Reclaim tasks from stale sessions")
     group.add_argument("--merge", action="store_true",
-                       help="Merge completed tasks to master sequentially")
+                       help="Merge completed tasks to the default branch sequentially")
     group.add_argument("--validate", dest="validate_file", metavar="FILE",
                        help="Validate a wave file before launching")
     group.add_argument("--preview", nargs="?", const="__auto__", dest="preview_file",

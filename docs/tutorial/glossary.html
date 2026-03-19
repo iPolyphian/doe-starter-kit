@@ -608,7 +608,7 @@
 
           <div class="term-card" data-term="branch" data-category="git-version-control">
             <div class="term-name"><a href="#branch" id="branch">Branch</a></div>
-            <p class="term-def">A parallel version of your project. The main branch (usually called <code>main</code> or <code>master</code>) is the primary version. You can create other branches to work on features without affecting the main version, then merge them back when the work is done. DOE typically works on a single branch for simplicity.</p>
+            <p class="term-def">A parallel version of your project. The main branch (usually called <code>main</code>, or <code>master</code> in older repos) is the primary version. You can create other branches to work on features without affecting the main version, then merge them back when the work is done. DOE typically works on a single branch for simplicity.</p>
           </div>
 
           <div class="term-card" data-term="push pull" data-category="git-version-control">
@@ -624,6 +624,11 @@
           <div class="term-card" data-term="merge" data-category="git-version-control">
             <div class="term-name"><a href="#merge" id="merge">Merge</a></div>
             <p class="term-def">Combining changes from one branch into another. If you built a feature on a separate branch, merging brings those changes into the main branch. Most merges happen automatically. Occasionally two branches change the same lines &mdash; that's a "merge conflict" and requires a human decision about which version to keep.</p>
+          </div>
+
+          <div class="term-card" data-term="pull request pr review" data-category="git-version-control">
+            <div class="term-name"><a href="#pull-request" id="pull-request">Pull Request</a></div>
+            <p class="term-def">A proposal to merge changes from one branch into another. In DOE, you create a pull request when a feature is complete &mdash; it triggers CI checks and provides a review checkpoint before changes reach the main branch.</p>
           </div>
 
           <div class="term-card" data-term="diff" data-category="git-version-control">
@@ -872,7 +877,7 @@
           <div></div>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.43.0</footer>
+        <footer class="site-footer">DOE Starter Kit v1.44.0</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->

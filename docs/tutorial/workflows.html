@@ -1591,7 +1591,7 @@ by name or category.</span>
         <p>For large features (5+ steps), Claude pauses after the core UI step for a mid-feature checkpoint &mdash; presenting accumulated <code>[manual]</code> checks for you to test. For smaller features, all manual checks are presented at the end. This is your chance to catch visual bugs before dependent steps build on top of them.</p>
 
         <h3>Stage 7 &mdash; Ship</h3>
-        <p>A housekeeping step handles the changelog entry, final version bump, and roadmap update. This keeps your project&rsquo;s records clean and accurate.</p>
+        <p>A housekeeping step handles the changelog entry, final version bump, and roadmap update. At feature completion, a pull request is created to merge the feature branch back to main, providing a review checkpoint before changes reach the stable branch. This keeps your project&rsquo;s records clean and accurate.</p>
 
         <h3>Stage 8 &mdash; Awaiting Sign-off</h3>
         <p>The feature is now code-complete &mdash; all steps are built and all <code>[auto]</code> criteria pass. The feature moves to the <strong>Awaiting Sign-off</strong> section in <code>todo.md</code> immediately. Claude presents the full manual test checklist for you to work through.</p>
@@ -1716,7 +1716,7 @@ by name or category.</span>
           </a>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.43.0</footer>
+        <footer class="site-footer">DOE Starter Kit v1.44.0</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->

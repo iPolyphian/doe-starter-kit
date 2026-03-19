@@ -10,6 +10,10 @@ If no unchecked `[manual]` items exist for the current feature, check `## Awaiti
 
 If nothing is found anywhere, report: "No manual tests pending." and stop.
 
+## Pre-merge context
+
+Snagging is the pre-merge verification gate. Before a feature branch PR can be merged to main, the snagging checklist must be completed. This includes automated checks (Playwright, Lighthouse, health check, contract verification via agent-verify) and manual visual checks.
+
 ## Step 2: Run automated test suite (if available)
 
 **Portability guard:** Only run this step if `execution/run_test_suite.py` exists. If it doesn't exist, skip to Step 3.
@@ -73,6 +77,8 @@ Show a brief summary:
 ```
 
 Use Unicode box-drawing characters (`┌─┐`, `├─┤`, `└─┘`, `│`). No emojis inside the box.
+
+**Chrome visual verification:** After the automated checks, prompt the user: "Run `/chrome` to open the app in Chrome for visual verification of [manual] items."
 
 **If test suite results show failures or warnings, mention them before telling the user to work through the checklist.** For example: "Playwright found 2 test failures and Lighthouse dropped 12 points -- see the automated results section at the top of the checklist."
 
