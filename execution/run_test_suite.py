@@ -536,7 +536,7 @@ def run_lighthouse(url: str) -> dict:
         }
 
     except FileNotFoundError:
-        return _error_result("lighthouse", "Lighthouse not found. Run: npm install -g lighthouse")
+        return _error_result("lighthouse", "Lighthouse not found. Run: python3 execution/run_test_suite.py --bootstrap")
     except subprocess.TimeoutExpired:
         return _error_result("lighthouse", f"Timed out after {LIGHTHOUSE_TIMEOUT}s")
     except (json.JSONDecodeError, KeyError) as e:
@@ -991,7 +991,7 @@ def main():
             subprocess.run(["npm", "init", "-y"], cwd=str(PROJECT_ROOT), capture_output=True)
         print("  Installing dependencies...")
         subprocess.run(
-            ["npm", "install", "--save-dev", "@playwright/test", "@axe-core/playwright", "serve"],
+            ["npm", "install", "--save-dev", "@playwright/test", "@axe-core/playwright", "serve", "lighthouse@11"],
             cwd=str(PROJECT_ROOT), timeout=120,
         )
         print("  Installing Chromium browser...")

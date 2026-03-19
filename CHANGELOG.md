@@ -7,6 +7,21 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.43.0 (2026-03-19)
+
+### Documentation
+- **Testing tutorial rewrite**: 3 inline SVG diagrams (filter funnel, runs-when timeline, tool map), updated catches/misses table, expanded baselines explanation
+- **Maestro getting-started section**: Full mobile testing onboarding (install, flows, template, custom flow guide, config)
+- **Troubleshooting expansion**: 4 new sections (Maestro 5 scenarios, bundle size 3 scenarios, CI/GitHub Actions 4 scenarios, tests-pass-but-broken teaching)
+- **README accuracy fixes**: Command count (24→29), page count (10→15), file count updated
+
+### Fixed
+- Broken directive references in getting-started, key-concepts, example-apps tutorials
+- Lighthouse now included in --bootstrap dependency install
+- Lighthouse error message now points to --bootstrap instead of global install
+
+---
+
 ## [v1.42.0] — 2026-03-18
 
 ### Added

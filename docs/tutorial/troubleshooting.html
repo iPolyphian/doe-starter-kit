@@ -1511,6 +1511,438 @@ location.reload();</pre></div>
           </div>
         </div>
 
+        <!-- Maestro Issues -->
+        <h2 id="maestro">Maestro Issues</h2>
+
+        <p>Maestro runs automated mobile tests against an emulator or physical device. It's bootstrapped automatically by <code>/snagging</code>, but these issues can arise when the environment isn't set up correctly. <em>See also: <a href="testing.html#maestro-getting-started">Testing &amp; Quality &gt; Getting Started with Maestro</a>.</em></p>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>CLI not found</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">maestro: command not found</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Maestro isn't installed on your machine. The <code>/snagging</code> command auto-bootstraps it, but if you're running Maestro flows manually, you'll need to install it yourself.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Run <code>/snagging</code>, which handles installation automatically. Or install Maestro manually:</p>
+                <div class="code-block"><pre>curl -Ls "https://get.maestro.mobile.dev" | bash</pre></div>
+                <p>After installation, restart your terminal so the <code>maestro</code> command is on your PATH.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>No devices found</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">No devices found</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Maestro can't find an emulator, simulator, or physical device to run tests against. It needs a running target before it can execute flows.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Start an emulator or simulator before running Maestro:</p>
+                <div class="code-block"><pre># Android — start an AVD emulator
+emulator -avd &lt;your-avd-name&gt;
+
+# iOS — open the Simulator app
+open -a Simulator</pre></div>
+                <p>If you're using a physical device, connect it via USB and ensure USB debugging is enabled (Android) or developer mode is on (iOS). See <a href="testing.html#mobile-config">Testing &amp; Quality &gt; Configuration</a> for setup details.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Flow timeout</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>A Maestro flow times out after 180 seconds without completing. The test hangs and then fails.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>The app took too long to load, or Maestro couldn't find an element it was looking for. This usually means the app isn't launching correctly on the device, or a UI element has changed and the flow YAML references a selector that no longer exists.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Check three things in order:</p>
+                <ol>
+                  <li><strong>Is the app installed?</strong> Open the app manually on the device/emulator. If it's not there, install it first.</li>
+                  <li><strong>Does <code>appId</code> match?</strong> Check <code>config.json</code> &mdash; the <code>appId</code> must match the app's bundle identifier exactly. Verify with: <code>adb shell pm list packages | grep &lt;name&gt;</code> (Android).</li>
+                  <li><strong>Have UI elements changed?</strong> If the app loads but the flow can't find an element, update the selector in the flow YAML to match the current UI.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>appId mismatch</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>Maestro launches the wrong app, or fails to launch any app at all. The flow immediately errors or interacts with an unexpected screen.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>The <code>appId</code> in <code>config.json</code> doesn't match the bundle identifier of the app installed on the device. Maestro uses this ID to launch the correct app.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Find the correct bundle ID and update <code>config.json</code>:</p>
+                <div class="code-block"><pre># Android — list installed packages
+adb shell pm list packages | grep &lt;your-app-name&gt;
+
+# iOS — check in Xcode under General &gt; Bundle Identifier</pre></div>
+                <p>Copy the correct ID into the <code>appId</code> field in <code>config.json</code>, then re-run the flow.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>No .maestro/ directory</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">No .maestro/ directory found</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>The Maestro flow files haven't been created yet. The <code>.maestro/</code> directory contains your test flows in YAML format, and it needs to exist before Maestro can run anything.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Bootstrap the test suite, which creates the directory and initial flow files:</p>
+                <div class="code-block"><pre>python3 execution/run_test_suite.py --bootstrap</pre></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bundle Size Issues -->
+        <h2 id="bundle-size">Bundle Size Issues</h2>
+
+        <p>The test suite tracks your build output size and alerts you when it grows significantly. This catches accidental bloat &mdash; unminified code, duplicate dependencies, or large assets that slipped in. <em>See also: <a href="testing.html#snagging-baselines">Testing &amp; Quality &gt; Baselines</a>.</em></p>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Bundle size grew by more than 5%</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-amber">Bundle size growth: 142KB -> 168KB (+18.3%) — exceeds 5% threshold</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Your build output is significantly larger than the saved baseline. The 5% threshold is designed to catch unintentional bloat &mdash; things like a new dependency you didn't mean to include, unminified code, or large images bundled into the output.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Ask yourself: did I just add a significant new feature or dependency? If yes, the growth is probably intentional &mdash; update the baseline so future comparisons use the new size:</p>
+                <div class="code-block"><pre>python3 execution/run_test_suite.py --update-baselines</pre></div>
+                <p>If the growth is unexpected, investigate what changed. Common culprits: a large library added as a dependency, images or fonts included in the build, or a minification step that stopped working. Ask Claude: <em>"The bundle size jumped 18%. What's causing it?"</em></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>No baseline exists</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>The bundle size check runs but reports no comparison &mdash; there's no previous measurement to compare against.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>This is your first run, or the baseline file (<code>tests/baselines/bundle-size.json</code>) was deleted. The test suite will automatically create a baseline from the current build, so this is informational only.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Nothing &mdash; the baseline is set automatically on first run. If you want to explicitly create or reset all baselines:</p>
+                <div class="code-block"><pre>python3 execution/run_test_suite.py --bootstrap</pre></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Misleading growth percentage</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>A large percentage growth (e.g. +10%) on a small bundle that only grew by a few kilobytes.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Percentage-based thresholds can be misleading on small bundles. A 50KB &rarr; 55KB change is 10% growth but only 5KB in absolute terms &mdash; probably harmless. The 5% threshold is tuned for typical app bundles; very small projects will trigger it more easily.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Look at the absolute numbers, not just the percentage. If the actual increase is small (under ~20KB), update the baseline and move on. If you're seeing this frequently on a small project, that's normal &mdash; it becomes more useful as your bundle grows.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CI / GitHub Actions Issues -->
+        <h2 id="ci">CI / GitHub Actions Issues</h2>
+
+        <p>When you set up GitHub Actions to run your tests automatically, you may encounter environment differences between your machine and the CI runner. These scenarios cover the most common ones.</p>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Missing Chromium in CI</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">browserType.launch: Executable doesn't exist at /home/runner/.cache/ms-playwright/chromium-*/chrome-linux/chrome</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>Playwright's Chromium browser isn't installed on the CI runner. <code>npm install</code> installs the Playwright package but not the browser binary &mdash; that's a separate step.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Add a browser install step to your GitHub Actions workflow, after <code>npm install</code> and before the test step:</p>
+                <div class="code-block"><pre>- name: Install Playwright browsers
+  run: npx playwright install chromium</pre></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>CI timeout</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>Tests pass locally but time out or flake in GitHub Actions. You may see <code>Timeout exceeded</code> errors or tests that intermittently fail.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>CI runners are typically slower than your local machine. Default timeouts that are generous locally can be too tight in CI, especially for Lighthouse audits and screenshot comparisons.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Increase the timeout for CI runs. You can do this in <code>playwright.config.js</code> or pass it as a flag:</p>
+                <div class="code-block"><pre>npx playwright test --timeout 60000</pre></div>
+                <p>For Lighthouse, the test suite already uses a 60-second timeout. If that's not enough in CI, ask Claude to increase it in the workflow file.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>Permissions error on scripts</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <div class="terminal" style="margin: 8px 0;">
+                  <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                  </div>
+                  <pre><span class="t-error">Permission denied: ./execution/run_test_suite.py</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>The script doesn't have execute permissions on the CI runner. File permissions can differ between macOS (where you develop) and Linux (where CI runs).</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Use <code>python3</code> explicitly instead of running the script directly:</p>
+                <div class="code-block"><pre># Instead of: ./execution/run_test_suite.py
+python3 execution/run_test_suite.py</pre></div>
+                <p>Or add execute permissions in your CI workflow: <code>chmod +x execution/*.py</code></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>GitHub Actions caching</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>Every CI run re-installs all npm packages and Playwright browsers from scratch, making builds slow (3&ndash;5 minutes just for setup).</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>CI runners start fresh each time. Without caching, <code>npm install</code> and <code>npx playwright install</code> download everything on every run.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Add caching steps to your workflow. Ask Claude: <em>"Add caching for node_modules and Playwright browsers to my GitHub Actions workflow."</em> Claude will add the appropriate <code>actions/cache</code> steps, which typically cuts setup time to under 30 seconds.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tests Pass but App is Broken -->
+        <h2 id="tests-pass-but-broken">Tests Pass but App is Broken</h2>
+
+        <p>This is the trickiest situation you'll encounter: all automated tests pass (everything is green), but the feature doesn't actually work when you use it. Understanding why this happens &mdash; and what to do about it &mdash; is one of the most important lessons in software quality.</p>
+
+        <div class="callout warn">
+          <span class="callout-icon">&#9888;</span>
+          <div class="callout-body">
+            <strong>This is a learning moment, not a tool failure.</strong> When tests pass but the app is broken, the gap is in the contract &mdash; the specification of what "working" means &mdash; not in the testing tools themselves.
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-title"><h3>What happened</h3></div>
+          <div class="scenario-body">
+            <div class="scenario-row">
+              <div class="scenario-label see">What you see</div>
+              <div class="scenario-content">
+                <p>All automated tests pass. The snagging checklist shows green across the board. But when you actually use the feature in your browser, something is wrong &mdash; a button doesn't work, data is missing, a calculation is incorrect.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label means">What it means</div>
+              <div class="scenario-content">
+                <p>The contract criteria were too loose. Tests check exactly what was specified &mdash; nothing more. For example, a criterion like <code>file: app.js contains handleClick</code> verifies that the function <em>exists</em>, but it doesn't verify that the function actually <em>works correctly</em>. The function could have a bug, and the test would still pass.</p>
+                <p>This is not a flaw in the tools &mdash; it's the nature of automated testing. Tests can only verify what you tell them to check. See <a href="testing.html#snagging-baselines">Testing &amp; Quality &gt; Baselines</a> for more on how contracts and baselines work together.</p>
+              </div>
+            </div>
+            <div class="scenario-row">
+              <div class="scenario-label do">What to do</div>
+              <div class="scenario-content">
+                <p>Follow these four steps in order:</p>
+                <ol>
+                  <li><strong>Fix the bug.</strong> Get the feature working correctly first.</li>
+                  <li><strong>Write a new auto criterion</strong> that would have caught the bug. For example, instead of just checking the function exists, write a Playwright test that actually clicks the button and verifies the result:
+                    <div class="code-block"><pre>run: npx playwright test --grep "click handler saves data"</pre></div>
+                  </li>
+                  <li><strong>Add it to the regression suite</strong> so the same bug can never happen again without being caught.</li>
+                  <li><strong>Reflect on the gap.</strong> The problem was in the contract, not the tools. Ask: <em>"What should I have specified to catch this?"</em></li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-icon">&#10003;</span>
+          <div class="callout-body">
+            <strong>The lesson:</strong> Tests are only as good as their contracts. When a bug escapes, the right response is to strengthen the contract &mdash; not to blame the testing tools. Every escaped bug is an opportunity to make the test suite smarter. Over time, your contracts get tighter and fewer bugs slip through.
+          </div>
+        </div>
+
         <!-- Quick Reference -->
         <h2 id="quick-reference">Quick Reference</h2>
 
@@ -1564,6 +1996,18 @@ location.reload();</pre></div>
               <td><code>SKIP_CONTRACT_CHECK=1 git commit -m "..."</code></td>
               <td>Bypass the contract check for this commit (housekeeping only)</td>
             </tr>
+            <tr>
+              <td><code>curl -Ls "https://get.maestro.mobile.dev" | bash</code></td>
+              <td>Install Maestro CLI for mobile testing</td>
+            </tr>
+            <tr>
+              <td><code>python3 execution/run_test_suite.py --update-baselines</code></td>
+              <td>Update all baselines (Lighthouse, visual, a11y, bundle size)</td>
+            </tr>
+            <tr>
+              <td><code>npx playwright install chromium</code></td>
+              <td>Install Playwright's Chromium browser (required in CI)</td>
+            </tr>
           </tbody>
         </table>
 
@@ -1582,7 +2026,7 @@ location.reload();</pre></div>
           </a>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.42.0</footer>
+        <footer class="site-footer">DOE Starter Kit v1.43.0</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->
@@ -1597,6 +2041,10 @@ location.reload();</pre></div>
       <a href="#npm" class="toc-link">npm / Node Issues</a>
       <a href="#git-hooks" class="toc-link">Git Hook Issues</a>
       <a href="#snagging" class="toc-link">Snagging v2 Issues</a>
+      <a href="#maestro" class="toc-link">Maestro Issues</a>
+      <a href="#bundle-size" class="toc-link">Bundle Size Issues</a>
+      <a href="#ci" class="toc-link">CI / GitHub Actions</a>
+      <a href="#tests-pass-but-broken" class="toc-link">Tests Pass but Broken</a>
       <a href="#quick-reference" class="toc-link">Quick Reference</a>
     </nav>
 

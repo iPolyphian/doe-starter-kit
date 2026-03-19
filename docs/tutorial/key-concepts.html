@@ -761,17 +761,18 @@
         <p>They define goals, inputs, tools to use, expected outputs, and edge cases. Claude reads the relevant directive before starting a task, so it knows the rules and constraints without you having to repeat them every session.</p>
         <p>Directives are written by humans. They don't contain code &mdash; just clear instructions. When a directive is wrong or incomplete, you update it, and every future session automatically follows the new rules.</p>
 
-        <div class="code-block"><pre># directives/data-import.md
+        <div class="code-block"><pre># directives/your-feature.md
+# (Example: you create directives like this for your own project tasks)
 
 ## Goal
-Import election results from the Nomis API into src/data/
+Import results from an external API into src/data/
 
 ## Inputs
-- Nomis API endpoint (in .env as NOMIS_URL)
-- Census table ID passed as argument
+- API endpoint (in .env as API_URL)
+- Table or resource ID passed as argument
 
 ## Process
-1. Run execution/import_nomis.py with the table ID
+1. Run execution/import_data.py with the resource ID
 2. Validate the output CSV has expected columns
 3. Log row count to learnings.md if significantly different from last import
 
@@ -893,7 +894,7 @@ Contract:
           </a>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.42.0</footer>
+        <footer class="site-footer">DOE Starter Kit v1.43.0</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->

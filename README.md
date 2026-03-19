@@ -34,7 +34,7 @@ A template repository containing everything you need to run Claude Code with gua
 - **Directives** — SOPs for documentation governance, claim auditing, starter kit sync
 - **Audit system** — Automated false-positive detection with pre-commit hook
 - **Multi-agent coordination** — Wave management, task claiming, heartbeats, merge protocol for parallel Claude Code sessions (`/agent-status` dashboard). Installs globally to `~/.claude/scripts/` and `~/.claude/hooks/`.
-- **24 slash commands** — session lifecycle, quality checks, visual tools, multi-agent, utilities, and infrastructure (see below)
+- **29 slash commands** — session lifecycle, quality checks, visual tools, multi-agent, utilities, and infrastructure (see below)
 - **Session timer** — `/stand-up` (in kick-off mode) and `/crack-on` start a clock, `/sitrep` and `/wrap` report elapsed time
 - **Gamification** — Session scoring, badges, streaks, leaderboard, themed wrap-up cards
 - **Git hooks** — Pre-commit claim audit, commit message cleanup
@@ -43,7 +43,7 @@ A template repository containing everything you need to run Claude Code with gua
 
 **Documentation (43 files)**
 
-- **10 HTML tutorial pages** (`docs/tutorial/`) — Mintlify-style visual guides covering installation, first session, key concepts, commands, daily workflow, feature lifecycle, example apps, tips, and glossary
+- **15 HTML tutorial pages** (`docs/tutorial/`) — Mintlify-style visual guides covering installation, first session, key concepts, commands, daily workflow, feature lifecycle, example apps, tips, and glossary
 - **33 markdown reference docs** (`docs/reference/`) — searchable reference for every command, concept, workflow, file format, and example app
 
 **Guides**
@@ -53,7 +53,7 @@ A template repository containing everything you need to run Claude Code with gua
 
 ## Slash Commands
 
-24 commands in `global-commands/`. Install with `./setup.sh` or copy manually. Run `/commands` inside Claude Code for the full reference and installation health check.
+29 commands in `global-commands/`. Install with `./setup.sh` or copy manually. Run `/commands` inside Claude Code for the full reference and installation health check.
 
 | Category | Commands | Purpose |
 |----------|----------|---------|
@@ -95,4 +95,4 @@ The starter kit uses semantic versioning with GitHub releases. Every `/sync-doe`
 
 ## File Count
 
-92 files across 18 directories. See SYSTEM-MAP.md for the complete map.
+178 files across 27 directories. See SYSTEM-MAP.md for the complete map.

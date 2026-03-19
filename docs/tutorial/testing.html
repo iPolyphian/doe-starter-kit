@@ -794,14 +794,14 @@
               <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
             </div>
             <h3>Probabilistic</h3>
-            <p>Claude reads your code and traces logic paths looking for bugs. Runs after data-layer steps.</p>
+            <p>Playwright, Lighthouse, axe-core run your app and measure what happens. Catches broken pages, perf regressions, a11y violations.</p>
           </div>
           <div class="m-card">
             <div class="card-icon green">
               <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
             </div>
             <h3>Empirical</h3>
-            <p>Playwright opens your app in a real browser and checks pages load, buttons work, and elements exist. Runs after UI steps.</p>
+            <p>Manual snagging + /code-trace. Human judgment catches UX issues, visual bugs, and logic gaps that tools miss.</p>
           </div>
         </div>
 
@@ -811,14 +811,115 @@
 
         <ul>
           <li><strong>Deterministic checks</strong> catch typos, undefined variables, and unused code. They're fast, cheap, and mechanical. The same lint rule fires the same way every time.</li>
-          <li><strong>Probabilistic checks</strong> catch logic errors — a function that returns the wrong thing in an edge case, two modules passing data in incompatible formats. These require reasoning, which is why Claude does them rather than a script.</li>
-          <li><strong>Empirical checks</strong> catch integration failures — a button that exists in the code but doesn't do anything in the browser, a page that loads but throws an error in the console. Nothing beats running the actual app.</li>
+          <li><strong>Probabilistic checks</strong> catch runtime and integration failures &mdash; a page that loads but throws a console error, a performance regression, an accessibility violation introduced by a layout change. These tools run your app and measure what happens.</li>
+          <li><strong>Empirical checks</strong> catch UX and logic problems that tools can't see &mdash; a flow that feels wrong, a visual glitch on a specific device, a feature that technically works but confuses users. These require human judgment.</li>
         </ul>
+
+        <h3 id="filter-funnel">The filter funnel</h3>
+
+        <p>Think of the three layers as a funnel. Bugs enter at the top; each layer catches a different class before it reaches users.</p>
+
+        <!-- Filter Funnel SVG -->
+        <svg id="filter-funnel-svg" viewBox="0 0 480 380" style="width:100%;max-width:480px;display:block;margin:0 auto 24px;" aria-label="Filter funnel diagram showing bugs caught at three progressive layers">
+          <!-- Bugs entering -->
+          <text x="240" y="20" text-anchor="middle" font-size="12" font-weight="600" fill="var(--text-muted)">BUGS IN CODE</text>
+          <circle cx="120" cy="40" r="5" fill="var(--accent-rose)" opacity="0.7"/><circle cx="155" cy="36" r="4" fill="var(--accent-rose)" opacity="0.6"/><circle cx="185" cy="42" r="5" fill="var(--accent-rose)" opacity="0.8"/><circle cx="215" cy="38" r="4" fill="var(--accent-rose)" opacity="0.5"/><circle cx="245" cy="44" r="5" fill="var(--accent-rose)" opacity="0.7"/><circle cx="275" cy="37" r="4" fill="var(--accent-rose)" opacity="0.6"/><circle cx="305" cy="41" r="5" fill="var(--accent-rose)" opacity="0.8"/><circle cx="335" cy="39" r="4" fill="var(--accent-rose)" opacity="0.5"/><circle cx="360" cy="43" r="5" fill="var(--accent-rose)" opacity="0.7"/>
+
+          <!-- Layer 1: Deterministic -->
+          <polygon points="80,60 400,60 370,130 110,130" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5" opacity="0.9"/>
+          <text x="240" y="85" text-anchor="middle" font-size="13" font-weight="600" fill="var(--accent)">DETERMINISTIC</text>
+          <text x="240" y="102" text-anchor="middle" font-size="10.5" fill="var(--text-secondary)">ESLint &bull; health check &bull; type checking</text>
+          <text x="240" y="118" text-anchor="middle" font-size="9.5" fill="var(--text-muted)">catches: syntax errors, stubs, code smells</text>
+
+          <!-- Fewer bugs pass through -->
+          <circle cx="160" cy="142" r="4" fill="var(--accent-rose)" opacity="0.6"/><circle cx="210" cy="138" r="5" fill="var(--accent-rose)" opacity="0.7"/><circle cx="260" cy="144" r="4" fill="var(--accent-rose)" opacity="0.5"/><circle cx="300" cy="140" r="5" fill="var(--accent-rose)" opacity="0.6"/><circle cx="185" cy="145" r="4" fill="var(--accent-rose)" opacity="0.8"/>
+
+          <!-- Layer 2: Probabilistic -->
+          <polygon points="110,155 370,155 340,225 140,225" fill="#FEF3C7" stroke="var(--accent-amber)" stroke-width="1.5" opacity="0.9"/>
+          <text x="240" y="180" text-anchor="middle" font-size="13" font-weight="600" fill="var(--accent-amber)">PROBABILISTIC</text>
+          <text x="240" y="197" text-anchor="middle" font-size="10.5" fill="var(--text-secondary)">Playwright &bull; Lighthouse &bull; axe-core</text>
+          <text x="240" y="213" text-anchor="middle" font-size="9.5" fill="var(--text-muted)">catches: broken pages, perf regressions, a11y violations</text>
+          <style>
+            [data-theme="dark"] #filter-funnel-svg polygon:nth-of-type(2) { fill: #78350F; opacity: 0.5; }
+            [data-theme="dark"] #filter-funnel-svg polygon:nth-of-type(1) { fill: #312E81; opacity: 0.5; }
+            [data-theme="dark"] #filter-funnel-svg polygon:nth-of-type(3) { fill: #064E3B; opacity: 0.5; }
+          </style>
+
+          <!-- Even fewer bugs -->
+          <circle cx="200" cy="238" r="4" fill="var(--accent-rose)" opacity="0.5"/><circle cx="260" cy="235" r="4" fill="var(--accent-rose)" opacity="0.6"/>
+
+          <!-- Layer 3: Empirical -->
+          <polygon points="140,250 340,250 310,320 170,320" fill="#ECFDF5" stroke="var(--accent-green)" stroke-width="1.5" opacity="0.9"/>
+          <text x="240" y="275" text-anchor="middle" font-size="13" font-weight="600" fill="var(--accent-green)">EMPIRICAL</text>
+          <text x="240" y="292" text-anchor="middle" font-size="10.5" fill="var(--text-secondary)">manual snagging &bull; /code-trace</text>
+          <text x="240" y="308" text-anchor="middle" font-size="9.5" fill="var(--text-muted)">catches: UX issues, visual bugs, logic gaps</text>
+
+          <!-- Almost nothing passes -->
+          <text x="240" y="345" text-anchor="middle" font-size="11" font-weight="600" fill="var(--accent-green)">SHIPPED TO USERS</text>
+          <line x1="210" y1="325" x2="210" y2="335" stroke="var(--accent-green)" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="270" y1="325" x2="270" y2="335" stroke="var(--accent-green)" stroke-width="1" stroke-dasharray="3,3"/>
+          <text x="240" y="370" text-anchor="middle" font-size="10" fill="var(--text-muted)">Each layer filters out bugs the previous layer missed</text>
+        </svg>
 
         <!-- What Runs When -->
         <h2 id="what-runs-when">What Runs When</h2>
 
-        <p>You don't need to remember any of this. Claude signals the right checks at each transition. This table is a reference if you want to know what's happening behind the scenes.</p>
+        <p>You don't need to remember any of this. Claude signals the right checks at each transition. This diagram and table are a reference if you want to know what's happening behind the scenes.</p>
+
+        <!-- Runs-When Timeline SVG -->
+        <svg id="runs-when-timeline" viewBox="0 0 520 260" style="width:100%;max-width:520px;display:block;margin:0 auto 28px;" aria-label="Timeline showing when each quality tool runs during development">
+          <!-- Timeline axis -->
+          <line x1="60" y1="230" x2="490" y2="230" stroke="var(--border)" stroke-width="2"/>
+          <!-- Tick marks and labels -->
+          <line x1="90" y1="225" x2="90" y2="235" stroke="var(--text-muted)" stroke-width="1.5"/>
+          <text x="90" y="250" text-anchor="middle" font-size="9.5" fill="var(--text-muted)">Every</text>
+          <text x="90" y="260" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--text-secondary)">commit</text>
+
+          <line x1="180" y1="225" x2="180" y2="235" stroke="var(--text-muted)" stroke-width="1.5"/>
+          <text x="180" y="250" text-anchor="middle" font-size="9.5" fill="var(--text-muted)">Every</text>
+          <text x="180" y="260" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--text-secondary)">build</text>
+
+          <line x1="280" y1="225" x2="280" y2="235" stroke="var(--text-muted)" stroke-width="1.5"/>
+          <text x="280" y="250" text-anchor="middle" font-size="9.5" fill="var(--text-muted)">Every</text>
+          <text x="280" y="260" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--text-secondary)">step</text>
+
+          <line x1="380" y1="225" x2="380" y2="235" stroke="var(--text-muted)" stroke-width="1.5"/>
+          <text x="380" y="250" text-anchor="middle" font-size="9.5" fill="var(--text-muted)">Every</text>
+          <text x="380" y="260" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--text-secondary)">feature</text>
+
+          <line x1="470" y1="225" x2="470" y2="235" stroke="var(--text-muted)" stroke-width="1.5"/>
+          <text x="470" y="250" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--text-secondary)">CI</text>
+
+          <!-- Tool bars -->
+          <!-- ESLint: every commit -->
+          <rect x="75" y="20" width="40" height="22" rx="4" fill="var(--accent)" opacity="0.85"/>
+          <text x="95" y="35" text-anchor="middle" font-size="9" font-weight="600" fill="#fff">ESLint</text>
+
+          <!-- Health check: every build onwards -->
+          <rect x="165" y="50" width="320" height="22" rx="4" fill="var(--accent)" opacity="0.2" stroke="var(--accent)" stroke-width="1"/>
+          <text x="325" y="65" text-anchor="middle" font-size="9" font-weight="500" fill="var(--accent)">health check</text>
+
+          <!-- Playwright/Lighthouse/axe: every step onwards -->
+          <rect x="255" y="80" width="230" height="22" rx="4" fill="var(--accent-amber)" opacity="0.2" stroke="var(--accent-amber)" stroke-width="1"/>
+          <text x="370" y="95" text-anchor="middle" font-size="9" font-weight="500" fill="var(--accent-amber)">Playwright &bull; Lighthouse &bull; axe-core</text>
+
+          <!-- Visual regression / code-trace: every feature -->
+          <rect x="355" y="110" width="130" height="22" rx="4" fill="var(--accent-green)" opacity="0.2" stroke="var(--accent-green)" stroke-width="1"/>
+          <text x="420" y="125" text-anchor="middle" font-size="9" font-weight="500" fill="var(--accent-green)">visual regression &bull; /code-trace</text>
+
+          <!-- CI: all -->
+          <rect x="455" y="150" width="40" height="50" rx="4" fill="var(--accent-blue)" opacity="0.15" stroke="var(--accent-blue)" stroke-width="1"/>
+          <text x="475" y="170" text-anchor="middle" font-size="9" font-weight="500" fill="var(--accent-blue)">all of</text>
+          <text x="475" y="182" text-anchor="middle" font-size="9" font-weight="500" fill="var(--accent-blue)">above</text>
+
+          <!-- Legend -->
+          <rect x="60" y="160" width="10" height="10" rx="2" fill="var(--accent)" opacity="0.85"/>
+          <text x="75" y="169" font-size="9" fill="var(--text-muted)">Deterministic</text>
+          <rect x="145" y="160" width="10" height="10" rx="2" fill="var(--accent-amber)" opacity="0.6"/>
+          <text x="160" y="169" font-size="9" fill="var(--text-muted)">Probabilistic</text>
+          <rect x="240" y="160" width="10" height="10" rx="2" fill="var(--accent-green)" opacity="0.6"/>
+          <text x="255" y="169" font-size="9" fill="var(--text-muted)">Empirical</text>
+        </svg>
 
         <table class="quality-table">
           <thead>
@@ -879,6 +980,103 @@
           </div>
         </div>
 
+        <!-- Tool Map -->
+        <h2 id="tool-map">Tool Map</h2>
+
+        <p>Every tool in the Quality Stack, grouped by layer. All tools are live and run automatically at the appropriate moment.</p>
+
+        <!-- Tool Map SVG -->
+        <svg id="tool-map-svg" viewBox="0 0 500 370" style="width:100%;max-width:500px;display:block;margin:0 auto 24px;" aria-label="Tool map showing all quality tools grouped by layer">
+          <!-- Deterministic layer -->
+          <rect x="10" y="10" width="480" height="70" rx="8" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="25" y="32" font-size="12" font-weight="700" fill="var(--accent)">DETERMINISTIC</text>
+          <text x="25" y="48" font-size="10" fill="var(--text-muted)">Same result every time. Runs on commit / build.</text>
+          <rect x="25" y="55" width="60" height="18" rx="4" fill="var(--accent)" opacity="0.15"/><text x="55" y="67" text-anchor="middle" font-size="9" font-weight="600" fill="var(--accent)">ESLint</text>
+          <rect x="95" y="55" width="85" height="18" rx="4" fill="var(--accent)" opacity="0.15"/><text x="137" y="67" text-anchor="middle" font-size="9" font-weight="600" fill="var(--accent)">health check</text>
+          <rect x="190" y="55" width="75" height="18" rx="4" fill="var(--accent)" opacity="0.15"/><text x="228" y="67" text-anchor="middle" font-size="9" font-weight="600" fill="var(--accent)">/code-trace</text>
+
+          <!-- Probabilistic layer -->
+          <rect x="10" y="95" width="480" height="90" rx="8" fill="#FEF3C7" stroke="var(--accent-amber)" stroke-width="1.5"/>
+          <text x="25" y="117" font-size="12" font-weight="700" fill="var(--accent-amber)">PROBABILISTIC</text>
+          <text x="25" y="133" font-size="10" fill="var(--text-muted)">Runs your app and measures outcomes. Runs every step / feature.</text>
+          <rect x="25" y="142" width="70" height="18" rx="4" fill="var(--accent-amber)" opacity="0.15"/><text x="60" y="154" text-anchor="middle" font-size="9" font-weight="600" fill="var(--accent-amber)">Playwright</text>
+          <rect x="105" y="142" width="78" height="18" rx="4" fill="var(--accent-amber)" opacity="0.15"/><text x="144" y="154" text-anchor="middle" font-size="9" font-weight="600" fill="var(--accent-amber)">Lighthouse</text>
+          <rect x="193" y="142" width="65" height="18" rx="4" fill="var(--accent-amber)" opacity="0.15"/><text x="226" y="154" text-anchor="middle" font-size="9" font-weight="600" fill="var(--accent-amber)">axe-core</text>
+          <rect x="268" y="142" width="108" height="18" rx="4" fill="var(--accent-amber)" opacity="0.15"/><text x="322" y="154" text-anchor="middle" font-size="9" font-weight="600" fill="var(--accent-amber)">visual regression</text>
+          <text x="25" y="174" font-size="9.5" font-style="italic" fill="var(--text-muted)">Mobile: Maestro replaces Playwright &bull; bundle size tracking added</text>
+          <style>
+            [data-theme="dark"] #tool-map-svg rect:nth-of-type(4) { fill: #78350F; opacity: 0.3; }
+            [data-theme="dark"] #tool-map-svg rect:nth-of-type(1) { fill: #312E81; opacity: 0.3; }
+            [data-theme="dark"] #tool-map-svg rect:nth-of-type(9) { fill: #064E3B; opacity: 0.3; }
+          </style>
+
+          <!-- Empirical layer -->
+          <rect x="10" y="200" width="480" height="70" rx="8" fill="#ECFDF5" stroke="var(--accent-green)" stroke-width="1.5"/>
+          <text x="25" y="222" font-size="12" font-weight="700" fill="var(--accent-green)">EMPIRICAL</text>
+          <text x="25" y="238" font-size="10" fill="var(--text-muted)">Human judgment. Runs at feature complete.</text>
+          <rect x="25" y="248" width="120" height="18" rx="4" fill="var(--accent-green)" opacity="0.15"/><text x="85" y="260" text-anchor="middle" font-size="9" font-weight="600" fill="var(--accent-green)">/snagging checklist</text>
+          <rect x="155" y="248" width="100" height="18" rx="4" fill="var(--accent-green)" opacity="0.15"/><text x="205" y="260" text-anchor="middle" font-size="9" font-weight="600" fill="var(--accent-green)">manual testing</text>
+        </svg>
+
+        <h3 id="catches-misses">What each tool catches &mdash; and misses</h3>
+
+        <table class="quality-table">
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>What It Catches</th>
+              <th>What It Misses</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ESLint</td>
+              <td>Syntax errors, unused variables, code style violations, dangerous patterns</td>
+              <td>Logic errors, runtime failures, anything that needs execution</td>
+            </tr>
+            <tr>
+              <td>Health check</td>
+              <td>Stubs, TODOs in code, missing files, build regressions</td>
+              <td>Subtle bugs, visual issues, performance problems</td>
+            </tr>
+            <tr>
+              <td>/code-trace</td>
+              <td>Logic path errors, edge cases, cross-module data mismatches</td>
+              <td>Visual rendering, browser-specific bugs, real-world performance</td>
+            </tr>
+            <tr>
+              <td>Playwright</td>
+              <td>Broken pages, dead links, missing elements, navigation failures</td>
+              <td>Visual layout, performance, things that load fine but look wrong</td>
+            </tr>
+            <tr>
+              <td>Lighthouse</td>
+              <td>Performance regressions, SEO issues, best practice violations</td>
+              <td>Functional bugs, visual correctness, dynamic interactions</td>
+            </tr>
+            <tr>
+              <td>axe-core</td>
+              <td>Accessibility violations: missing labels, low contrast, focus traps</td>
+              <td>Screen reader flow quality, cognitive load, content clarity</td>
+            </tr>
+            <tr>
+              <td>Visual regression</td>
+              <td>Unintended screenshot diffs, layout shifts, CSS regressions</td>
+              <td>Dynamic content, animations, interaction states</td>
+            </tr>
+            <tr>
+              <td>Maestro (mobile)</td>
+              <td>Native UI flows: taps, swipes, element visibility, app launch</td>
+              <td>Visual rendering quality, performance metrics, network edge cases</td>
+            </tr>
+            <tr>
+              <td>Manual snagging</td>
+              <td>UX feel, visual polish, edge cases only a human notices</td>
+              <td>Nothing &mdash; but it's slow and doesn't scale</td>
+            </tr>
+          </tbody>
+        </table>
+
         <!-- Your Role -->
         <h2 id="your-role">Your Role</h2>
 
@@ -918,7 +1116,7 @@
             </div>
             <div class="role-body">
               <div class="role-title">When something breaks</div>
-              <div class="role-desc">Claude explains what failed, why it likely happened, and what to try first. For anything Claude can't diagnose automatically, see the <a href="troubleshooting.html">Troubleshooting</a> page.</div>
+              <div class="role-desc">Claude explains what failed, why it likely happened, and what to try first. For anything Claude can't diagnose automatically, see the <a href="troubleshooting.html">Troubleshooting</a> page &mdash; including <a href="troubleshooting.html#maestro">Maestro issues</a>, <a href="troubleshooting.html#ci">CI failures</a>, and <a href="troubleshooting.html#tests-pass-but-broken">tests pass but app broken</a>.</div>
             </div>
           </li>
         </ul>
@@ -1037,9 +1235,23 @@
           </div>
         </div>
 
-        <h3 id="snagging-baselines">Updating baselines</h3>
+        <h3 id="snagging-baselines">Baselines: why they exist</h3>
 
-        <p>Baselines are the "known good" reference points for visual screenshots, Lighthouse scores, and accessibility violations. When you intentionally change something &mdash; redesign a page, accept a performance trade-off, or fix an accessibility violation &mdash; the baselines need updating so future runs compare against the new state.</p>
+        <p>Every quality metric needs a reference point. Without one, the system can only tell you "your Lighthouse score is 78" &mdash; not whether that's good or bad, better or worse than yesterday. Baselines solve this by recording a "known good" state that you've approved. Every future test run compares against that baseline and reports the <em>delta</em>.</p>
+
+        <p><strong>"At baseline"</strong> means the current measurement matches what was last approved. A green tile in the snagging checklist means the metric hasn't regressed from its baseline.</p>
+
+        <h3>Baseline types</h3>
+
+        <ul>
+          <li><strong>Visual screenshots</strong> &mdash; pixel-level reference images for each page. Diffs flag layout shifts and CSS regressions.</li>
+          <li><strong>Lighthouse scores</strong> &mdash; the approved performance score. Small fluctuations (&plusmn;5 points) are treated as noise; bigger drops are flagged.</li>
+          <li><strong>Accessibility violations</strong> &mdash; the count and types of known violations. New violations are flagged immediately; fixing one prompts you to update the baseline.</li>
+        </ul>
+
+        <h3>When to update baselines</h3>
+
+        <p>Update baselines after <em>intentional</em> changes: a page redesign, a new page added, an accepted performance trade-off, or a fixed accessibility issue. Never update baselines to silence a regression you haven't investigated.</p>
 
         <p>Tell Claude which baselines to update:</p>
 
@@ -1059,6 +1271,13 @@
           </div>
         </div>
 
+        <div class="callout warn">
+          <span class="callout-icon">&#9888;</span>
+          <div class="callout-body">
+            <strong>Don't update baselines blindly.</strong> If a test fails and you don't know why, investigate first. Updating the baseline to make the red go away just hides the problem. See <a href="troubleshooting.html">Troubleshooting</a> for common failure scenarios.
+          </div>
+        </div>
+
         <!-- Mobile Testing -->
         <h2 id="mobile-testing">Mobile Testing</h2>
 
@@ -1071,19 +1290,81 @@
           <li><strong>Mobile-specific snagging sections</strong> appear in the checklist: Device Conditions, Accessibility Quick Check, and Network Resilience</li>
         </ul>
 
+        <h3 id="maestro-getting-started">Getting Started with Maestro</h3>
+
+        <p>Maestro is a mobile UI testing framework &mdash; think of it as Playwright but for native apps. It drives real iOS simulators and Android emulators, tapping buttons, entering text, and asserting that elements appear on screen. DOE uses it whenever your project type is <code>react-native</code>, <code>expo</code>, or <code>flutter</code> (auto-detected from <code>tests/config.json</code>).</p>
+
+        <h3>Installation</h3>
+
+        <p>The easiest way to install Maestro is through the <code>/snagging</code> command, which runs <code>--bootstrap</code> automatically on first use. This installs the Maestro CLI and creates a template flow directory. You can also install manually:</p>
+
+        <div class="code-block"><pre>curl -Ls "https://get.maestro.mobile.dev" | bash</pre></div>
+
+        <p>The <code>--bootstrap</code> flag does two things for mobile projects:</p>
+
+        <ol>
+          <li>Installs the Maestro CLI (if not already present)</li>
+          <li>Creates a <code>.maestro/</code> directory with a template <code>app-launch.yaml</code> flow</li>
+        </ol>
+
+        <h3>How flows work</h3>
+
+        <p>Maestro flows are YAML files in your project's <code>.maestro/</code> directory. Each file describes a sequence of UI interactions. Here's the template flow that <code>--bootstrap</code> creates:</p>
+
+        <div class="code-block"><pre>appId: com.example.app
+---
+- launchApp
+- assertVisible: ".*"</pre></div>
+
+        <p>Line by line:</p>
+
+        <ul>
+          <li><code>appId</code> &mdash; the bundle identifier of the app to test (matches your <code>config.json</code>)</li>
+          <li><code>---</code> &mdash; separates config from the flow steps</li>
+          <li><code>launchApp</code> &mdash; launches the app on the simulator/emulator</li>
+          <li><code>assertVisible: ".*"</code> &mdash; asserts that any element is visible (basic "app starts" check)</li>
+        </ul>
+
+        <h3>Writing a custom flow</h3>
+
+        <p>Add new <code>.yaml</code> files to <code>.maestro/</code> for each user journey you want to test. A simple login flow might look like:</p>
+
+        <div class="code-block"><pre>appId: com.example.myapp
+---
+- launchApp
+- tapOn: "Log In"
+- inputText:
+    id: "email-field"
+    text: "test@example.com"
+- inputText:
+    id: "password-field"
+    text: "password123"
+- tapOn: "Submit"
+- assertVisible: "Welcome"</pre></div>
+
+        <p>Maestro discovers all <code>.yaml</code> files in <code>.maestro/</code> automatically &mdash; no registration step. Results appear as a "Maestro Flows" tile in the snagging checklist alongside Lighthouse and accessibility results.</p>
+
+        <div class="callout info">
+          <span class="callout-icon">&#9432;</span>
+          <div class="callout-body">
+            <strong>Maestro troubleshooting.</strong> If Maestro flows fail to run, check that your simulator/emulator is booted and the app is installed. For timeout errors and other common issues, see <a href="troubleshooting.html#maestro">Troubleshooting &gt; Maestro</a>.
+          </div>
+        </div>
+
         <h3 id="mobile-config">Configuration</h3>
 
-        <p>Your <code>tests/config.json</code> can include mobile-specific fields:</p>
+        <p>Your <code>tests/config.json</code> needs these fields for mobile projects:</p>
 
-        <pre><code>{
+        <div class="code-block"><pre>{
   "projectType": "react-native",
   "appId": "com.example.myapp",
   "platform": "both"
-}</code></pre>
+}</pre></div>
 
         <ul>
-          <li><code>appId</code> &mdash; Your app's bundle identifier, used by Maestro flows</li>
-          <li><code>platform</code> &mdash; Target platform: <code>"ios"</code>, <code>"android"</code>, or <code>"both"</code> (default)</li>
+          <li><code>projectType</code> &mdash; one of <code>"react-native"</code>, <code>"expo"</code>, or <code>"flutter"</code>. This is how DOE knows to use Maestro instead of Playwright.</li>
+          <li><code>appId</code> &mdash; your app's bundle identifier, used by Maestro flows</li>
+          <li><code>platform</code> &mdash; target platform: <code>"ios"</code>, <code>"android"</code>, or <code>"both"</code> (default)</li>
         </ul>
 
         <h3 id="mobile-checklist">Mobile Snagging Sections</h3>
@@ -1152,7 +1433,7 @@
           </a>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.42.0</footer>
+        <footer class="site-footer">DOE Starter Kit v1.43.0</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->
@@ -1160,11 +1441,16 @@
     <nav class="toc">
       <div class="toc-title">On this page</div>
       <a href="#three-layers" class="toc-link">The Three Layers</a>
+      <a href="#filter-funnel" class="toc-link">Filter Funnel</a>
       <a href="#what-runs-when" class="toc-link">What Runs When</a>
+      <a href="#tool-map" class="toc-link">Tool Map</a>
+      <a href="#catches-misses" class="toc-link">Catches &amp; Misses</a>
       <a href="#your-role" class="toc-link">Your Role</a>
       <a href="#commands" class="toc-link">Commands</a>
       <a href="#snagging-checklist" class="toc-link">The Snagging Checklist</a>
+      <a href="#snagging-baselines" class="toc-link">Baselines</a>
       <a href="#mobile-testing" class="toc-link">Mobile Testing</a>
+      <a href="#maestro-getting-started" class="toc-link">Maestro Getting Started</a>
       <a href="#signposting" class="toc-link">The Signposting System</a>
     </nav>
 
