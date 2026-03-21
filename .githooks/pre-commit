@@ -94,6 +94,28 @@ if [ -n "$STAGED_FILES" ]; then
     done
 fi
 
+# ─── innerHTML XSS check (warnings only — never blocks commit) ───
+
+if [ -n "$STAGED_JS" ]; then
+    for f in $STAGED_JS; do
+        # Flag new innerHTML assignments that concatenate variables without _crmEsc()
+        UNSAFE=$(git diff --cached -- "$f" | grep -E '^\+.*innerHTML\s*[\+\=]' | grep -v '_crmEsc\|_escHtml\|escapeHTML\|textContent\|// xss-safe' || true)
+        if [ -n "$UNSAFE" ]; then
+            echo "⚠ Potential XSS in $f — innerHTML with unescaped content. Use _crmEsc() or mark // xss-safe" >&2
+        fi
+    done
+fi
+
+# ─── STATE.md staleness check (warning only) ───
+
+if [ -n "$STAGED_FILES" ]; then
+    STATE_STAGED=$(echo "$STAGED_FILES" | grep -c "STATE.md" || true)
+    CODE_STAGED=$(echo "$STAGED_FILES" | grep -cE '\.(js|jsx|ts|tsx|py|html|css|md)$' || true)
+    if [ "$STATE_STAGED" = "0" ] && [ "$CODE_STAGED" -gt "0" ]; then
+        echo "⚠ STATE.md not updated — consider updating if position, decisions, or context changed" >&2
+    fi
+fi
+
 # ─── Contract verification (solo mode gate) ───
 # Checks current todo.md step's contract criteria are all [x] before allowing commit.
 # Skip with: SKIP_CONTRACT_CHECK=1 git commit -m '...'

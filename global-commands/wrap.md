@@ -1,5 +1,18 @@
 Before ending this session, complete all steps in order.
 
+## Step 0: Post-merge cleanup (if applicable)
+
+Run `git branch --show-current` to check the current branch. If on a feature branch (not `main`):
+1. Check if the branch's PR has been merged: `gh pr list --state merged --head $(git branch --show-current) --json number,title 2>/dev/null`
+2. If the PR is merged: switch to main, pull latest, and delete the local feature branch:
+   ```bash
+   git checkout main && git pull && git branch -d <feature-branch-name>
+   ```
+3. If the PR is NOT merged but the feature is complete (all steps `[x]` in todo.md): warn "Feature complete but PR not yet merged. Run `/snagging` to verify, then merge before wrapping."
+4. If the PR doesn't exist yet: warn "On a feature branch with no PR. Create one with `gh pr create` or switch to main if this was ad-hoc work."
+
+If already on `main`, skip this step entirely.
+
 ## Step 1: Housekeeping
 
 1. **Update STATE.md** — Write the current position, any decisions made, blockers found, and a 1-2 sentence summary under Last Session.

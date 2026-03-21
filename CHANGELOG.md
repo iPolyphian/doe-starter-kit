@@ -7,6 +7,18 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.45.0 (2026-03-21)
+
+### Added
+- **Pre-commit innerHTML/XSS check** — warns (blocking with `SKIP_XSS_CHECK=1` bypass) when innerHTML is used without escaping in staged JS files
+- **Pre-commit STATE.md staleness check** — warns when code changes are committed without updating STATE.md
+- **Wrap Step 0: branch cleanup** — checks if on a feature branch with a merged PR before wrapping, offers to switch back to main
+- **5 compliance triggers in CLAUDE.md** — auto-load legal/compliance docs when building: personal data features (GDPR), email/SMS (PECR), donations (PPERA), content generation (imprints), opposition research (defamation)
+
+### Changed
+- **Rule 6** rewritten for branch+PR workflow — feature branches, commit per step on branch, `gh pr create` at retro, CI must pass before merge, no direct commits to main
+- **Rule 11** updated — retro step now includes PR creation with template auto-filled from contract criteria
+
 ## v1.43.0 (2026-03-19)
 
 ### Documentation
