@@ -4,7 +4,7 @@ Before showing the reference below, run a quick health check:
 
 2. **Installation check:** List all `.md` files in `~/.claude/commands/` and compare against the 24 expected commands below. Report installed count (e.g. "24/24 commands installed" or "22/24 — missing: /audit, /review").
 
-3. **Update check:** Run `gh release view --repo iPolyphian/doe-starter-kit --json tagName -q .tagName` to get the latest remote release version. Compare with the local version from step 1. If newer, show: "Update available: vX.Y.Z → run `cd ~/doe-starter-kit && git pull && ./setup.sh`". If current, show "up to date". If the command fails (offline, no gh CLI), skip silently and just show "update check: skipped (offline or gh CLI not available)".
+3. **Update check:** Run `gh release view --repo Albion-Labs/doe-starter-kit --json tagName -q .tagName` to get the latest remote release version. Compare with the local version from step 1. If newer, show: "Update available: vX.Y.Z → run `cd ~/doe-starter-kit && git pull && ./setup.sh`". If current, show "up to date". If the command fails (offline, no gh CLI), skip silently and just show "update check: skipped (offline or gh CLI not available)".
 
 Format the health check as a compact status block:
 
