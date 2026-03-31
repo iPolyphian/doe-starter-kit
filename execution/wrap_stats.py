@@ -134,13 +134,35 @@ def detect_platform() -> str:
     return "linux"
 
 
+# ── Session date derivation ─────────────────────────────────
+
+def derive_session_date(metrics: dict) -> str:
+    """Derive the session date from the majority of commits.
+
+    If commits span midnight, use the date with the most commits.
+    Falls back to today if no commits have parseable dates.
+    """
+    from collections import Counter
+    dates = []
+    for entry in metrics.get("commitLog", []):
+        try:
+            dt = datetime.fromisoformat(entry["time"])
+            dates.append(dt.strftime("%Y-%m-%d"))
+        except (ValueError, KeyError):
+            continue
+    if dates:
+        most_common = Counter(dates).most_common(1)[0][0]
+        return most_common
+    return datetime.now().strftime("%Y-%m-%d")
+
+
 # ── Streak & duration ────────────────────────────────────────
 
-def compute_streak(stats: dict) -> int:
+def compute_streak(stats: dict, session_date_str: str) -> int:
     streak_data = stats.get("streak", {})
     last_date_str = streak_data.get("lastSessionDate")
     current = streak_data.get("current", 0)
-    today = datetime.now().date()
+    today = datetime.strptime(session_date_str, "%Y-%m-%d").date()
 
     if not last_date_str:
         return 1
@@ -212,9 +234,44 @@ def load_stats(path: Path) -> dict:
             return fresh_stats()
         if data["version"] == 1:
             data = migrate_v1_to_v2(data)
+        # On feature branches, local stats.json may be stale (branched before
+        # recent sessions on other branches). Check origin/main for fresher
+        # streak data and use it if the lastSessionDate is more recent.
+        data = _merge_main_streak(data, path)
         return data
     except (json.JSONDecodeError, OSError):
         return fresh_stats()
+
+
+def _merge_main_streak(data: dict, stats_path: Path) -> dict:
+    """If origin/main has a more recent streak, use it.
+
+    Feature branches diverge from main and miss sessions committed on other
+    branches. This causes streak resets when the local stats.json has a stale
+    lastSessionDate. Fix: read stats.json from origin/main and prefer its
+    streak if lastSessionDate is newer.
+    """
+    try:
+        rel = str(stats_path.relative_to(PROJECT_ROOT))
+    except ValueError:
+        return data
+    try:
+        result = subprocess.run(
+            ["git", "show", f"origin/main:{rel}"],
+            capture_output=True, text=True, timeout=5, cwd=PROJECT_ROOT
+        )
+        if result.returncode != 0:
+            return data
+        main_data = json.loads(result.stdout)
+        main_streak = main_data.get("streak", {})
+        local_streak = data.get("streak", {})
+        main_last = main_streak.get("lastSessionDate", "")
+        local_last = local_streak.get("lastSessionDate", "")
+        if main_last > local_last:
+            data["streak"] = main_streak
+    except (json.JSONDecodeError, subprocess.TimeoutExpired, OSError):
+        pass
+    return data
 
 
 # ── Leaderboard & stats update ───────────────────────────────
@@ -264,8 +321,9 @@ def build_leaderboard(stats: dict, current_metrics: dict) -> list:
 
 
 def update_stats(stats: dict, metrics: dict, streak: int, steps: int, duration: str,
-                 platform: str, model: Optional[str], tag: str) -> dict:
-    today_str = datetime.now().strftime("%Y-%m-%d")
+                 platform: str, model: Optional[str], tag: str,
+                 session_date_str: Optional[str] = None) -> dict:
+    today_str = session_date_str or datetime.now().strftime("%Y-%m-%d")
 
     lt = stats.setdefault("lifetime", {})
     lt["totalSessions"] = lt.get("totalSessions", 0) + 1
@@ -333,9 +391,10 @@ def main():
     stats_path = PROJECT_ROOT / args.stats
 
     metrics = gather_git_metrics(args.since)
+    session_date = derive_session_date(metrics)
     steps = count_steps_completed_since(todo_path, args.session_start)
     stats = load_stats(stats_path)
-    streak = compute_streak(stats)
+    streak = compute_streak(stats, session_date)
     duration = compute_session_duration(args.session_start)
     leaderboard = build_leaderboard(stats, metrics)
 
@@ -344,7 +403,8 @@ def main():
     model = args.model  # None is valid (unknown)
     tag = args.tag if args.tag else auto_classify_tag(metrics, steps)
 
-    updated = update_stats(stats, metrics, streak, steps, duration, platform, model, tag)
+    updated = update_stats(stats, metrics, streak, steps, duration, platform, model, tag,
+                           session_date_str=session_date)
 
     if not args.dry_run:
         stats_path.parent.mkdir(parents=True, exist_ok=True)
