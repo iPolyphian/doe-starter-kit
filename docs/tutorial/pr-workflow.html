@@ -999,6 +999,41 @@
           requires. If you edit only markdown files, the gate passes and project-specific checks are skipped entirely.
         </p>
 
+        <h3>Why three tiers?</h3>
+
+        <p>
+          Each tier exists for a specific reason:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Gate</strong> catches universal problems &mdash; broken documentation, stub functions left in code,
+            TODO markers that should have been resolved. These apply to every project regardless of language or framework.
+            If the gate fails, something fundamental is wrong and must be fixed before merging.
+          </li>
+          <li>
+            <strong>Project</strong> catches code-quality and correctness issues specific to your stack &mdash; a linting
+            error in JavaScript, a failing unit test in Python, a type error in Go. These only run when you change relevant
+            files, so editing a README does not trigger your entire test suite. If a project check fails, your code has a
+            real problem that needs fixing.
+          </li>
+          <li>
+            <strong>Advisory</strong> tracks metrics you care about but should not block your work &mdash; Lighthouse
+            performance scores, bundle size changes, test coverage percentages. A 2-point Lighthouse drop should not
+            prevent you from shipping a critical bug fix. You see the results, you decide whether to act on them.
+          </li>
+        </ul>
+
+        <div class="callout info">
+          <span class="callout-icon">&#9432;</span>
+          <div class="callout-body">
+            <strong>Advisory checks can be promoted.</strong> If your Playwright browser tests are stable and reliable,
+            move them from advisory to project tier so they block merges. The tier system is a starting point &mdash;
+            adjust it as your test suite matures. See the comments in <code>doe-ci.yml</code> for how to move checks
+            between tiers.
+          </div>
+        </div>
+
         <h3>When CI fails</h3>
 
         <p>
