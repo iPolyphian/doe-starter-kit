@@ -7,6 +7,26 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.49.0 (2026-04-01)
+
+### Added
+- **Phase-based directives** — 6 new directives extracted from CLAUDE.md: `planning-rules.md`, `building-rules.md`, `delivery-rules.md`, `context-management.md`, `self-annealing.md`, `framework-evolution.md`
+- **Adversarial review guide** (`directives/adversarial-review/README.md`) — blast radius matrix, Finder/Adversarial/Referee agent roles with scoring, invocation modes, DAG integration
+- **DAG executor** (`execution/dispatch_dag.py`) — dependency graph from `Depends:`/`Owns:` metadata in todo.md. Modes: `--validate`, `--graph`, `--dispatch`, `--status`
+- **Custom agent definitions** (`.claude/agents/`) — Finder, Adversarial, Referee, ReadOnly agents for adversarial review with mechanically blocked Edit/Write
+- **8 new methodology scenarios** (10-17) in `audit_claims.py` and `test_methodology.py` — router coverage, rule completeness, scale consistency, DAG validation, directive schema, cross-reference consistency, agent definition integrity, plan vs actual
+- **Three-Level Verification** section in `directives/testing-strategy.md` — Exists/Substantive/Wired depth levels for contract criteria
+- **Pre-push methodology checks** (`.githooks/pre-push`) — runs `test_methodology.py --quick` before every push
+- **Methodology Tests CI step** in `doe-ci.yml` — runs methodology checks in the DOE Gate tier
+- **Upgrade guide** in `CUSTOMIZATION.md` — documents v1.49.0 CFA changes for existing users
+- **Safe/Change with Care/Do Not Change** sections in `CUSTOMIZATION.md` — clear trichotomy for customisation risk
+
+### Changed
+- **CLAUDE.md** — rewritten from ~113-line monolith to ~55-line thin router. Rules replaced with one-liner pointers to phase directives. Trigger table replaces Progressive Disclosure section
+- **SYSTEM-MAP.md** — updated to document CFA architecture (phase directives, agents, DAG executor, pre-push hook)
+- **crack-on.md** — dependency analysis from DAG executor, session blocking for large features
+- **test_methodology.py** — `--scenario` flag now accepts multiple values (`action="append"`)
+
 ## v1.48.0 (2026-03-31)
 
 ### Added

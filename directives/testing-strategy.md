@@ -72,6 +72,56 @@ Rules:
 | `run: <cmd>` | `run: python3 execution/verify.py --self-test` | Exit code 0 |
 | `html: <path> has <sel>` | `html: index.html has .main-content` | CSS selector match |
 
+## Three-Level Verification
+
+When writing `[auto]` contract criteria, aim for depth -- not just existence. Three levels of verification catch progressively more bugs:
+
+### Level 1: Exists
+The file or function is physically present.
+```
+Verify: file: src/feature.js exists
+```
+**Catches:** missing files, typos in filenames, forgotten creation.
+**Misses:** stubs, placeholder code, dead functions.
+
+### Level 2: Substantive
+The implementation contains real logic, not stubs or placeholders.
+```
+Verify: file: src/feature.js contains calculateScore
+Verify: run: ! grep -q 'return null' src/feature.js
+```
+**Catches:** stub implementations (`return null`, `// TODO`), empty function bodies, placeholder text.
+**Misses:** code that exists but is never called.
+
+### Level 3: Wired
+The implementation is actually imported, called, and used by the rest of the application.
+```
+Verify: run: grep -rq 'calculateScore' src/
+Verify: run: grep -rq 'featureInit' src/app.js
+```
+**Catches:** orphan code, dead functions, modules that exist but are never loaded.
+**Misses:** logic correctness (use `/code-trace` for that).
+
+### When to use each level
+- **Quick tasks (1-2 files):** Level 1 is usually enough -- the contract criteria themselves describe the behaviour.
+- **Data-layer steps (algorithms, scoring, derivation):** Use Level 2 to verify substantive implementation, then run `/code-trace` for logic correctness.
+- **Integration steps (cross-module wiring):** Use Level 3 to verify the module is actually connected to the rest of the app.
+- **All [APP] features:** The `[manual]` criteria naturally cover "is it wired?" since the tester sees the UI working.
+
+### Post-Step Testing Protocol
+
+After completing each step, Claude runs the appropriate quality checks based on the step type:
+
+| Step type | What runs automatically | Signpost |
+|-----------|------------------------|----------|
+| Data-layer (algorithms, scoring, derivation) | `/code-trace` on the new module | "This is a data-layer step -- running code trace" |
+| UI (pages, components, layouts) | Playwright browser tests | "Running browser tests for affected pages" |
+| Integration (cross-module wiring) | `/code-trace --integration` | "Running integration trace across modules" |
+| Any step | Regression suite (if wired) | "Regression: N/N passed" |
+| Final step | Full sweep: regression + health check | "Running final verification sweep" |
+
+Claude announces what testing will happen at the start of each step and reports results after completion. The user never has to remember what to run.
+
 ## Edge Cases
 - `html:` pattern requires `beautifulsoup4` -- if not installed, criterion returns SKIP (not FAIL)
 - `run:` commands inherit the project root as cwd

@@ -126,6 +126,13 @@ jobs:
           else
             echo "No audit_claims.py found -- skipping"
           fi
+      - name: Methodology Tests
+        run: |
+          if [ -f execution/test_methodology.py ]; then
+            python3 execution/test_methodology.py --quick
+          else
+            echo "No test_methodology.py found -- skipping"
+          fi
 
   # ──────────────────────────────────────────────────────────────
   # Project tier: runs only when relevant files changed

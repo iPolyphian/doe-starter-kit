@@ -15,6 +15,7 @@ Usage:
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -695,6 +696,333 @@ def check_orphan_claims(report: AuditReport):
         Severity.PASS, "orphan_claims",
         f"{with_evidence}/{len(versioned)} versioned tasks have git commit evidence",
     ))
+
+
+# ══════════════════════════════════════════════════════════════
+# CFA CHECKS (10-17)
+# ══════════════════════════════════════════════════════════════
+
+@register("universal", fast=True)
+def check_router_coverage(report: AuditReport):
+    """CLAUDE.md triggers cover all directive files in directives/."""
+    claude_md = PROJECT_ROOT / "CLAUDE.md"
+    directives_dir = PROJECT_ROOT / "directives"
+
+    if not claude_md.exists() or not directives_dir.exists():
+        report.add(Finding(Severity.WARN, "router_coverage",
+                           "CLAUDE.md or directives/ not found — skipping"))
+        return
+
+    triggers_text = claude_md.read_text(encoding="utf-8")
+    all_directives = [
+        p for p in directives_dir.rglob("*.md")
+        if not p.name.startswith("_")
+    ]
+
+    covered = []
+    uncovered = []
+    for d in sorted(all_directives):
+        rel = str(d.relative_to(PROJECT_ROOT))
+        if rel in triggers_text or d.stem in triggers_text or d.name in triggers_text:
+            covered.append(rel)
+        else:
+            uncovered.append(rel)
+
+    total = len(all_directives)
+    if total == 0:
+        report.add(Finding(Severity.PASS, "router_coverage", "no directive files found"))
+        return
+
+    pct = len(covered) / total * 100
+    for u in uncovered:
+        report.add(Finding(Severity.WARN, "router_coverage",
+                           f"no trigger found: {u}", file=u))
+    if pct >= 80:
+        report.add(Finding(Severity.PASS, "router_coverage",
+                           f"{len(covered)}/{total} directives routed ({pct:.0f}%)"))
+    else:
+        report.add(Finding(Severity.WARN, "router_coverage",
+                           f"only {pct:.0f}% of directives routed ({len(covered)}/{total})"))
+
+
+@register("universal", fast=True)
+def check_rule_completeness(report: AuditReport):
+    """Core Behaviour rules in CLAUDE.md have corresponding directive coverage."""
+    claude_md = PROJECT_ROOT / "CLAUDE.md"
+
+    if not claude_md.exists():
+        report.add(Finding(Severity.WARN, "rule_completeness", "CLAUDE.md not found"))
+        return
+
+    text = claude_md.read_text(encoding="utf-8")
+    rules = re.findall(r"^\d+\.\s+\*\*(.+?)\.\*\*", text, re.MULTILINE)
+
+    if not rules:
+        report.add(Finding(Severity.WARN, "rule_completeness",
+                           "no Core Behaviour rules found in CLAUDE.md"))
+        return
+
+    rules_with_pointers = 0
+    for rule in rules:
+        rule_section = text[text.find(rule):text.find(rule) + 200]
+        if "directives/" in rule_section or "->" in rule_section:
+            rules_with_pointers += 1
+        else:
+            report.add(Finding(Severity.WARN, "rule_completeness",
+                               f"no directive pointer: {rule[:70]}",
+                               file="CLAUDE.md"))
+
+    pct = rules_with_pointers / len(rules) * 100
+    if pct >= 80:
+        report.add(Finding(Severity.PASS, "rule_completeness",
+                           f"{rules_with_pointers}/{len(rules)} rules have directive pointers ({pct:.0f}%)"))
+    else:
+        report.add(Finding(Severity.WARN, "rule_completeness",
+                           f"only {pct:.0f}% rules have directive pointers ({rules_with_pointers}/{len(rules)})"))
+
+
+@register("universal", fast=True)
+def check_scale_consistency(report: AuditReport):
+    """Directives mentioning scale modes use consistent section headings."""
+    directives_dir = PROJECT_ROOT / "directives"
+
+    if not directives_dir.exists():
+        report.add(Finding(Severity.WARN, "scale_consistency", "directives/ not found"))
+        return
+
+    scale_terms = ["solo", "informal parallel", "formal parallel", "wave", "dag"]
+    expected_headings = {"solo", "informal parallel", "formal parallel"}
+
+    files_with_scale = []
+    inconsistent = []
+
+    for d in sorted(directives_dir.rglob("*.md")):
+        text = d.read_text(encoding="utf-8").lower()
+        mentions = [t for t in scale_terms if t in text]
+        if len(mentions) >= 2:
+            files_with_scale.append(d.name)
+            headings = set()
+            for h in expected_headings:
+                if f"## {h}" in text or f"### {h}" in text:
+                    headings.add(h)
+            if headings and headings != expected_headings:
+                missing_h = expected_headings - headings
+                inconsistent.append((d.name, missing_h))
+
+    for name, missing_h in inconsistent:
+        report.add(Finding(Severity.WARN, "scale_consistency",
+                           f"{name}: missing scale headings {missing_h}",
+                           file=f"directives/{name}"))
+
+    if not inconsistent:
+        report.add(Finding(Severity.PASS, "scale_consistency",
+                           f"{len(files_with_scale)} scale files use consistent headings"))
+
+
+@register("universal", fast=False)
+def check_dag_validation(report: AuditReport):
+    """dispatch_dag.py --validate passes cleanly."""
+    executor = PROJECT_ROOT / "execution" / "dispatch_dag.py"
+
+    if not executor.exists():
+        report.add(Finding(Severity.WARN, "dag_validation",
+                           "execution/dispatch_dag.py not found — skipping"))
+        return
+
+    try:
+        result = subprocess.run(
+            [sys.executable, str(executor), "--validate"],
+            capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30,
+        )
+        if result.returncode == 0:
+            report.add(Finding(Severity.PASS, "dag_validation", "DAG validation passed"))
+        else:
+            report.add(Finding(Severity.WARN, "dag_validation",
+                               "DAG validation found issues",
+                               file="execution/dispatch_dag.py"))
+    except subprocess.TimeoutExpired:
+        report.add(Finding(Severity.WARN, "dag_validation", "DAG validation timed out"))
+    except OSError as e:
+        report.add(Finding(Severity.WARN, "dag_validation", f"cannot run DAG validator: {e}"))
+
+
+@register("universal", fast=True)
+def check_directive_schema(report: AuditReport):
+    """Directive files follow the required schema: Goal section, When to Use trigger."""
+    directives_dir = PROJECT_ROOT / "directives"
+
+    if not directives_dir.exists():
+        report.add(Finding(Severity.WARN, "directive_schema", "directives/ not found"))
+        return
+
+    required_patterns = {
+        "Goal": re.compile(r"^##\s+Goal", re.MULTILINE | re.IGNORECASE),
+        "When to Use": re.compile(r"^##\s+When to Use", re.MULTILINE | re.IGNORECASE),
+    }
+    _SCHEMA_SKIP = {"spec-reviewer.md", "code-quality-reviewer.md", "implementer-prompt.md"}
+
+    total = 0
+    issue_count = 0
+
+    for d in sorted(directives_dir.rglob("*.md")):
+        if d.name.startswith("_") or d.name in _SCHEMA_SKIP:
+            continue
+        total += 1
+        text = d.read_text(encoding="utf-8")
+        rel = str(d.relative_to(PROJECT_ROOT))
+        for section_name, pattern in required_patterns.items():
+            if not pattern.search(text):
+                issue_count += 1
+                report.add(Finding(Severity.WARN, "directive_schema",
+                                   f"missing '## {section_name}' section",
+                                   file=rel))
+
+    if issue_count == 0:
+        report.add(Finding(Severity.PASS, "directive_schema",
+                           f"all {total} directives have Goal + When to Use sections"))
+
+
+@register("universal", fast=True)
+def check_cross_reference_consistency(report: AuditReport):
+    """Directive cross-references and CLAUDE.md triggers point to real files."""
+    # Collect forward-reference exempt files from uncompleted todo.md steps
+    exempt_files: set = set()
+    step_re = re.compile(r"^\d+\.\s+\[[ x]\]")
+    owns_re = re.compile(r"^\s+Owns:\s*(.+)$", re.IGNORECASE)
+    todo = PROJECT_ROOT / "tasks" / "todo.md"
+    if todo.exists():
+        todo_text = todo.read_text(encoding="utf-8")
+        in_uncompleted = False
+        for line in todo_text.splitlines():
+            step_match = step_re.match(line.strip())
+            if step_match:
+                in_uncompleted = "[ ]" in line
+            if in_uncompleted:
+                owns_match = owns_re.match(line)
+                if owns_match:
+                    for f in owns_match.group(1).split(","):
+                        exempt_files.add(f.strip())
+
+    issue_count = 0
+    ref_pattern = re.compile(r"`((?:directives|execution|\.claude)/[^`]+)`")
+
+    claude_md = PROJECT_ROOT / "CLAUDE.md"
+    if claude_md.exists():
+        text = claude_md.read_text(encoding="utf-8")
+        for ref in ref_pattern.findall(text):
+            full = PROJECT_ROOT / ref
+            expanded = Path(os.path.expanduser(ref))
+            if not full.exists() and not expanded.exists() and ref not in exempt_files:
+                issue_count += 1
+                report.add(Finding(Severity.WARN, "cross_reference_consistency",
+                                   f"missing file referenced in CLAUDE.md: {ref}",
+                                   file="CLAUDE.md"))
+
+    directives_dir = PROJECT_ROOT / "directives"
+    if directives_dir.exists():
+        for d in sorted(directives_dir.rglob("*.md")):
+            text = d.read_text(encoding="utf-8")
+            rel = str(d.relative_to(PROJECT_ROOT))
+            for ref in ref_pattern.findall(text):
+                full = PROJECT_ROOT / ref
+                expanded = Path(os.path.expanduser(ref))
+                if not full.exists() and not expanded.exists() and ref not in exempt_files:
+                    issue_count += 1
+                    report.add(Finding(Severity.WARN, "cross_reference_consistency",
+                                       f"missing file: {ref}",
+                                       file=rel))
+
+    if issue_count == 0:
+        report.add(Finding(Severity.PASS, "cross_reference_consistency",
+                           "all cross-references resolve"))
+
+
+@register("universal", fast=True)
+def check_agent_definition_integrity(report: AuditReport):
+    """Agent files in .claude/agents/ have required frontmatter and read-only tool lists."""
+    agents_dir = PROJECT_ROOT / ".claude" / "agents"
+
+    if not agents_dir.exists():
+        report.add(Finding(Severity.WARN, "agent_definition_integrity",
+                           ".claude/agents/ not found — skipping"))
+        return
+
+    agent_files = sorted(agents_dir.glob("*.md"))
+    issue_count = 0
+
+    for af in agent_files:
+        text = af.read_text(encoding="utf-8")
+        name = af.stem
+        tools_match = re.search(r"^tools:\s*(.+)$", text, re.MULTILINE)
+        if not tools_match:
+            issue_count += 1
+            report.add(Finding(Severity.WARN, "agent_definition_integrity",
+                               f"{name}: missing tools: line in frontmatter",
+                               file=str(af.relative_to(PROJECT_ROOT))))
+            continue
+
+        tools = [t.strip() for t in tools_match.group(1).split(",")]
+        # Read-only agents must not have Edit or Write
+        if name in ("Finder", "Adversarial", "Referee", "ReadOnly"):
+            if "Edit" in tools or "Write" in tools:
+                issue_count += 1
+                report.add(Finding(Severity.WARN, "agent_definition_integrity",
+                                   f"{name}: has Edit/Write — should be read-only",
+                                   file=str(af.relative_to(PROJECT_ROOT))))
+
+    if issue_count == 0:
+        report.add(Finding(Severity.PASS, "agent_definition_integrity",
+                           f"all {len(agent_files)} agent definitions are consistent"))
+
+
+@register("universal", fast=False)
+def check_plan_vs_actual(report: AuditReport):
+    """For completed features, plan deliverables exist on disk."""
+    roadmap = PROJECT_ROOT / "ROADMAP.md"
+    plans_dir = PROJECT_ROOT / ".claude" / "plans"
+
+    if not roadmap.exists() or not plans_dir.exists():
+        report.add(Finding(Severity.PASS, "plan_vs_actual",
+                           "no ROADMAP.md or .claude/plans/ — nothing to check"))
+        return
+
+    roadmap_text = roadmap.read_text(encoding="utf-8")
+    complete_match = re.search(
+        r"^## Complete\b.*?\n(.*?)(?=^## |\Z)",
+        roadmap_text, re.MULTILINE | re.DOTALL,
+    )
+    if not complete_match:
+        report.add(Finding(Severity.PASS, "plan_vs_actual",
+                           "no ## Complete section in ROADMAP.md"))
+        return
+
+    complete_text = complete_match.group(1)
+    completed_features = re.findall(r"^###\s+(.+?)(?:\s+\(|$)", complete_text, re.MULTILINE)
+
+    issue_count = 0
+    checked = 0
+
+    for feature in completed_features:
+        safe_name = re.sub(r"[^a-z0-9-]", "-", feature.lower().strip())
+        candidates = list(plans_dir.glob(f"*{safe_name[:20]}*"))
+        if not candidates:
+            continue
+        checked += 1
+        plan_file = candidates[0]
+        plan_text = plan_file.read_text(encoding="utf-8")
+        file_refs = re.findall(
+            r"`((?:execution|directives|\.claude|src)/[^`]+\.\w+)`", plan_text
+        )
+        missing = [f for f in file_refs if not (PROJECT_ROOT / f).exists()]
+        for m in missing:
+            issue_count += 1
+            report.add(Finding(Severity.WARN, "plan_vs_actual",
+                               f"{feature}: deliverable missing: {m}",
+                               file=plan_file.name))
+
+    if issue_count == 0:
+        report.add(Finding(Severity.PASS, "plan_vs_actual",
+                           f"checked {checked} completed feature plans — all deliverables exist"))
 
 
 # ══════════════════════════════════════════════════════════════

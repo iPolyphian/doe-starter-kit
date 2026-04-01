@@ -1,0 +1,28 @@
+#!/bin/bash
+# Pre-push hook: runs test_methodology.py --quick before every push.
+# Fast structural checks only -- no execution tests, no pytest.
+# Catches cross-reference breaks, contract issues, and DAG validation errors
+# before they reach the remote and trigger CI.
+
+set -e
+
+# Find project root (where this hook lives)
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$HOOK_DIR/.." && pwd)"
+
+echo "Running methodology checks (--quick)..."
+
+if [ -f "$PROJECT_ROOT/execution/test_methodology.py" ]; then
+    python3 "$PROJECT_ROOT/execution/test_methodology.py" --quick
+    exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        echo ""
+        echo "Pre-push blocked: test_methodology.py --quick failed."
+        echo "Fix the issues above, then push again."
+        echo "Skip with: git push --no-verify"
+        exit 1
+    fi
+    echo "Methodology checks passed."
+else
+    echo "No test_methodology.py found -- skipping."
+fi

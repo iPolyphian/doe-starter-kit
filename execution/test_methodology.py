@@ -579,6 +579,374 @@ def scenario_execution_script_tests(verbose: bool = False):
 
 
 # ════════════════════════════════════════════════════════════
+# Scenario 10: router_coverage
+# ════════════════════════════════════════════════════════════
+
+def scenario_router_coverage(verbose: bool = False):
+    """Check that CLAUDE.md triggers cover all directive files in directives/."""
+    claude_md = PROJECT_ROOT / "CLAUDE.md"
+    directives_dir = PROJECT_ROOT / "directives"
+    vlines = []
+
+    if not claude_md.exists():
+        return _result("WARN", "CLAUDE.md not found", vlines)
+    if not directives_dir.exists():
+        return _result("WARN", "directives/ not found", vlines)
+
+    triggers_text = claude_md.read_text(encoding="utf-8")
+
+    all_directives = []
+    for p in directives_dir.rglob("*.md"):
+        if p.name.startswith("_"):
+            continue
+        all_directives.append(p)
+
+    covered = []
+    uncovered = []
+    for d in sorted(all_directives):
+        rel = str(d.relative_to(PROJECT_ROOT))
+        if rel in triggers_text or d.stem in triggers_text or d.name in triggers_text:
+            covered.append(rel)
+        else:
+            uncovered.append(rel)
+
+    total = len(all_directives)
+    vlines.append(f"  Total directive files: {total}")
+    vlines.append(f"  Referenced in CLAUDE.md: {len(covered)}")
+    for u in uncovered:
+        vlines.append(f"  Missing trigger: {u}")
+
+    if total == 0:
+        return _result("PASS", "no directive files found", vlines)
+
+    pct = len(covered) / total * 100
+    if pct >= 80:
+        return _result("PASS", f"{len(covered)}/{total} directives routed ({pct:.0f}%)", vlines)
+    return _result("WARN", f"only {pct:.0f}% of directives routed ({len(covered)}/{total})", vlines)
+
+
+# ════════════════════════════════════════════════════════════
+# Scenario 11: rule_completeness
+# ════════════════════════════════════════════════════════════
+
+def scenario_rule_completeness(verbose: bool = False):
+    """Check that Core Behaviour rules in CLAUDE.md have corresponding directive coverage."""
+    claude_md = PROJECT_ROOT / "CLAUDE.md"
+    vlines = []
+
+    if not claude_md.exists():
+        return _result("WARN", "CLAUDE.md not found", vlines)
+
+    text = claude_md.read_text(encoding="utf-8")
+    rules = re.findall(r"^\d+\.\s+\*\*(.+?)\.\*\*", text, re.MULTILINE)
+    vlines.append(f"  Core Behaviour rules found: {len(rules)}")
+
+    if not rules:
+        return _result("WARN", "no Core Behaviour rules found in CLAUDE.md", vlines)
+
+    rules_with_pointers = 0
+    for rule in rules:
+        rule_section = text[text.find(rule):text.find(rule) + 200]
+        if "directives/" in rule_section or "->" in rule_section:
+            rules_with_pointers += 1
+        else:
+            vlines.append(f"  No directive pointer: {rule[:50]}")
+
+    pct = rules_with_pointers / len(rules) * 100
+    vlines.append(f"  Rules with directive pointers: {rules_with_pointers}/{len(rules)} ({pct:.0f}%)")
+
+    if pct >= 80:
+        return _result("PASS", f"{rules_with_pointers}/{len(rules)} rules have directive pointers", vlines)
+    return _result("WARN", f"only {pct:.0f}% rules have directive pointers", vlines)
+
+
+# ════════════════════════════════════════════════════════════
+# Scenario 12: scale_consistency
+# ════════════════════════════════════════════════════════════
+
+def scenario_scale_consistency(verbose: bool = False):
+    """Check that directives mentioning scale modes use consistent section headings."""
+    directives_dir = PROJECT_ROOT / "directives"
+    vlines = []
+
+    if not directives_dir.exists():
+        return _result("WARN", "directives/ not found", vlines)
+
+    scale_terms = ["solo", "informal parallel", "formal parallel", "wave", "dag"]
+    expected_headings = {"solo", "informal parallel", "formal parallel"}
+
+    files_with_scale = []
+    inconsistent = []
+
+    for d in sorted(directives_dir.rglob("*.md")):
+        text = d.read_text(encoding="utf-8").lower()
+        mentions = [t for t in scale_terms if t in text]
+        if len(mentions) >= 2:
+            files_with_scale.append(d.name)
+            headings = set()
+            for h in expected_headings:
+                if f"## {h}" in text or f"### {h}" in text:
+                    headings.add(h)
+            if headings and headings != expected_headings:
+                missing = expected_headings - headings
+                inconsistent.append(f"{d.name}: missing headings {missing}")
+
+    vlines.append(f"  Files discussing scale: {len(files_with_scale)}")
+    for f in files_with_scale:
+        vlines.append(f"    {f}")
+    for i in inconsistent:
+        vlines.append(f"  Inconsistent: {i}")
+
+    if inconsistent:
+        return _result("WARN", f"{len(inconsistent)} files with inconsistent scale headings", vlines)
+    return _result("PASS", f"{len(files_with_scale)} files use consistent scale terminology", vlines)
+
+
+# ════════════════════════════════════════════════════════════
+# Scenario 13: dag_validation
+# ════════════════════════════════════════════════════════════
+
+def scenario_dag_validation(verbose: bool = False):
+    """Run dispatch_dag.py --validate and check it passes."""
+    executor = PROJECT_ROOT / "execution" / "dispatch_dag.py"
+    vlines = []
+
+    if not executor.exists():
+        return _result("WARN", "execution/dispatch_dag.py not found", vlines)
+
+    try:
+        result = subprocess.run(
+            [sys.executable, str(executor), "--validate"],
+            capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30,
+        )
+        output = result.stdout + result.stderr
+        vlines.extend([f"  {l}" for l in output.splitlines()[:20]])
+
+        if result.returncode == 0:
+            return _result("PASS", "DAG validation passed", vlines)
+        return _result("WARN", "DAG validation found issues", vlines)
+    except subprocess.TimeoutExpired:
+        return _result("WARN", "DAG validation timed out", vlines)
+    except OSError as e:
+        return _result("WARN", f"cannot run DAG validator: {e}", vlines)
+
+
+# ════════════════════════════════════════════════════════════
+# Scenario 14: directive_schema
+# ════════════════════════════════════════════════════════════
+
+def scenario_directive_schema(verbose: bool = False):
+    """Check that directive files follow the required schema: Goal section, When to Use trigger."""
+    directives_dir = PROJECT_ROOT / "directives"
+    vlines = []
+
+    if not directives_dir.exists():
+        return _result("WARN", "directives/ not found", vlines)
+
+    required_sections = {
+        "goal": re.compile(r"^##\s+Goal", re.MULTILINE | re.IGNORECASE),
+        "trigger": re.compile(r"^##\s+When to Use", re.MULTILINE | re.IGNORECASE),
+    }
+    _SCHEMA_SKIP = {"spec-reviewer.md", "code-quality-reviewer.md", "implementer-prompt.md"}
+
+    total = 0
+    issues = []
+
+    for d in sorted(directives_dir.rglob("*.md")):
+        if d.name.startswith("_") or d.name in _SCHEMA_SKIP:
+            continue
+        total += 1
+        text = d.read_text(encoding="utf-8")
+        rel = str(d.relative_to(PROJECT_ROOT))
+
+        for section_name, pattern in required_sections.items():
+            if not pattern.search(text):
+                issues.append(f"{rel}: missing '## {section_name.title()}' section")
+                vlines.append(f"  {rel}: missing {section_name}")
+
+    vlines.insert(0, f"  Directives checked: {total}")
+    vlines.insert(1, f"  Required sections: Goal, When to Use (trigger)")
+    vlines.insert(2, f"  Schema issues: {len(issues)}")
+
+    if not issues:
+        return _result("PASS", f"all {total} directives have Goal + When to Use sections", vlines)
+    return _result("WARN", f"{len(issues)} schema issue(s) in {total} directives", vlines)
+
+
+# ════════════════════════════════════════════════════════════
+# Scenario 15: cross_reference_consistency
+# ════════════════════════════════════════════════════════════
+
+import os as _os
+
+def scenario_cross_reference_consistency(verbose: bool = False):
+    """Validate that directive cross-references and CLAUDE.md triggers point to real files.
+
+    Handles forward references: files referenced by uncompleted todo.md steps
+    are exempt (they don't exist yet).
+    """
+    vlines = []
+
+    # Collect forward-reference exempt files (from uncompleted steps in todo.md)
+    exempt_files = set()
+    step_re = re.compile(r"^\d+\.\s+\[[ x]\]")
+    owns_re = re.compile(r"^\s+Owns:\s*(.+)$", re.IGNORECASE)
+    todo = PROJECT_ROOT / "tasks" / "todo.md"
+    if todo.exists():
+        todo_text = todo.read_text(encoding="utf-8")
+        in_uncompleted = False
+        for line in todo_text.splitlines():
+            step_match = step_re.match(line.strip())
+            if step_match:
+                in_uncompleted = "[ ]" in line
+            if in_uncompleted:
+                owns_match = owns_re.match(line)
+                if owns_match:
+                    for f in owns_match.group(1).split(","):
+                        exempt_files.add(f.strip())
+
+    vlines.append(f"  Forward-reference exempt files: {len(exempt_files)}")
+
+    # Check CLAUDE.md trigger references
+    claude_md = PROJECT_ROOT / "CLAUDE.md"
+    issues = []
+
+    if claude_md.exists():
+        text = claude_md.read_text(encoding="utf-8")
+        refs = re.findall(r"`((?:directives|execution|\.claude)/[^`]+)`", text)
+        for ref in refs:
+            full = PROJECT_ROOT / ref
+            expanded = Path(_os.path.expanduser(ref))
+            if not full.exists() and not expanded.exists() and ref not in exempt_files:
+                issues.append(f"CLAUDE.md references missing file: {ref}")
+                vlines.append(f"  Missing: {ref} (from CLAUDE.md)")
+
+    # Check directive cross-references
+    directives_dir = PROJECT_ROOT / "directives"
+    if directives_dir.exists():
+        for d in sorted(directives_dir.rglob("*.md")):
+            text = d.read_text(encoding="utf-8")
+            refs = re.findall(r"`((?:directives|execution|\.claude)/[^`]+)`", text)
+            for ref in refs:
+                full = PROJECT_ROOT / ref
+                expanded = Path(_os.path.expanduser(ref))
+                if not full.exists() and not expanded.exists() and ref not in exempt_files:
+                    rel = str(d.relative_to(PROJECT_ROOT))
+                    issues.append(f"{rel} references missing file: {ref}")
+                    vlines.append(f"  Missing: {ref} (from {rel})")
+
+    vlines.insert(1, f"  Cross-reference issues: {len(issues)}")
+
+    if not issues:
+        return _result("PASS", "all cross-references resolve", vlines)
+    return _result("WARN", f"{len(issues)} broken cross-reference(s)", vlines)
+
+
+# ════════════════════════════════════════════════════════════
+# Scenario 16: agent_definition_integrity
+# ════════════════════════════════════════════════════════════
+
+def scenario_agent_definition_integrity(verbose: bool = False):
+    """Validate agent files match their README claims (tool lists, scoring)."""
+    agents_dir = PROJECT_ROOT / ".claude" / "agents"
+    readme = PROJECT_ROOT / "directives" / "adversarial-review" / "README.md"
+    vlines = []
+
+    if not agents_dir.exists():
+        return _result("WARN", ".claude/agents/ not found", vlines)
+
+    agent_files = sorted(agents_dir.glob("*.md"))
+    vlines.append(f"  Agent files found: {len(agent_files)}")
+
+    issues = []
+
+    for af in agent_files:
+        text = af.read_text(encoding="utf-8")
+        name = af.stem
+
+        tools_match = re.search(r"^tools:\s*(.+)$", text, re.MULTILINE)
+        if not tools_match:
+            issues.append(f"{name}: missing tools: line in frontmatter")
+            continue
+
+        tools = [t.strip() for t in tools_match.group(1).split(",")]
+        vlines.append(f"  {name}: tools = {', '.join(tools)}")
+
+        if name in ("Finder", "Adversarial", "Referee", "ReadOnly"):
+            if "Edit" in tools or "Write" in tools:
+                issues.append(f"{name}: has Edit/Write — should be read-only")
+
+    if readme.exists():
+        readme_text = readme.read_text(encoding="utf-8")
+        for role in ("Finder", "Adversarial", "Referee"):
+            af = agents_dir / f"{role}.md"
+            if not af.exists():
+                issues.append(f"README references {role} but agent file missing")
+                continue
+            agent_text = af.read_text(encoding="utf-8")
+            if role == "Adversarial":
+                if "-1x" not in agent_text and "dismissing" not in agent_text.lower():
+                    issues.append(f"{role}: missing -1x dismissal penalty (README claims it)")
+
+    if not issues:
+        return _result("PASS", f"all {len(agent_files)} agent definitions are consistent", vlines)
+    return _result("WARN", f"{len(issues)} agent integrity issue(s)", vlines)
+
+
+# ════════════════════════════════════════════════════════════
+# Scenario 17: plan_vs_actual
+# ════════════════════════════════════════════════════════════
+
+def scenario_plan_vs_actual(verbose: bool = False):
+    """For completed features, verify plan deliverables exist on disk.
+
+    Structural only — checks files exist, not semantic intent.
+    Only checks features in ROADMAP.md ## Complete.
+    """
+    roadmap = PROJECT_ROOT / "ROADMAP.md"
+    plans_dir = PROJECT_ROOT / ".claude" / "plans"
+    vlines = []
+
+    if not roadmap.exists():
+        return _result("PASS", "no ROADMAP.md — nothing to check", vlines)
+    if not plans_dir.exists():
+        return _result("PASS", "no .claude/plans/ — nothing to check", vlines)
+
+    roadmap_text = roadmap.read_text(encoding="utf-8")
+    complete_match = re.search(r"^## Complete\b.*?\n(.*?)(?=^## |\Z)", roadmap_text, re.MULTILINE | re.DOTALL)
+    if not complete_match:
+        return _result("PASS", "no ## Complete section in ROADMAP.md", vlines)
+
+    complete_text = complete_match.group(1)
+    completed_features = re.findall(r"^###\s+(.+?)(?:\s+\(|$)", complete_text, re.MULTILINE)
+    vlines.append(f"  Completed features in ROADMAP: {len(completed_features)}")
+
+    issues = []
+    checked = 0
+
+    for feature in completed_features:
+        safe_name = re.sub(r"[^a-z0-9-]", "-", feature.lower().strip())
+        candidates = list(plans_dir.glob(f"*{safe_name[:20]}*"))
+        if not candidates:
+            continue
+        checked += 1
+        plan_file = candidates[0]
+        plan_text = plan_file.read_text(encoding="utf-8")
+        file_refs = re.findall(r"`((?:execution|directives|\.claude|src)/[^`]+\.\w+)`", plan_text)
+        missing = [f for f in file_refs if not (PROJECT_ROOT / f).exists()]
+        if missing:
+            issues.append(f"{feature}: {len(missing)} deliverable(s) missing")
+            for m in missing[:3]:
+                vlines.append(f"  Missing: {m} (plan: {plan_file.name})")
+
+    vlines.append(f"  Plans checked: {checked}")
+
+    if not issues:
+        return _result("PASS", f"checked {checked} completed feature plans — all deliverables exist", vlines)
+    return _result("WARN", f"{len(issues)} feature(s) have missing deliverables", vlines)
+
+
+# ════════════════════════════════════════════════════════════
 # Scenario registry
 # ════════════════════════════════════════════════════════════
 
@@ -592,6 +960,14 @@ SCENARIOS = [
     ("status_protocol_compliance",  scenario_status_protocol_compliance),
     ("claude_md_quality",           scenario_claude_md_quality),
     ("execution_script_tests",      scenario_execution_script_tests),
+    ("router_coverage",             scenario_router_coverage),
+    ("rule_completeness",           scenario_rule_completeness),
+    ("scale_consistency",           scenario_scale_consistency),
+    ("dag_validation",              scenario_dag_validation),
+    ("directive_schema",            scenario_directive_schema),
+    ("cross_reference_consistency", scenario_cross_reference_consistency),
+    ("agent_definition_integrity",  scenario_agent_definition_integrity),
+    ("plan_vs_actual",              scenario_plan_vs_actual),
 ]
 
 # Scenarios excluded from --quick mode
@@ -633,15 +1009,23 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Scenarios:
-  session_start_discipline   Check .tmp/.session-start exists and is recent
-  contract_completeness      Verify tasks/todo.md steps have valid contracts
-  learnings_freshness        Check learnings.md and retro quality
-  rationalisation_coverage   YOU MUST rules covered in rationalisation-tables.md
-  trigger_completeness       Every directive has a trigger in CLAUDE.md
-  review_discipline          Features shipped with review evidence (informational)
-  status_protocol_compliance Wave agent reports have STATUS field
-  claude_md_quality          Score CLAUDE.md against quality rubric (grades A-F)
-  execution_script_tests     Run pytest against tests/execution/ (full mode only)
+  session_start_discipline       Check .tmp/.session-start exists and is recent
+  contract_completeness          Verify tasks/todo.md steps have valid contracts
+  learnings_freshness            Check learnings.md and retro quality
+  rationalisation_coverage       YOU MUST rules covered in rationalisation-tables.md
+  trigger_completeness           Every directive has a trigger in CLAUDE.md
+  review_discipline              Features shipped with review evidence (informational)
+  status_protocol_compliance     Wave agent reports have STATUS field
+  claude_md_quality              Score CLAUDE.md against quality rubric (grades A-F)
+  execution_script_tests         Run pytest against tests/execution/ (full mode only)
+  router_coverage                CLAUDE.md triggers cover all directive files
+  rule_completeness              Core Behaviour rules have directive pointers
+  scale_consistency              Scale headings (Solo/Parallel) are consistent
+  dag_validation                 Run dispatch_dag.py --validate
+  directive_schema               Directives have Goal + When to Use sections
+  cross_reference_consistency    Cross-references point to real files
+  agent_definition_integrity     Agent files match README claims
+  plan_vs_actual                 Completed features' plan deliverables exist
         """,
     )
     parser.add_argument(
@@ -649,8 +1033,8 @@ Scenarios:
         help="List all scenario names",
     )
     parser.add_argument(
-        "--scenario", metavar="NAME",
-        help="Run a specific scenario by name",
+        "--scenario", metavar="NAME", action="append",
+        help="Run a specific scenario by name (can be repeated)",
     )
     parser.add_argument(
         "--verbose", action="store_true",
@@ -669,10 +1053,12 @@ Scenarios:
 
     # Build list of scenarios to run
     if args.scenario:
-        found = [(i, name, fn) for i, (name, fn) in enumerate(SCENARIOS, 1) if name == args.scenario]
-        if not found:
+        requested = args.scenario  # list from action="append"
+        found = [(i, name, fn) for i, (name, fn) in enumerate(SCENARIOS, 1) if name in requested]
+        unknown = set(requested) - {name for _, name, _ in found}
+        if unknown:
             known = ", ".join(n for n, _ in SCENARIOS)
-            print(f"Unknown scenario '{args.scenario}'. Known: {known}", file=sys.stderr)
+            print(f"Unknown scenario(s): {', '.join(unknown)}. Known: {known}", file=sys.stderr)
             sys.exit(2)
         to_run = found
     elif args.quick:

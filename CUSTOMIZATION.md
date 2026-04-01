@@ -149,6 +149,52 @@ These hooks **warn but don't block** — they print to stderr so you see the war
 
 ---
 
+## Upgrading from Older Kit Versions
+
+If your project was set up with an older version of the kit, here's what changed:
+
+### v1.49.0 — Context-First Architecture
+
+**CLAUDE.md is now a thin router.** The ~113-line inline rulebook is now a ~55-line trigger table that loads directives on demand. If you reference rules by number (e.g. "Rule 6"), update those references to point to the directive file instead.
+
+**Phase-based directives replace inline rules:**
+- `directives/planning-rules.md` — contracts, dependencies, scale-aware planning
+- `directives/building-rules.md` — branches, code hygiene, file ownership
+- `directives/delivery-rules.md` — retros, guardrails, performance budgets
+- `directives/context-management.md` — post-compaction, solo/parallel/formal modes
+- `directives/self-annealing.md` — failure response, learnings curation
+- `directives/framework-evolution.md` — track native Claude Code features
+
+**DAG executor for parallel dispatch.** `execution/dispatch_dag.py` parses `Depends:` and `Owns:` metadata from todo.md to build a dependency graph. Use `--validate` to check your step metadata, `--graph` to see wave groupings, `--dispatch` to run parallel steps.
+
+**Custom agent definitions.** `.claude/agents/` contains Finder, Adversarial, Referee, and ReadOnly agents for adversarial review. Edit/Write are mechanically blocked. Run with `claude --agent=Finder`.
+
+**Pre-push methodology checks.** `.githooks/pre-push` runs `test_methodology.py --quick` before every push. Catches structural issues (broken cross-refs, invalid contracts) before they reach CI.
+
+---
+
+## Safe to Change
+
+- **CLAUDE.md triggers** — add or remove triggers to match your project's workflow
+- **Directive content** — edit rules to match your team's conventions
+- **Contract patterns** — adjust the `Verify:` patterns in todo.md to match your tooling
+- **Commands** — edit or add slash commands in `~/.claude/commands/`
+- **Hooks** — add or remove hooks in `.claude/settings.json`
+- **Stats categories** — customise `.claude/stats.json` tracking
+
+## Change with Care
+
+- **Core Behaviour rules** — these are always-on for a reason. Removing one removes a safety net.
+- **Post-compaction recovery** — if you modify the recovery instructions in context-management.md, test by running `/clear` mid-feature and checking if the agent recovers correctly
+- **Shared file list** — the SHARED_FILES constant in dispatch_dag.py defines which files are off-limits to parallel agents. Adding files to this list is safe; removing files risks merge conflicts.
+
+## Do Not Change
+
+- **Hook enforcement model** — the three-hook system (protect directives, block secrets, block dangerous commands) is the last line of defence against agent misbehaviour
+- **Contract requirement** — every step needs at least one `[auto]` criterion. This is the only thing that makes autonomous building safe.
+
+---
+
 ## What NOT to put in the starter kit
 
 When syncing improvements back (see `directives/starter-kit-sync.md`), never sync:

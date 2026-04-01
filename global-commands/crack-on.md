@@ -10,6 +10,10 @@ Read CLAUDE.md, tasks/todo.md, STATE.md, and learnings.md.
 
 **DOE Kit check:** If `~/doe-starter-kit` exists, run `cd ~/doe-starter-kit && git describe --tags --abbrev=0 2>/dev/null` to get the current kit version. Compare against STATE.md's "DOE Starter Kit" version. If versions match → `synced`. If kit tag is newer → `* pull`. No outbound push detection — `/wrap` handles session-specific reminders for modified kit-syncable files. If the directory doesn't exist, skip the DOE Kit line entirely.
 
+**Dependency analysis:** Parse `Depends:` and `Owns:` metadata from steps in todo.md ## Current. If `execution/dispatch_dag.py` exists, run `python3 execution/dispatch_dag.py --graph 2>&1` to see the wave structure. Show the next wave in the card. If the next wave has 2+ steps (parallel opportunity), add a line after PICKING UP: `PARALLEL   Wave has N steps -- run sequential or parallel? (parallel uses dispatch_dag.py)`. Wait for the user's response. If "parallel", run `python3 execution/dispatch_dag.py --dispatch`. If "sequential" or no response after showing the card, proceed with the first step as usual.
+
+**Session blocking (session block):** For large features (5+ remaining steps), suggest which steps to tackle this session based on context budget. A session can typically handle 3-4 steps before context degrades. Show: `SESSION BLOCK   Suggest Steps N-M this session (N steps remaining, ~K context budget)`. This is advisory -- the user can override.
+
 Show a bordered kick-off card, then immediately pick up the next incomplete step. One step at a time -- commit, push, then stop and show what you did.
 
 ```

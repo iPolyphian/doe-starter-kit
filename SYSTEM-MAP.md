@@ -16,16 +16,23 @@ Everything else is loaded **on demand** — Claude reads them because CLAUDE.md 
 ```
 CLAUDE.md tells Claude to check these:
 ├── tasks/todo.md        ← What's in progress, what's next
-└── STATE.md             ← Decisions, blockers, where we left off
+└── STATE.md             ← Blockers, current position, where we left off
 ```
 
 ## What Claude checks before building (Progressive Disclosure)
 
 ```
 CLAUDE.md tells Claude to check these before starting work:
-├── learnings.md         ← Project-specific patterns and gotchas
-├── STATE.md             ← Recent decisions that affect this work
-└── directives/          ← SOPs for recurring tasks (if a trigger matches)
+├── learnings.md         ← Project-specific patterns, decisions, and gotchas
+├── STATE.md             ← Current blockers that affect this work
+└── directives/          ← Phase-based directives loaded by trigger:
+    ├── planning-rules.md      ← Contracts, dependencies, scale-aware planning
+    ├── building-rules.md      ← Branches, code hygiene, file ownership, DAG push
+    ├── delivery-rules.md      ← Retros, guardrails, performance budgets
+    ├── context-management.md  ← Post-compaction, solo/parallel/formal modes
+    ├── self-annealing.md      ← Failure response, learnings curation, degradation
+    ├── framework-evolution.md ← Track native Claude Code features, absorption
+    ├── adversarial-review/    ← Multi-agent scored review with custom agents
     ├── documentation-governance.md  ← Governed docs checklist + front-matter format
     └── claim-auditing.md            ← When/how to run audits
 ```
@@ -34,12 +41,12 @@ CLAUDE.md tells Claude to check these before starting work:
 
 ### 📋 The Rules (you update via me)
 
-| File | Goes to | Lines | Purpose |
-|------|---------|-------|---------|
-| CLAUDE.md | `./CLAUDE.md` | ~115 | The operating system. 9 rules, guardrails with proof requirement, break glass procedure, code hygiene. Auto-loaded. |
-| settings.json | `./.claude/settings.json` | ~25 | 3 PreToolUse guardrail hooks (PostToolUse hooks now in global `~/.claude/settings.json`) |
-| SYSTEM-MAP.md | `./SYSTEM-MAP.md` | — | This breakdown. For you, not Claude. |
-| CUSTOMIZATION.md | `./CUSTOMIZATION.md` | — | What to keep, customize, or clear when starting a new project. For you, not Claude. |
+| File | Goes to | Purpose |
+|------|---------|---------|
+| CLAUDE.md | `./CLAUDE.md` | The operating system. 9 rules, guardrails, code hygiene, break glass, triggers. Auto-loaded. |
+| settings.json | `./.claude/settings.json` | 3 pre-action hooks (protect directives, block secrets, block dangerous commands) |
+| SYSTEM-MAP.md | `./SYSTEM-MAP.md` | This breakdown. For you, not Claude. |
+| CUSTOMIZATION.md | `./CUSTOMIZATION.md` | What to keep, customize, or clear when starting a new project. For you, not Claude. |
 
 ### 🔒 The Guardrails (enforce the rules automatically)
 
@@ -50,13 +57,14 @@ CLAUDE.md tells Claude to check these before starting work:
 | block_dangerous_commands.py | `./.claude/hooks/` | Blocks force-push, rm -rf, etc |
 | commit-msg | `./.githooks/` | Strips AI co-author trailers from git commits |
 | pre-commit | `./.githooks/` | Runs fast claim audit checks before every commit. Blocks on FAILs. |
+| pre-push | `./.githooks/` | Runs test_methodology.py --quick before push |
 
 ### 🧠 The Memory (Claude writes, Claude reads)
 
 | File | Goes to | Purpose |
 |------|---------|---------|
-| STATE.md | `./STATE.md` | Session memory. Blockers, current position, last session. Decisions go in learnings.md. Survives /clear. |
-| learnings.md | `./learnings.md` | Project patterns. Max 50 lines. Governed doc. |
+| STATE.md | `./STATE.md` | Session memory. Blockers, current position. Survives /clear. |
+| learnings.md | `./learnings.md` | Project patterns, decisions, common mistakes. Max 50 lines. |
 | stats.json | `./.claude/stats.json` | Persistent session stats, streaks, badges, scores. Updated by /wrap. |
 | universal-claude-md-template.md | `~/.claude/CLAUDE.md` | One-time setup. Cross-project patterns. Max 30 lines. |
 
@@ -64,43 +72,60 @@ CLAUDE.md tells Claude to check these before starting work:
 
 | File | Goes to | Purpose |
 |------|---------|---------|
-| todo.md | `./tasks/todo.md` | Active tasks, steps, timestamps. Features tagged [APP] or [INFRA]. |
-| archive.md | `./tasks/archive.md` | Completed features moved from todo |
-| ROADMAP.md | `./ROADMAP.md` | Ideas notepad. No automation. |
+| todo.md | `./tasks/todo.md` | Active tasks with numbered steps, version tags, timestamps. Last 3 done features. |
+| archive.md | `./tasks/archive.md` | Full step-by-step detail for all completed features. |
+| ROADMAP.md | `./ROADMAP.md` | Forward-looking: Up Next, Ideas, Parked. Plus Complete section (one-line summaries). |
+| _TEMPLATE.md | `./directives/` | Template for new SOPs |
 
 ### 📐 The Directives (SOPs)
 
 | File | Goes to | Purpose |
 |------|---------|---------|
-| _TEMPLATE.md | `./directives/` | Template for new SOPs |
+| planning-rules.md | `./directives/` | Contracts, dependencies, scale-aware planning rules |
+| building-rules.md | `./directives/` | Branch discipline, code hygiene, file ownership, DAG push |
+| delivery-rules.md | `./directives/` | Retro discipline, guardrails, performance budgets |
+| context-management.md | `./directives/` | Post-compaction protocol, solo/parallel/formal mode switching |
+| self-annealing.md | `./directives/` | Failure response, learnings curation, degradation handling |
+| framework-evolution.md | `./directives/` | Track native Claude Code features, absorption decisions |
+| adversarial-review/ | `./directives/` | Multi-agent scored review workflow |
 | documentation-governance.md | `./directives/` | Governed doc registry, front-matter format, staleness rules |
 | claim-auditing.md | `./directives/` | When/how to audit claims, pre-commit integration |
 | starter-kit-sync.md | `./directives/` | How to sync DOE improvements back to the starter kit repo |
 
-### 🔍 The Audit System
+### 🤖 The Agents (custom agents for adversarial review)
 
 | File | Goes to | Purpose |
 |------|---------|---------|
-| audit_claims.py | `./execution/` | Automated false-positive detection. 6 universal checks (incl. active wave detection). Extensible with project-specific checks via `@register()` decorator. |
+| Finder.md | `./.claude/agents/` | Identifies issues (read-only) |
+| Adversarial.md | `./.claude/agents/` | Filters false positives (read-only) |
+| Referee.md | `./.claude/agents/` | Final arbiter (read-only) |
+| ReadOnly.md | `./.claude/agents/` | General-purpose read-only agent |
+
+### 🔍 The Execution Scripts
+
+| File | Goes to | Purpose |
+|------|---------|---------|
+| dispatch_dag.py | `./execution/` | DAG executor for parallel step dispatch |
+| test_methodology.py | `./execution/` | Structural methodology checks (17 scenarios) |
+| audit_claims.py | `./execution/` | Automated false-positive detection. Extensible with project-specific checks via `@register()` decorator. |
 | wrap_stats.py | `./execution/` | Deterministic session scoring. Gathers git metrics, computes streak/multiplier/score/badges, updates stats.json, outputs JSON for `/wrap` to render. |
 
 ### ⚡ The Commands (global — install once, available in every project)
 
 All slash commands install to `~/.claude/commands/` so they work across every DOE project. They reference relative paths (`STATE.md`, `tasks/todo.md`, etc.) so they're project-agnostic.
 
-| File | Goes to | Purpose |
-|------|---------|---------|
-| wrap.md | `~/.claude/commands/` | Type `/wrap` — gamified session summary; calls `execution/wrap_stats.py` for deterministic scoring, badges, streaks, genre title cards |
-| eod.md | `~/.claude/commands/` | Type `/eod` — end-of-day report aggregating all sessions, commits, features, and position |
-| pitch.md | `~/.claude/commands/` | Type `/pitch` — generate 3-5 product improvement ideas based on current state |
-| audit.md | `~/.claude/commands/` | Type `/audit` — comprehensive project audit (claims, workspace health, DOE integrity) |
-| stand-up.md | `~/.claude/commands/` | Type `/stand-up` — dual-mode: kick-off (no session) starts clock + plan; status (mid-session) shows daily status card |
-| crack-on.md | `~/.claude/commands/` | Type `/crack-on` — start session clock, pick up next step, commit, push, stop |
-| roast.md | `~/.claude/commands/` | Type `/roast` — comedy roast of the codebase + developer habits from stats.json |
-| sitrep.md | `~/.claude/commands/` | Type `/sitrep` — mid-session situation report with progress, commits, elapsed time |
-| sync-doe.md | `~/.claude/commands/` | Type `/sync-doe` — sync DOE improvements back to the starter kit repo |
-| agent-status.md | `~/.claude/commands/` | Type `/agent-status` — multi-agent dashboard for wave status, terminal liveness, task progress, merge order |
-| README.md | `~/.claude/commands/` | Quick reference for all 15 slash commands |
+| Command | Purpose |
+|---------|---------|
+| `/stand-up` | Dual-mode: kick-off (no session) or daily status (mid-session) |
+| `/crack-on` | Pick up next step immediately — commit, push, stop, report |
+| `/wrap` | End-of-session routine: stats, badges, themed summary |
+| `/pitch` | Generate 3-5 product ideas with structured pitches |
+| `/roast` | Roast the codebase — specific, brutal, funny |
+| `/audit` | Full claim audit — all checks, detailed explanations |
+| `/sitrep` | Mid-session situation report with progress, commits, elapsed time |
+| `/eod` | End-of-day report aggregating all sessions, commits, features, and position |
+| `/agent-status` | Multi-agent dashboard for wave status, terminal liveness, task progress, merge order |
+| `/sync-doe` | Sync DOE improvements back to the starter kit repo |
 
 ### 🔀 Multi-Agent Coordination (global — install once, available in every project)
 
@@ -112,36 +137,25 @@ Multi-agent files install to machine-level locations via `setup.sh`. They use `P
 | heartbeat.py | `~/.claude/hooks/` | PostToolUse: updates session heartbeat every 30s during active waves |
 | context_monitor.py | `~/.claude/hooks/` | PostToolUse: warns at 60% context usage, stops at 80% for graceful handoff |
 
-### 📐 The Plans & Sync
-
-| File | Goes to | Purpose |
-|------|---------|---------|
-| gamified-wrap.md | `./.claude/plans/` | Design plan for the gamified wrap system |
-| claude-chat-sync-prompt.md | `./.claude/` | Paste into Claude Chat to sync it with Claude Code changes |
-
 ## How they feed into each other
 
 ```
 SESSION START
 │
-├─→ CLAUDE.md (auto-loaded — the rules)
-├─→ ~/.claude/CLAUDE.md (auto-loaded — universal learnings)  
-├─→ /stand-up (kick-off mode) or /crack-on starts session clock → .tmp/.session-start
+├─→ CLAUDE.md (auto-loaded — 9 rules + guardrails + break glass)
+├─→ ~/.claude/CLAUDE.md (auto-loaded — universal learnings)
 │
 ├─→ Rule #1 says: check todo.md + STATE.md
-│   ├─→ tasks/todo.md → shows incomplete steps
-│   └─→ STATE.md → shows last session's decisions/blockers
+│   ├─→ tasks/todo.md → shows incomplete steps with version tags
+│   └─→ STATE.md → shows current position and blockers
 │
 ├─→ Progressive Disclosure says: check learnings + directives
-│   ├─→ learnings.md → project patterns
+│   ├─→ learnings.md → project patterns + decisions
 │   └─→ directives/ → SOPs if a trigger matches
-│       ├─→ documentation-governance.md → governed docs checklist
-│       └─→ claim-auditing.md → audit procedure
 │
 DURING WORK
 │
-├─→ Rule #8 before every commit: check STATE.md + learnings.md + governed docs
-├─→ .claude/settings.json → fires PreToolUse guardrail hooks
+├─→ .claude/settings.json → fires hooks before actions
 │   ├─→ protect_directives.py → blocks edits to existing SOPs
 │   ├─→ block_secrets_in_code.py → blocks API keys outside .env
 │   └─→ block_dangerous_commands.py → blocks force-push, rm -rf, etc.
@@ -151,37 +165,42 @@ DURING WORK
 ├─→ .githooks/pre-commit → runs fast claim audit before every commit
 │
 ├─→ execution/ → Claude runs scripts instead of inline code
+│   ├─→ dispatch_dag.py → DAG executor for parallel step dispatch
+│   ├─→ test_methodology.py → structural methodology checks
 │   ├─→ audit_claims.py → automated false-positive detection
 │   └─→ wrap_stats.py → deterministic session scoring for /wrap
 ├─→ ~/.claude/scripts/multi_agent.py → wave coordination for parallel sessions
-├─→ .claude/plans/ → Claude reads feature designs
+├─→ .claude/plans/ → Claude reads feature designs (version map per step)
 ├─→ .tmp/ → scratch space for intermediate files
 │
-SESSION END (or /wrap)
+├─→ Rule #8: before every commit, check if STATE.md or learnings.md need updating
+├─→ Rule #9: pitch spontaneously if a genuine improvement is spotted
 │
-├─→ STATE.md updated with decisions + position
+PER STEP COMPLETION
+│
+├─→ Mark step complete with timestamp in todo.md
+├─→ Bump version, update changelog, commit + push
+│
+FEATURE COMPLETION (retro)
+│
+├─→ Update version references
+├─→ Update changelog (final entry)
+├─→ Update roadmap status tags (IN PROGRESS → COMPLETE)
+├─→ Update feature heading (vX.Y.x → vX.Y.N)
+├─→ Run retro — log learnings
+├─→ Move feature to Done (oldest rolls to archive.md)
+├─→ Update ROADMAP.md Complete section
+├─→ Git commit + push
+│
+SESSION END (/wrap)
+│
+├─→ STATE.md updated with position
 ├─→ tasks/todo.md updated with timestamps
 ├─→ learnings.md or ~/.claude/CLAUDE.md updated if anything was learned
-├─→ .claude/stats.json updated with score, streak, badges
-├─→ directives/ gets new SOP if process was recurring (retro)
-├─→ tasks/archive.md receives old completed features
+├─→ .claude/stats.json updated with session metrics
 ├─→ Git commit + push
-└─→ Gamified session summary printed (genre title, badges, leaderboard)
+└─→ Themed session summary printed (score, badges, leaderboard)
 ```
-
-## Slash commands
-
-| Command | What it does |
-|---------|-------------|
-| `/stand-up` | Dual-mode: kick-off (no session) starts clock + bordered card + plan; status (mid-session) shows progress, momentum, blockers, decisions |
-| `/crack-on` | Start session clock, read state, pick up next incomplete step, commit, push, stop, report |
-| `/wrap` | End-of-session routine: housekeeping, git metrics, stats.json, gamified summary |
-| `/pitch` | Generate 3-5 product improvement ideas. Approved ideas go to ROADMAP.md |
-| `/roast` | Comedy roast of the codebase. Specific, brutal, funny. |
-| `/audit` | Full claim audit — all checks, detailed explanations |
-| `/sitrep` | Mid-session situation report — progress bar, commits, elapsed time, blockers, context usage |
-| `/agent-status` | Multi-agent dashboard — wave status, terminal liveness, task progress, merge order |
-| `/sync-doe` | Sync universal DOE improvements from current project to the starter kit repo |
 
 ## What's project-level vs machine-level
 
@@ -189,7 +208,7 @@ SESSION END (or /wrap)
 PROJECT (lives in your repo, shared via git)
 ├── CLAUDE.md
 ├── CUSTOMIZATION.md
-├── STATE.md  
+├── STATE.md
 ├── ROADMAP.md
 ├── SYSTEM-MAP.md
 ├── learnings.md
@@ -200,48 +219,59 @@ PROJECT (lives in your repo, shared via git)
 │   └── archive.md
 ├── directives/
 │   ├── _TEMPLATE.md
+│   ├── planning-rules.md
+│   ├── building-rules.md
+│   ├── delivery-rules.md
+│   ├── context-management.md
+│   ├── self-annealing.md
+│   ├── framework-evolution.md
+│   ├── adversarial-review/
 │   ├── documentation-governance.md
 │   ├── claim-auditing.md
 │   └── starter-kit-sync.md
 ├── execution/
+│   ├── dispatch_dag.py
+│   ├── test_methodology.py
 │   ├── audit_claims.py
 │   └── wrap_stats.py
 ├── .claude/
-│   ├── settings.json (PreToolUse only)
+│   ├── settings.json
 │   ├── stats.json
-│   ├── claude-chat-sync-prompt.md
+│   ├── plans/
 │   ├── hooks/
 │   │   ├── protect_directives.py
 │   │   ├── block_secrets_in_code.py
 │   │   └── block_dangerous_commands.py
-│   └── plans/
-│       └── gamified-wrap.md
+│   ├── agents/               ← custom agents for adversarial review
+│   │   ├── Finder.md         ← Identifies issues (read-only)
+│   │   ├── Adversarial.md    ← Filters false positives (read-only)
+│   │   ├── Referee.md        ← Final arbiter (read-only)
+│   │   └── ReadOnly.md       ← General-purpose read-only agent
+│   └── claude-chat-sync-prompt.md
 ├── .githooks/
 │   ├── commit-msg
-│   └── pre-commit
+│   ├── pre-commit
+│   └── pre-push
 ├── .tmp/
 └── .env (git-ignored)
 
 MACHINE (lives on your computer, applies to all projects)
-├── ~/.claude/CLAUDE.md
-├── ~/.claude/settings.json (PostToolUse hooks merged by setup.sh)
-├── ~/.claude/commands/
-│   ├── README.md
-│   ├── wrap.md
-│   ├── pitch.md
+├── ~/.claude/CLAUDE.md          ← Universal learnings
+├── ~/.claude/settings.json      ← Global settings (PostToolUse hooks merged by setup.sh)
+├── ~/.claude/commands/          ← Slash commands
 │   ├── stand-up.md
 │   ├── crack-on.md
-│   ├── roast.md
-│   ├── audit.md
+│   ├── wrap.md
 │   ├── sitrep.md
+│   ├── eod.md
+│   ├── audit.md
+│   ├── pitch.md
+│   ├── roast.md
 │   ├── sync-doe.md
-│   ├── agent-status.md
-│   └── eod.md
+│   └── agent-status.md
 ├── ~/.claude/hooks/
 │   ├── heartbeat.py
 │   └── context_monitor.py
 └── ~/.claude/scripts/
     └── multi_agent.py
 ```
-
-Total: 49 files across 10 directories. If you see a file not on this list, it shouldn't be there.
