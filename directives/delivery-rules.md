@@ -18,6 +18,16 @@ Check STATE.md, learnings.md, and governed docs before every commit. Update if p
 
 Pitch spontaneously: if you notice a genuine improvement, pitch it briefly. One sentence what, one sentence why. User says "add it" (-> Ideas in ROADMAP.md) or "this is important" (-> Must Plan).
 
+## Pre-Retro Quality Gate
+
+Before starting the retro step on any feature (regardless of size):
+
+1. Run `python3 execution/test_methodology.py --scenario cross_reference_consistency --scenario directive_schema --scenario agent_definition_integrity`
+2. If the feature modified shared infrastructure (directives, CLAUDE.md routing, agents, execution scripts): spawn Finder agent to review all files modified during the feature (`git diff --name-only main...HEAD`). The Finder should focus on cross-file consistency and documentation-implementation drift, not individual code correctness.
+3. Fix findings before proceeding to retro. Log significant findings to learnings.md.
+
+This gate is the universal safety net. Even if the mid-feature checkpoint in `building-rules.md` was skipped or the feature had fewer than 5 steps, the pre-retro gate catches accumulated drift before it ships.
+
 ## Retro Discipline
 
 Retro discipline: every feature gets a mandatory retro as its final step. Includes PR creation via `gh pr create`.
@@ -33,8 +43,9 @@ Retro discipline: every feature gets a mandatory retro as its final step. Includ
 4. If [APP] feature, add to showcase entries array
 5. Update feature heading from (vX.Y.x) to (vX.Y.N)
 6. Run brief retro: what worked, what was slow, what to do differently
-7. PR creation: `gh pr create` from feature branch to main
-8. Move the whole block to ## Done
+7. Promote lasting contracts to `tests/invariants.txt`. Auto-promote: any `[auto]` contract whose `Verify:` pattern references files in `CLAUDE.md`, `directives/`, `.claude/agents/`, `execution/`, `.github/workflows/`, `.githooks/`, `SYSTEM-MAP.md`, `CUSTOMIZATION.md`, or `tests/`. Skip version-specific patterns (containing `vX.Y.Z` or HTML filenames). If the feature intentionally changed something an existing invariant tests, update that invariant to reflect the new state.
+8. PR creation: `gh pr create` from feature branch to main
+9. Move the whole block to ## Done
 
 ## IMPORTANT: Guardrails
 

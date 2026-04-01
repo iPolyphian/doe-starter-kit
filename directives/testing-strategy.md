@@ -122,6 +122,37 @@ After completing each step, Claude runs the appropriate quality checks based on 
 
 Claude announces what testing will happen at the start of each step and reports results after completion. The user never has to remember what to run.
 
+## Playwright MCP: Converting [manual] to [auto] Criteria
+
+When the Playwright MCP server is available (`mcp__plugin_playwright_playwright__*` tools), many criteria labelled `[manual]` can be converted to `[auto]` with `Verify: run:` patterns that drive a browser. This reduces the manual testing burden at feature completion.
+
+### When to Convert
+
+Convert a `[manual]` criterion to `[auto]` when it checks something a browser can verify deterministically:
+- **Element existence:** "Button X appears on the page" -> DOM snapshot + selector check
+- **Content rendering:** "Card shows data" -> navigate + text content check
+- **Navigation flow:** "Clicking X navigates to Y" -> click + URL assertion
+- **Responsive layout:** "Layout stacks on mobile" -> resize viewport + check element position
+- **Error states:** "Error message appears on invalid input" -> fill form + check error element
+
+### When to Keep [manual]
+
+Keep `[manual]` for criteria that require human judgment:
+- **Visual quality:** "Layout looks clean and professional" -- subjective
+- **Interaction feel:** "Scrolling is smooth" -- timing-dependent
+- **Content accuracy:** "The analysis is fair and balanced" -- domain judgment
+- **Accessibility feel:** "Screen reader experience is coherent" -- holistic UX
+
+### Process
+
+When starting a feature with `[manual]` visual/UI criteria:
+1. Review each `[manual]` criterion against the conversion rules above
+2. For each convertible criterion, write a `Verify: run:` pattern using Playwright
+3. Update the contract in todo.md (change `[manual]` to `[auto]`, add `Verify:` pattern)
+4. Keep only genuinely subjective criteria as `[manual]`
+
+This reduces the manual sign-off burden and catches regressions automatically.
+
 ## Edge Cases
 - `html:` pattern requires `beautifulsoup4` -- if not installed, criterion returns SKIP (not FAIL)
 - `run:` commands inherit the project root as cwd

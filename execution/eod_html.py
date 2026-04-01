@@ -400,6 +400,8 @@ def render_checks(data):
     # DOE Kit row
     version = esc(doe.get("version", ""))
     synced = doe.get("synced", True)
+    u_count = doe.get("userCount", 0)
+    c_count = doe.get("creatorCount", 0)
     if version:
         if synced:
             rows.append(
@@ -408,10 +410,14 @@ def render_checks(data):
                 f'<span class="check-value">{version}</span></div>'
             )
         else:
+            uc_parts = []
+            if u_count: uc_parts.append(f"{u_count}u")
+            if c_count: uc_parts.append(f"{c_count}c")
+            uc_label = f' ({" ".join(uc_parts)})' if uc_parts else ""
             rows.append(
                 f'    <div class="check-row"><span class="check-warn">{version}*</span> '
                 f'<span class="check-label">DOE Kit</span> '
-                f'<span class="check-value">not synced</span></div>'
+                f'<span class="check-value">not synced{esc(uc_label)}</span></div>'
             )
     if not rows:
         return ""

@@ -62,6 +62,35 @@ In DAG parallel mode (formal parallel), individual steps do NOT push to the feat
 ## Explain Technical Decisions
 When making technical choices during building, explain simply. No jargon without context. If recommending a library, framework, or pattern, explain why in terms the user can evaluate.
 
+## Quality Gate
+
+Contracts verify each step in isolation. They don't catch cross-step drift -- where step 3's documentation claim becomes false after step 5 changes the implementation, or where two directives describe the same concept with no cross-reference. This gate catches consistency issues between steps.
+
+### Mid-feature checkpoint (5+ step features)
+
+After every 4th completed step, before picking up the next:
+
+1. Run `python3 execution/test_methodology.py --scenario cross_reference_consistency --scenario directive_schema --scenario agent_definition_integrity`
+2. Assess blast radius using `directives/adversarial-review/README.md` matrix:
+   - **High** (feature modified directives, agents, execution scripts, or CLAUDE.md routing): spawn Finder agent to scan all files modified during the feature for semantic drift
+   - **Medium** (single feature, no shared interfaces): methodology checks only
+   - **Low** (docs, comments, config): no mid-feature gate needed
+3. Fix findings before continuing. 3 fix attempts then escalate to user.
+
+The methodology checks catch structural issues (broken references, invalid schemas, invariant drift). The Finder agent catches semantic issues (documentation claims that contradict implementation, duplicated concepts without cross-references, descriptions in one file that conflict with the state of another).
+
+### Invariant failures during builds
+If `invariant_regression` reports drift during a build:
+- If your step **intentionally changed** what the invariant tests (e.g. restructuring CLAUDE.md) -> update `tests/invariants.txt` to reflect the new state in the same commit
+- If your step **shouldn't have affected** what the invariant tests -> fix the code, not the invariant
+
+### What the Finder should receive
+
+When spawning the Finder for a mid-feature gate, pass it:
+- The list of files modified since the feature branch was created (`git diff --name-only main...HEAD`)
+- The current step number and total steps
+- Instruction to focus on cross-file consistency, not individual code correctness
+
 ## Build-Phase Triggers
 These triggers apply during building (absorbed from the original CLAUDE.md trigger table):
 - Editing `src/` or scripts that write to `src/data/` -> run `python3 execution/build.py` to rebuild HTML

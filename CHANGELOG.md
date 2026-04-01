@@ -7,6 +7,24 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.50.0 (2026-04-01)
+
+### Added
+- **Sync audit script** (`execution/audit_sync.py`) — pre-flight for /sync-doe that compares project vs kit across 7 directories, flags universal files missing from kit
+- **Feature request handler** (`execution/doe_feature_request.py`) — scans kit for overlap, searches GitHub issues, files sanitised bug reports
+- **Snagging orchestrator** (`execution/run_snagging.py`) — pre-merge verification gate, reads contracts from todo.md
+- **Documentation scanner** (`execution/scan_docs.py`) — audits tutorial/reference docs against kit version
+- **DOE health command** (`global-commands/doe-health.md`) — `/doe-health` wrapper for methodology tests
+- **Unit tests** for 4 shared execution scripts (`tests/execution/test_audit_claims.py`, `test_health_check.py`, `test_verify.py`, `test_wrap_stats.py`)
+- **Quality Gate section** in `building-rules.md` — mid-feature checkpoints every 4 steps with blast radius assessment
+- **Pre-Retro Quality Gate** in `delivery-rules.md` — mandatory methodology + Finder pass before retro
+- **Invariant promotion step** in retro procedure (step 7) — auto-promote lasting contracts to `tests/invariants.txt`
+- **Playwright MCP section** in `testing-strategy.md` — guidance on converting `[manual]` criteria to `[auto]` with browser automation
+- **Cross-file consistency check** (item 6) in `Finder.md` agent definition
+
+### Changed
+- **eod_html.py** — DOE Kit sync indicator now shows user/creator change counts (e.g. "not synced (3u 2c)")
+
 ## v1.49.1 (2026-04-01)
 
 ### Added
