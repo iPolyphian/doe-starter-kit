@@ -116,6 +116,100 @@ if [ -n "$STAGED_FILES" ]; then
     fi
 fi
 
+# ─── Sign-off enforcement (no unchecked [manual] in Done) ───
+# Prevents features from skipping Awaiting Sign-off.
+# Skip with: SKIP_SIGNOFF_CHECK=1 git commit -m '...'
+
+if [ "${SKIP_SIGNOFF_CHECK:-0}" != "1" ]; then
+    TODO_STAGED=$(echo "$STAGED_FILES" | grep -c "tasks/todo.md" || true)
+    if [ "$TODO_STAGED" -gt "0" ]; then
+        # Extract ## Done section and check for unchecked [manual] items
+        UNCHECKED=$(sed -n '/^## Done/,$ p' tasks/todo.md | grep -c '\[ \] \[manual\]' || true)
+        if [ "$UNCHECKED" -gt "0" ]; then
+            echo ""
+            echo "═══ Sign-off check failed ═══"
+            echo ""
+            echo "$UNCHECKED unchecked [manual] item(s) in ## Done."
+            echo "Move feature to ## Awaiting Sign-off or check items off first."
+            echo ""
+            echo "Skip with: SKIP_SIGNOFF_CHECK=1 git commit -m '...'"
+            exit 1
+        fi
+    fi
+fi
+
+# ─── todo.md structural lint (contract existence, retro step, [APP]+[manual]) ───
+# Skip with: SKIP_TODO_LINT=1 git commit -m '...'
+
+if [ "${SKIP_TODO_LINT:-0}" != "1" ]; then
+    TODO_STAGED=$(echo "$STAGED_FILES" | grep -c "tasks/todo.md" || true)
+    if [ "$TODO_STAGED" -gt "0" ]; then
+        python3 execution/lint_todo.py 2>&1
+        if [ $? -ne 0 ]; then
+            exit 1
+        fi
+    fi
+fi
+
+# ─── Quality gate checkpoint (every 4 completed steps) ───
+# Skip with: SKIP_QUALITY_GATE=1 git commit -m '...'
+
+if [ "${SKIP_QUALITY_GATE:-0}" != "1" ]; then
+    TODO_STAGED=$(echo "$STAGED_FILES" | grep -c "tasks/todo.md" || true)
+    if [ "$TODO_STAGED" -gt "0" ]; then
+        # Count completed steps in ## Current
+        COMPLETED=$(sed -n '/^## Current$/,/^## / p' tasks/todo.md | grep -cE '^\s*[0-9]+[a-d]?\.\s+\[x\]' || true)
+        if [ "$COMPLETED" -ge 4 ]; then
+            # Read marker: feature_name:step_count
+            FEATURE=$(sed -n '/^## Current$/,/^## / { /^### /p; }' tasks/todo.md | head -1 | sed 's/^### //' | sed 's/\s*\[.*//' | xargs)
+            MARKER=$(cat .tmp/.quality-gate 2>/dev/null || echo ":")
+            MARKER_FEATURE=$(echo "$MARKER" | cut -d: -f1)
+            MARKER_STEP=$(echo "$MARKER" | cut -d: -f2)
+            # Reset if feature changed
+            if [ "$FEATURE" != "$MARKER_FEATURE" ]; then
+                MARKER_STEP=0
+            fi
+            SINCE_GATE=$((COMPLETED - MARKER_STEP))
+            if [ "$SINCE_GATE" -ge 4 ]; then
+                echo ""
+                echo "═══ Quality gate checkpoint required ═══"
+                echo ""
+                echo "$COMPLETED steps done, last gate at step $MARKER_STEP."
+                echo "Run: python3 execution/quality_gate.py --checkpoint"
+                echo ""
+                echo "Skip with: SKIP_QUALITY_GATE=1 git commit -m '...'"
+                exit 1
+            fi
+        fi
+    fi
+fi
+
+# ─── Pre-retro gate (all steps complete, methodology must pass) ───
+# Skip with: SKIP_RETRO_GATE=1 git commit -m '...'
+
+if [ "${SKIP_RETRO_GATE:-0}" != "1" ]; then
+    TODO_STAGED=$(echo "$STAGED_FILES" | grep -c "tasks/todo.md" || true)
+    if [ "$TODO_STAGED" -gt "0" ]; then
+        TOTAL=$(sed -n '/^## Current$/,/^## / p' tasks/todo.md | grep -cE '^\s*[0-9]+[a-d]?\.\s+\[' || true)
+        DONE=$(sed -n '/^## Current$/,/^## / p' tasks/todo.md | grep -cE '^\s*[0-9]+[a-d]?\.\s+\[x\]' || true)
+        if [ "$TOTAL" -gt "0" ] && [ "$TOTAL" = "$DONE" ]; then
+            FEATURE=$(sed -n '/^## Current$/,/^## / { /^### /p; }' tasks/todo.md | head -1 | sed 's/^### //' | sed 's/\s*\[.*//' | xargs)
+            MARKER=$(cat .tmp/.pre-retro-gate 2>/dev/null || echo ":")
+            MARKER_FEATURE=$(echo "$MARKER" | cut -d: -f1)
+            if [ "$FEATURE" != "$MARKER_FEATURE" ]; then
+                echo ""
+                echo "═══ Pre-retro gate required ═══"
+                echo ""
+                echo "All $TOTAL steps complete. Run pre-retro gate first."
+                echo "Run: python3 execution/quality_gate.py --pre-retro"
+                echo ""
+                echo "Skip with: SKIP_RETRO_GATE=1 git commit -m '...'"
+                exit 1
+            fi
+        fi
+    fi
+fi
+
 # ─── Contract verification (solo mode gate) ───
 # Checks current todo.md step's contract criteria are all [x] before allowing commit.
 # Skip with: SKIP_CONTRACT_CHECK=1 git commit -m '...'

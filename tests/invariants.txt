@@ -1,0 +1,18 @@
+# Codebase Invariants
+# Lasting assertions that should always be true. Regression-tested at
+# pre-push, CI, and pre-retro. Same Verify: syntax as contracts but
+# without the "Verify:" prefix.
+#
+# When an invariant fails during a feature build:
+#   - If your step INTENTIONALLY changed what it tests -> update the invariant
+#   - If your step SHOULDN'T have affected it -> fix the code, not the invariant
+#
+# Promoted at retro from completed contracts. Auto-promote: any [auto]
+# contract whose Verify: pattern references files in CLAUDE.md, directives/,
+# .claude/agents/, execution/, .github/workflows/, .githooks/, SYSTEM-MAP.md,
+# CUSTOMIZATION.md, or tests/. Skip version-specific patterns (vX.Y.Z, HTML
+# filenames). Review before committing -- remove brittle or project-specific ones.
+#
+# To bootstrap from existing contracts:
+#   python3 execution/bootstrap_invariants.py          # preview
+#   python3 execution/bootstrap_invariants.py --write  # append to this file

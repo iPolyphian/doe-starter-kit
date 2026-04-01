@@ -7,6 +7,19 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.49.1 (2026-04-01)
+
+### Added
+- **todo.md structural linter** (`execution/lint_todo.py`) — enforces contract existence on every step, retro as last step, [APP] features require [manual] criteria
+- **Quality gate runner** (`execution/quality_gate.py`) — wrapper for mid-feature checkpoints (`--checkpoint`) and pre-retro gates (`--pre-retro`), writes markers to `.tmp/`
+- **Invariant bootstrap** (`execution/bootstrap_invariants.py`) — scans completed contracts and promotes lasting patterns to `tests/invariants.txt`
+- **Invariants template** (`tests/invariants.txt`) — empty file with format docs, ready for project-specific invariants
+- **5 new pre-commit checks** in `.githooks/pre-commit`:
+  - Sign-off enforcement — blocks `[ ] [manual]` in `## Done` (`SKIP_SIGNOFF_CHECK=1`)
+  - Structural lint — calls `lint_todo.py` when `todo.md` is staged (`SKIP_TODO_LINT=1`)
+  - Quality gate checkpoint — blocks after 4+ steps without running gate (`SKIP_QUALITY_GATE=1`)
+  - Pre-retro gate — blocks retro commit without methodology pass (`SKIP_RETRO_GATE=1`)
+
 ## v1.49.0 (2026-04-01)
 
 ### Added
