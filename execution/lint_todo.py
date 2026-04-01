@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Structural linter for tasks/todo.md.
 
-Validates three rules in ## Current and ## Queue:
+Validates four rules in ## Current and ## Queue:
 1. Every numbered step has a Contract: block
 2. Every feature's last numbered step is Retro
 3. [APP] features have at least one [manual] criterion
+4. Completed features (all steps [x]) must not remain in ## Current
 
 Called by pre-commit hook when todo.md is staged.
 Skip with: SKIP_TODO_LINT=1
@@ -15,6 +16,8 @@ import sys
 from pathlib import Path
 
 STEP_RE = re.compile(r"^\s*\d+[a-d]?\.\s+\[[ x]\]\s+(.*)")
+STEP_DONE_RE = re.compile(r"^\s*\d+[a-d]?\.\s+\[x\]\s+")
+STEP_ANY_RE = re.compile(r"^\s*\d+[a-d]?\.\s+\[[ x]\]\s+")
 CONTRACT_RE = re.compile(r"^\s+Contract:\s*$")
 FEATURE_RE = re.compile(r"^###\s+(.*)")
 SECTION_RE = re.compile(r"^##\s+(\S+)")
@@ -28,12 +31,15 @@ def lint_todo(path="tasks/todo.md"):
     errors = []
 
     in_scope = False
+    current_section = None
     feature_name = None
     feature_line = 0
     feature_is_app = False
     feature_has_manual = False
     steps = []  # (line_num, name, has_contract)
     pending_step = None  # (line_num, name) waiting for Contract:
+    step_done_count = 0
+    step_total_count = 0
 
     def flush_feature():
         nonlocal feature_name, steps, pending_step
@@ -59,6 +65,14 @@ def lint_todo(path="tasks/todo.md"):
             short = feature_name[:50]
             errors.append(f"Line {feature_line}: [APP] '{short}' has no [manual] criterion")
 
+        # Rule 4: completed features must not stay in Current
+        if current_section == "Current" and step_total_count > 0 and step_done_count == step_total_count:
+            short = feature_name[:50]
+            errors.append(
+                f"Line {feature_line}: '{short}' -- all {step_total_count} steps complete "
+                f"but still in ## Current. Move to ## Awaiting Sign-off or ## Done."
+            )
+
     for i, line in enumerate(lines, 1):
         stripped = line.strip()
 
@@ -69,11 +83,13 @@ def lint_todo(path="tasks/todo.md"):
                 flush_feature()
                 feature_name = None
                 steps = []
+                current_section = section
                 in_scope = True
             elif in_scope:
                 flush_feature()
                 feature_name = None
                 steps = []
+                current_section = None
                 in_scope = False
             continue
 
@@ -88,6 +104,8 @@ def lint_todo(path="tasks/todo.md"):
             feature_is_app = "[APP]" in feature_name
             feature_has_manual = False
             steps = []
+            step_done_count = 0
+            step_total_count = 0
             continue
 
         if feature_name is None:
@@ -98,6 +116,9 @@ def lint_todo(path="tasks/todo.md"):
             if pending_step:
                 steps.append((*pending_step, False))
             pending_step = (i, step_m.group(1))
+            step_total_count += 1
+            if STEP_DONE_RE.match(line):
+                step_done_count += 1
             continue
 
         if CONTRACT_RE.match(line) and pending_step:
