@@ -1053,7 +1053,6 @@
           <a class="sidebar-link active" href="tips-and-mistakes.html">Tips &amp; Mistakes</a>
           <a class="sidebar-link nested" href="tips-and-mistakes.html#hooks">Understanding Hooks</a>
           <a class="sidebar-link nested" href="tips-and-mistakes.html#recovery">When Things Go Wrong</a>
-          <a class="sidebar-link nested" href="tips-and-mistakes.html#security">Security</a>
           <a class="sidebar-link" href="faq.html">FAQ</a>
           <a class="sidebar-link" href="glossary.html">Glossary</a>
         </div>
@@ -1417,7 +1416,7 @@
               </div>
               <pre><span class="t-comment"># Getting updates from the starter kit:</span>
 <span class="t-prompt">$</span> <span class="t-cmd">/pull-doe</span>
-<span class="t-out">  Checking version... your project: v1.28.0, latest: v1.51.2</span>
+<span class="t-out">  Checking version... your project: v1.28.0, latest: v1.50.1</span>
 <span class="t-out">  Changelog: new /scope command, improved /wrap output, hook fix</span>
 <span class="t-out">  Apply update? [y/n]</span></pre>
             </div>
@@ -1478,7 +1477,7 @@
                     <div class="vscode-terminal-body">
                       <pre><span class="t-comment"># Getting updates from the starter kit:</span>
 <span class="t-prompt">$</span> <span class="t-cmd">/pull-doe</span>
-<span class="t-out">  Checking version... your project: v1.28.0, latest: v1.51.2</span>
+<span class="t-out">  Checking version... your project: v1.28.0, latest: v1.50.1</span>
 <span class="t-out">  Changelog: new /scope command, improved /wrap output, hook fix</span>
 <span class="t-out">  Apply update? [y/n]</span></pre>
                     </div>
@@ -1802,88 +1801,6 @@
           <div class="callout-body"><strong>The most common recovery is the simplest:</strong> <code>/wrap</code>, <code>/clear</code>, <code>/crack-on</code>. This fixes 90% of quality issues by giving Claude a fresh context window with your full project state preserved in files.</div>
         </div>
 
-        <!-- ── Security ── -->
-        <h2 id="security">Security</h2>
-        <p>The DOE framework includes security hooks that catch common vulnerabilities before they reach version control. But tools alone aren&rsquo;t enough &mdash; good habits matter just as much.</p>
-
-        <h3 style="font-size: 16px; font-weight: 600; margin: 24px 0 8px; color: var(--text-primary);">Rules to live by</h3>
-
-        <div class="card-grid">
-          <div class="m-card dont-card" style="cursor: default;">
-            <div class="card-marker">Rule</div>
-            <h4>NEVER paste sensitive data into AI prompts</h4>
-            <p>Do not paste sensitive credentials, API keys, passwords, or private data into Claude or any other AI assistant. Anything you type into a prompt may be logged or used for training. Keep secrets in <code>.env</code> and let execution scripts read them.</p>
-          </div>
-          <div class="m-card dont-card" style="cursor: default;">
-            <div class="card-marker">Rule</div>
-            <h4>NEVER commit secrets to git</h4>
-            <p>The <code>block_secrets_in_code.py</code> hook catches most patterns, but don&rsquo;t rely on it as your only defence. Treat <code>.env</code> as the single source of truth for credentials. If a secret accidentally reaches a commit, rotate it immediately &mdash; git history is permanent.</p>
-          </div>
-          <div class="m-card dont-card" style="cursor: default;">
-            <div class="card-marker">Rule</div>
-            <h4>NEVER disable security hooks</h4>
-            <p>Bypassing hooks with <code>--no-verify</code> or removing them from <code>settings.json</code> removes the safety net that catches XSS, injection, and leaked secrets. If a hook blocks you incorrectly, fix the hook &mdash; don&rsquo;t disable it.</p>
-          </div>
-        </div>
-
-        <h3 style="font-size: 16px; font-weight: 600; margin: 24px 0 8px; color: var(--text-primary);">Operational security</h3>
-
-        <div class="accordion">
-
-          <details>
-            <summary>Working on a shared computer</summary>
-            <div class="acc-body">
-              <p>If you use DOE on a shared computer (office machine, pair-programming station, lab workstation), take extra precautions:</p>
-              <ul>
-                <li>Never save credentials in the browser or terminal history.</li>
-                <li>Use a personal <code>.env</code> file and remove it when you finish.</li>
-                <li>Lock your screen when stepping away &mdash; an open Claude Code session has access to your project files.</li>
-                <li>Clear your terminal history (<code>history -c</code>) before leaving.</li>
-              </ul>
-            </div>
-          </details>
-
-          <details>
-            <summary>Team member offboarding</summary>
-            <div class="acc-body">
-              <p>When someone leaves the team, treat it as a security event:</p>
-              <ul>
-                <li>Rotate any API keys or credentials they had access to.</li>
-                <li>Remove their access from GitHub, cloud services, and any shared <code>.env</code> vaults.</li>
-                <li>Audit recent commits for any credentials that may have been added.</li>
-                <li>Update <code>.env.example</code> if key names changed during rotation.</li>
-              </ul>
-              <p>Do this promptly. Stale credentials are one of the most common causes of security incidents.</p>
-            </div>
-          </details>
-
-          <details>
-            <summary>What to do if you suspect a breach</summary>
-            <div class="acc-body">
-              <p>If you believe credentials have been exposed, API keys leaked, or unauthorised access has occurred:</p>
-              <ol>
-                <li><strong>Rotate immediately.</strong> Change every credential that may have been exposed. Do this before investigating &mdash; minutes matter.</li>
-                <li><strong>Check git history.</strong> Run <code>git log --all -p -S "sk_"</code> (or your key prefix) to find if secrets ever appeared in commits.</li>
-                <li><strong>Review access logs.</strong> Check your API provider dashboards for unexpected usage.</li>
-                <li><strong>Notify stakeholders.</strong> If user data may have been affected, inform the appropriate people promptly.</li>
-                <li><strong>Document what happened.</strong> Write a brief incident note covering what was exposed, when, and what was done. Store it outside the public repo.</li>
-              </ol>
-            </div>
-          </details>
-
-        </div>
-
-        <h3 style="font-size: 16px; font-weight: 600; margin: 24px 0 8px; color: var(--text-primary);">Security test coverage</h3>
-
-        <p>The DOE Starter Kit includes security test fixtures in <code>tests/security/</code> that validate your pre-commit hooks are actually catching vulnerabilities. Each <code>bad-*</code> file contains a deliberately insecure pattern (XSS, eval injection, hardcoded secrets, shell injection) and the test runner confirms the hooks block them.</p>
-
-        <div class="callout info">
-          <span class="callout-icon">&#9432;</span>
-          <div class="callout-body"><strong>Run the security tests</strong> after modifying any hook configuration: <code>./tests/security/run-security-tests.sh</code>. The suite also includes <code>good-*</code> files that verify safe patterns are not falsely blocked, giving you confidence that your hooks are precise, not just aggressive.</div>
-        </div>
-
-        <p>For project-specific test coverage, add your own test fixtures to <code>tests/security/</code>. If your app handles user-generated HTML, file uploads, or authentication tokens, write targeted bad-file/good-file pairs that match your threat model. The <code>THREAT_MODEL.md</code> at the root of the kit documents common attack surfaces to help you decide what to test.</p>
-
         <!-- Pagination -->
         <div class="pagination">
           <a href="example-apps.html">
@@ -1911,7 +1828,6 @@
       <a href="#troubleshoot" class="toc-link">Troubleshooting</a>
       <a href="#hooks" class="toc-link">Understanding Hooks</a>
       <a href="#recovery" class="toc-link">When Things Go Wrong</a>
-      <a href="#security" class="toc-link">Security</a>
     </nav>
 
   </div><!-- /layout -->
