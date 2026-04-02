@@ -7,6 +7,15 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.51.7 (2026-04-02)
+
+### Added
+- **PR merge confirmation hook** (`confirm_pr_merge.py`) — blocks `gh pr merge` and forces a two-step confirmation flow. Claude shows a bordered card with PR details and asks before merging. No bypass without user approval.
+
+### Changed
+- **Dangerous commands** (`block_dangerous_commands.py`) — `gh pr merge` moved from absolute block to dedicated confirmation hook. Claude can now merge with user approval instead of never.
+- **Settings** (`settings.json`) — registered `confirm_pr_merge.py` as PreToolUse bash hook.
+
 ## v1.51.6 (2026-04-02)
 
 ### Fixed

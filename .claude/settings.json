@@ -1,5 +1,30 @@
 {
+  "enabledPlugins": {
+    "vercel@claude-plugins-official": false
+  },
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "write|edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/copy_plan_to_project.py",
+            "description": "Auto-copy plans from ~/.claude/plans/ to project .claude/plans/"
+          }
+        ]
+      },
+      {
+        "matcher": "read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/check_plan_freshness_hook.py",
+            "description": "Check plan freshness when .claude/plans/*.md is read"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "write|create|edit",
@@ -28,18 +53,21 @@
             "type": "command",
             "command": "python3 .claude/hooks/block_dangerous_commands.py",
             "description": "Block destructive commands"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "write|edit",
-        "hooks": [
+          },
           {
             "type": "command",
-            "command": "python3 .claude/hooks/copy_plan_to_project.py",
-            "description": "Auto-copy plans from ~/.claude/plans/ into project .claude/plans/"
+            "command": "python3 .claude/hooks/guard_kit_writes.py",
+            "description": "Block direct kit writes via Bash (cp, git commit, etc.)"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/enforce_review_gate.py",
+            "description": "Block gh pr create without passing adversarial review"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/confirm_pr_merge.py",
+            "description": "Block gh pr merge unless user approves"
           }
         ]
       }
