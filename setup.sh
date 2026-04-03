@@ -40,7 +40,7 @@ for f in "$COMMANDS_SRC"/*.md; do
     if [ "$fname" = "README.md" ]; then
         continue
     fi
-    cp "$f" "$COMMANDS_DST/$fname"
+    cp -f "$f" "$COMMANDS_DST/$fname"
     COMMAND_COUNT=$((COMMAND_COUNT + 1))
 done
 
@@ -49,7 +49,7 @@ mkdir -p "$HOOKS_DST"
 HOOK_COUNT=0
 for f in "$HOOKS_SRC"/*.py; do
     [ -f "$f" ] || continue
-    cp "$f" "$HOOKS_DST/$(basename "$f")"
+    cp -f "$f" "$HOOKS_DST/$(basename "$f")"
     HOOK_COUNT=$((HOOK_COUNT + 1))
 done
 
@@ -58,7 +58,7 @@ mkdir -p "$SCRIPTS_DST"
 SCRIPT_COUNT=0
 for f in "$SCRIPTS_SRC"/*.py; do
     [ -f "$f" ] || continue
-    cp "$f" "$SCRIPTS_DST/$(basename "$f")"
+    cp -f "$f" "$SCRIPTS_DST/$(basename "$f")"
     SCRIPT_COUNT=$((SCRIPT_COUNT + 1))
 done
 
