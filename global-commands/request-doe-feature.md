@@ -23,17 +23,17 @@ Wait for their response before continuing.
 
 Run these checks silently (no need to show raw output to the user):
 
-1. **Overlap scan:** `python3 execution/doe_feature_request.py --scan-existing "<user's description>"`
+1. **Overlap scan:** `python3 ~/doe-starter-kit/execution/doe_feature_request.py --scan-existing "<user's description>"`
    - If overlaps found, tell the user: "I found some related existing features: [list]. Your request might extend these, or it might be genuinely new. I'll note the overlap."
 
-2. **Duplicate check:** `python3 execution/doe_feature_request.py --search-duplicates "<user's description>"`
+2. **Duplicate check:** `python3 ~/doe-starter-kit/execution/doe_feature_request.py --search-duplicates "<user's description>"`
    - If duplicates found, tell the user: "There's an existing issue that might cover this: [#N title]. Want to add your perspective to that issue instead, or file a new one?"
    - If they choose to add context, use `gh issue comment` to append.
 
-3. **Categorise:** `python3 execution/doe_feature_request.py --categorise "<user's description>"`
+3. **Categorise:** `python3 ~/doe-starter-kit/execution/doe_feature_request.py --categorise "<user's description>"`
    - Use the result for labelling. Don't ask the user about categories.
 
-4. **Sanitise:** `python3 execution/doe_feature_request.py --sanitise "<user's full input>"`
+4. **Sanitise:** `python3 ~/doe-starter-kit/execution/doe_feature_request.py --sanitise "<user's full input>"`
    - Sanitise all user input before including in the issue body.
 
 ### Phase 5: Draft + File
@@ -65,7 +65,7 @@ Build a structured draft and present it in a bordered box. **Generate programmat
 └────────────────────────────────────────────────────────────┘
 ```
 
-If the user says **yes**: Save the draft as JSON, then run `python3 execution/doe_feature_request.py --file <json_path>`. If gh fails, automatically run `--fallback` to save locally and tell the user where the file is.
+If the user says **yes**: Save the draft as JSON, then run `python3 ~/doe-starter-kit/execution/doe_feature_request.py --file <json_path>`. If gh fails, automatically run `--fallback` to save locally and tell the user where the file is.
 
 If the user says **edit**: Ask what to change, update the draft, re-present.
 

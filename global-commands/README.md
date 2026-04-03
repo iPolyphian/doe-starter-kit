@@ -70,6 +70,14 @@ Structured feature request for the DOE starter kit. Guides through description, 
 Triage-first DOE framework bug reporter. 5-phase flow: gather user description + Claude's reconstruction + environment, check if fixed in newer version (route to `/pull-doe`), detect user error (route to tutorial docs), search for duplicates (offer to comment), then sanitise and file a GitHub Issue on the upstream repo with labels. Falls back to local markdown if `gh` is unavailable.
 *Added 18/03/26*
 
+### `/doe-health`
+Runs the DOE methodology testing framework (`execution/test_methodology.py`). Checks structural integrity: session discipline, contract completeness, learnings freshness, trigger coverage, review discipline, CLAUDE.md quality grading, and cross-reference consistency.
+*Added 24/03/26*
+
+### `/code-trace`
+Reads CLAUDE.md to understand project structure, then traces execution paths for a given function, endpoint, or feature. Maps the call chain from entry point to side effects.
+*Added 24/03/26*
+
 ## Visual
 
 ### `/project-recap`

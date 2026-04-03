@@ -17,7 +17,7 @@ If there's no relevant conversation context (user is reporting from memory), not
 **Environment capture:** Run the execution script to gather system info:
 
 ```bash
-python3 execution/doe_bug_report.py --environment
+python3 ~/doe-starter-kit/execution/doe_bug_report.py --environment
 ```
 
 Parse the JSON output. Present the environment in a bordered card:
@@ -54,7 +54,7 @@ Wait for their response before proceeding to Phase 2.
 Run the version check:
 
 ```bash
-python3 execution/doe_bug_report.py --version-check
+python3 ~/doe-starter-kit/execution/doe_bug_report.py --version-check
 ```
 
 Parse the JSON output. Present the result in a bordered card:
@@ -105,7 +105,7 @@ If you assess this as user error:
 2. Scan tutorials for relevant documentation:
 
 ```bash
-python3 execution/doe_bug_report.py --scan-tutorials "<relevant keywords>"
+python3 ~/doe-starter-kit/execution/doe_bug_report.py --scan-tutorials "<relevant keywords>"
 ```
 
 3. Present in a bordered card:
@@ -136,7 +136,7 @@ If uncertain, err on the side of filing — false positives are better than lost
 Search for existing issues that might match:
 
 ```bash
-python3 execution/doe_bug_report.py --search-duplicates "<keywords from the bug description>"
+python3 ~/doe-starter-kit/execution/doe_bug_report.py --search-duplicates "<keywords from the bug description>"
 ```
 
 If matches are found, present in a bordered card:
@@ -236,7 +236,7 @@ Body: Use this structure:
 **Sanitise the draft:**
 
 ```bash
-python3 execution/doe_bug_report.py --sanitise "<full draft body>"
+python3 ~/doe-starter-kit/execution/doe_bug_report.py --sanitise "<full draft body>"
 ```
 
 This strips API keys, secrets, absolute paths, and email addresses. Review the sanitised output — if it removed something that was actually needed for the bug report (e.g. a path that's part of the error), add it back in generic form (e.g. `~/project/src/file.js` instead of the absolute path).
@@ -285,7 +285,7 @@ This strips API keys, secrets, absolute paths, and email addresses. Review the s
 If the user approves:
 
 ```bash
-python3 execution/doe_bug_report.py --file-issue "<title>" "<sanitised body>" "bug,user-reported,<version>,<severity>,<project-type>"
+python3 ~/doe-starter-kit/execution/doe_bug_report.py --file-issue "<title>" "<sanitised body>" "bug,user-reported,<version>,<severity>,<project-type>"
 ```
 
 Present the result in a bordered card:

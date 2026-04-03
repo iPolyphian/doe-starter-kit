@@ -345,7 +345,7 @@ def card_data():
 
 def card_confirmation(config):
     """Card 5: Confirmation before writing. Returns True to proceed."""
-    framework_name = DETECT_PATTERNS.get(config["framework"], {}).get("name", config["framework"])
+    framework_name = _FALLBACK_DETECT_PATTERNS.get(config["framework"], {}).get("name", config["framework"])
     collab = config["collaboration_mode"]
     parts = [framework_name]
     if config["project_type"]:
@@ -407,7 +407,7 @@ def card_confirmation(config):
 
 def card_done(kit_version, project_dir, config, file_count):
     """Card 7: Done."""
-    framework_name = DETECT_PATTERNS.get(config["framework"], {}).get("name", config["framework"])
+    framework_name = _FALLBACK_DETECT_PATTERNS.get(config["framework"], {}).get("name", config["framework"])
 
     rows = [top()]
     rows.append(header(f"DONE -- DOE v{kit_version}"))
@@ -645,9 +645,11 @@ def install_layer_files(config, kit_dir, project_dir):
     # 5. Claude Code hooks (.claude/hooks/)
     claude_hooks_src = kit_dir / ".claude" / "hooks"
     ch_count = 0
+    # guard_kit_writes.py is kit-contributor-only — skip for user projects
+    skip_hooks = {"guard_kit_writes.py"}
     if claude_hooks_src.is_dir():
         for f in claude_hooks_src.iterdir():
-            if f.is_file():
+            if f.is_file() and f.name not in skip_hooks:
                 if copy_to_project(f, f".claude/hooks/{f.name}"):
                     ch_count += 1
     if ch_count:
