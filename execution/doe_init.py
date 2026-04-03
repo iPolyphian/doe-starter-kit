@@ -589,6 +589,11 @@ def install_layer_files(config, kit_dir, project_dir):
         if not src.exists():
             return False
         dst.parent.mkdir(parents=True, exist_ok=True)
+        # Remove read-only destination before copying (shutil.copy2
+        # preserves source permissions, so previous installs may
+        # have left read-only files that can't be overwritten)
+        if dst.exists():
+            dst.chmod(0o644)
         shutil.copy2(src, dst)
         total += 1
         return True
