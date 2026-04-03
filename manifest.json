@@ -85,7 +85,10 @@
     "dispatch_dag.py",
     "run_snagging.py",
     "record_review_result.py",
-    "persist_review_findings.py"
+    "persist_review_findings.py",
+    "doe_utils.py",
+    "multi_agent.py",
+    "build_hq.py"
   ],
   "triggers": [
     {"situation": "Planning/scoping", "directive": "planning-rules.md", "layer": "universal"},

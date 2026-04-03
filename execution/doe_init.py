@@ -654,7 +654,12 @@ def install_layer_files(config, kit_dir, project_dir):
     if ch_count:
         rows.append(line(f".claude/hooks/ ({ch_count} hooks) .......... done"))
 
-    # 5b. Claude Code agents (.claude/agents/)
+    # 5b. Claude Code stats (.claude/stats.json)
+    stats_src = kit_dir / ".claude" / "stats.json"
+    if copy_to_project(stats_src, ".claude/stats.json"):
+        rows.append(line(".claude/stats.json ................. done"))
+
+    # 5d. Claude Code agents (.claude/agents/)
     agents_src = kit_dir / ".claude" / "agents"
     agent_count = 0
     if agents_src.is_dir():
@@ -665,7 +670,7 @@ def install_layer_files(config, kit_dir, project_dir):
     if agent_count:
         rows.append(line(f".claude/agents/ ({agent_count} agents) ....... done"))
 
-    # 5c. Claude Code project settings (.claude/settings.json)
+    # 5e. Claude Code project settings (.claude/settings.json)
     settings_src = kit_dir / ".claude" / "settings.json"
     settings_dst = project_dir / ".claude" / "settings.json"
     if settings_src.exists() and not settings_dst.exists():
@@ -837,9 +842,10 @@ def setup_ci_git_collaboration(config, kit_dir, project_dir):
         result = subprocess.run(
             ["git", "init"], cwd=project_dir, capture_output=True,
         )
-        if result.returncode != 0:
+        if result.returncode == 0:
+            has_git = True
+        else:
             print(f"  Warning: git init failed (exit {result.returncode})")
-            has_git = False
 
     # ── Set git hooks path
     result = subprocess.run(
