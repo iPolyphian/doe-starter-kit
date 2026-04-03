@@ -1,3 +1,3 @@
 ## Regulated Data
-- Personal data features -> `directives/data-compliance.md` (DPIA is hard blocker)
-- Dataset or legal position change -> `directives/documentation-governance.md`
+<!-- Layer-specific triggers are generated into the ## Triggers section from manifest.json -->
+<!-- Kept here: non-trigger guidance only -->

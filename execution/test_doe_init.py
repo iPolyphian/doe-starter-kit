@@ -81,9 +81,20 @@ def _fake_home():
 
 
 def run_sandboxed(func, *args, **kwargs):
-    """Run with stdout suppressed AND global writes sandboxed."""
+    """Run with stdout suppressed AND global writes sandboxed.
+
+    Creates a fresh temp directory per call so that read-only files
+    written by shutil.copy2 in a previous invocation don't cause
+    PermissionError when a later framework tries to overwrite them.
+    """
+    fresh_dir = tempfile.mkdtemp(prefix="doe-test-home-")
+    fresh_home = Path(fresh_dir)
+
+    def _per_call_home():
+        return fresh_home
+
     buf = io.StringIO()
-    with patch.object(Path, "home", staticmethod(_fake_home)):
+    with patch.object(Path, "home", staticmethod(_per_call_home)):
         with redirect_stdout(buf):
             return func(*args, **kwargs)
 

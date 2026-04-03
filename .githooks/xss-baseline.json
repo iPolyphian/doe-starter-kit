@@ -1,4 +1,0 @@
-{
-  "_comment": "Known innerHTML counts per file. Counts are ceilings, not targets. After remediation, update to lower count. New files should not be baselined -- fix the code. Remove entries at zero.",
-  "_usage": "The pre-commit hook allows innerHTML in baselined files as long as the count does not increase. Files not in this baseline are fully gated."
-}
