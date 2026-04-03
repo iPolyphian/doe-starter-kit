@@ -10,6 +10,24 @@ set -e
 HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$HOOK_DIR/.." && pwd)"
 
+# ─── Auto-stamp tutorial docs version ───
+# If the latest commit message contains a version tag (vX.Y.Z), stamp the
+# tutorial HTML files and amend the commit so docs ship with correct version.
+LATEST_MSG=$(git log -1 --format=%s 2>/dev/null)
+VERSION_TAG=$(echo "$LATEST_MSG" | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | tail -1)
+
+if [ -n "$VERSION_TAG" ] && [ -f "$PROJECT_ROOT/execution/stamp_tutorial_version.py" ]; then
+    # Check if docs already have this version (skip if already stamped)
+    CURRENT=$(grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' "$PROJECT_ROOT/docs/tutorial/index.html" 2>/dev/null | head -1)
+    if [ "$CURRENT" != "$VERSION_TAG" ]; then
+        echo "Stamping tutorial docs with $VERSION_TAG..."
+        python3 "$PROJECT_ROOT/execution/stamp_tutorial_version.py" "$VERSION_TAG" --root "$PROJECT_ROOT"
+        git add "$PROJECT_ROOT/docs/tutorial/"*.html
+        git commit --amend --no-edit --no-verify
+        echo "Docs stamped and amended into commit."
+    fi
+fi
+
 echo "Running methodology checks (--quick)..."
 
 if [ -f "$PROJECT_ROOT/execution/test_methodology.py" ]; then
