@@ -439,8 +439,27 @@ def scenario_claude_md_quality(verbose: bool = False):
 
     scores = {}
 
-    # 1. Commands/workflows (20 pts): presence of common command patterns
-    cmd_patterns = [r"\bgit\b", r"\bpython3\b", r"\bnpm\b", r"\bpytest\b", r"gh\s+pr"]
+    # 1. Commands/workflows (20 pts): framework-aware command patterns
+    # Universal DOE commands (every project uses git, python3 for scripts, gh for PRs)
+    cmd_patterns = [r"\bgit\b", r"\bpython3\b", r"gh\s+pr"]
+    # Framework-specific commands from tests/config.json
+    config_path = PROJECT_ROOT / "tests" / "config.json"
+    project_type = "html-app"
+    if config_path.exists():
+        try:
+            import json as _json
+            project_type = _json.loads(config_path.read_text()).get("projectType", "html-app")
+        except (ValueError, OSError):
+            pass
+    _fw_patterns = {
+        "nextjs":  [r"\bnpm\b", r"\bnpx\b"],
+        "vite":    [r"\bnpm\b", r"\bnpx\b"],
+        "html-app": [r"\bpytest\b", r"\bbuild\.py\b"],
+        "python":  [r"\bpytest\b", r"\bruff\b"],
+        "go":      [r"\bgo\s+(test|build|vet)\b"],
+        "flutter": [r"\bflutter\b"],
+    }
+    cmd_patterns.extend(_fw_patterns.get(project_type, [r"\bpytest\b"]))
     cmd_hits = sum(1 for p in cmd_patterns if re.search(p, text))
     scores["Commands/workflows"] = (cmd_hits / len(cmd_patterns)) * 20
 
