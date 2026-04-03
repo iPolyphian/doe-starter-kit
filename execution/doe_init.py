@@ -373,11 +373,14 @@ def card_confirmation(config):
     rows.append(sep())
     rows.append(line("Will create:"))
     rows.append(line("  CLAUDE.md          Framework-aware config"))
+    rows.append(line("  ROADMAP.md         Product roadmap"))
     rows.append(line("  directives/        Methodology + security"))
     rows.append(line("  execution/         Verification scripts"))
     rows.append(line("  .github/workflows/ CI + auto-rebase"))
     rows.append(line("  .githooks/         Pre-commit hooks"))
-    rows.append(line("  tasks/todo.md      Empty task list"))
+    rows.append(line("  .claude/settings   Hook configuration"))
+    rows.append(line("  .claude/agents/    Adversarial review agents"))
+    rows.append(line("  tasks/             todo.md + archive.md"))
     rows.append(line("  STATE.md           Session state tracker"))
     rows.append(line("  SECURITY.md        Security policy"))
 
@@ -610,13 +613,14 @@ def install_layer_files(config, kit_dir, project_dir):
             src = kit_dir / "directives" / name
             if copy_to_project(src, f"directives/{name}"):
                 dir_count += 1
-    # Adversarial review directory (referenced as dir in triggers)
-    adv_src = kit_dir / "directives" / "adversarial-review"
-    if adv_src.is_dir():
-        for f in adv_src.iterdir():
-            if f.is_file():
-                if copy_to_project(f, f"directives/adversarial-review/{f.name}"):
-                    dir_count += 1
+    # Directive directories (referenced as dirs in triggers)
+    for dir_name in ["adversarial-review", "best-practices"]:
+        dir_src = kit_dir / "directives" / dir_name
+        if dir_src.is_dir():
+            for f in dir_src.iterdir():
+                if f.is_file():
+                    if copy_to_project(f, f"directives/{dir_name}/{f.name}"):
+                        dir_count += 1
     rows.append(line(f"directives/ ({dir_count} files) ........... done"))
 
     # 3. Execution scripts (per active layer)
@@ -650,6 +654,29 @@ def install_layer_files(config, kit_dir, project_dir):
     if ch_count:
         rows.append(line(f".claude/hooks/ ({ch_count} hooks) .......... done"))
 
+    # 5b. Claude Code agents (.claude/agents/)
+    agents_src = kit_dir / ".claude" / "agents"
+    agent_count = 0
+    if agents_src.is_dir():
+        for f in agents_src.iterdir():
+            if f.is_file():
+                if copy_to_project(f, f".claude/agents/{f.name}"):
+                    agent_count += 1
+    if agent_count:
+        rows.append(line(f".claude/agents/ ({agent_count} agents) ....... done"))
+
+    # 5c. Claude Code project settings (.claude/settings.json)
+    settings_src = kit_dir / ".claude" / "settings.json"
+    settings_dst = project_dir / ".claude" / "settings.json"
+    if settings_src.exists() and not settings_dst.exists():
+        settings_dst.parent.mkdir(parents=True, exist_ok=True)
+        kit_settings = json.loads(settings_src.read_text())
+        # Copy hooks config only — strip kit-specific keys like enabledPlugins
+        project_settings = {"hooks": kit_settings.get("hooks", {})}
+        settings_dst.write_text(json.dumps(project_settings, indent=2) + "\n")
+        total += 1
+        rows.append(line(".claude/settings.json .............. done"))
+
     # 6. Root-level security + layer files (SECURITY.md, etc.)
     root_count = 0
     for layer_name in active_layers:
@@ -661,16 +688,17 @@ def install_layer_files(config, kit_dir, project_dir):
     if root_count:
         rows.append(line(f"security files ({root_count}) .............. done"))
 
-    # 7. Base template files (STATE.md, learnings.md, tasks/todo.md)
+    # 7. Base template files (STATE.md, learnings.md, ROADMAP.md, tasks/)
     base_dir = templates_dir / "_base"
     tmpl_count = 0
-    for name in ["STATE.md", "learnings.md"]:
+    for name in ["STATE.md", "learnings.md", "ROADMAP.md"]:
         src = base_dir / name
         if copy_to_project(src, name):
             tmpl_count += 1
-    todo_src = base_dir / "tasks" / "todo.md"
-    if copy_to_project(todo_src, "tasks/todo.md"):
-        tmpl_count += 1
+    for name in ["todo.md", "archive.md"]:
+        src = base_dir / "tasks" / name
+        if copy_to_project(src, f"tasks/{name}"):
+            tmpl_count += 1
     rows.append(line(f"starter files ({tmpl_count}) ............... done"))
 
     # 8. Framework-specific files (.gitignore, .env.example)

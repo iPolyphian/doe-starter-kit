@@ -13,15 +13,28 @@
         "serial-dispatch-protocol.md",
         "subagent-protocol.md",
         "security-rules.md",
-        "incident-response.md"
+        "incident-response.md",
+        "claim-auditing.md",
+        "testing-strategy.md",
+        "architectural-invariants.md",
+        "manual-testing.md",
+        "integrations.md",
+        "starter-kit-sync.md",
+        "starter-kit-pull.md",
+        "_TEMPLATE.md"
       ],
       "execution": [
         "health_check.py",
         "verify.py",
         "audit_claims.py",
-        "generate_test_checklist.py"
+        "generate_test_checklist.py",
+        "test_methodology.py",
+        "wrap_stats.py",
+        "quality_gate.py",
+        "check_contract.py",
+        "lint_todo.py"
       ],
-      "hooks": ["pre-commit", "commit-msg"],
+      "hooks": ["pre-commit", "commit-msg", "pre-push"],
       "commands": [
         "stand-up.md", "crack-on.md", "wrap.md", "sitrep.md",
         "review.md", "agent-verify.md", "snagging.md", "audit.md"
@@ -44,7 +57,7 @@
       "files": []
     },
     "data_handling": {
-      "directives": [],
+      "directives": ["data-safety.md"],
       "files": []
     },
     "regulated": {
@@ -72,7 +85,15 @@
     {"situation": "About to skip a guardrail", "directive": "rationalisation-tables.md", "layer": "universal"},
     {"situation": "Something went seriously wrong", "directive": "break-glass.md", "layer": "universal"},
     {"situation": "Security-sensitive code", "directive": "security-rules.md", "layer": "universal"},
+    {"situation": "Auditing claims", "directive": "claim-auditing.md", "layer": "universal"},
+    {"situation": "Testing setup / strategy", "directive": "testing-strategy.md", "layer": "universal"},
+    {"situation": "Refactoring / architecture", "directive": "architectural-invariants.md", "layer": "universal"},
+    {"situation": "Writing code", "directive": "best-practices/", "layer": "universal"},
+    {"situation": "Manual testing", "directive": "manual-testing.md", "layer": "universal"},
+    {"situation": "Slack / GitHub integrations / notifications", "directive": "integrations.md", "layer": "universal"},
+    {"situation": "DOE kit sync", "directive": "starter-kit-sync.md", "layer": "universal"},
     {"situation": "[APP] feature", "directive": "chrome-verification.md", "layer": "public_facing", "frameworks": ["nextjs", "vite", "static"]},
+    {"situation": "Data safety / handling", "directive": "data-safety.md", "layer": "data_handling"},
     {"situation": "Personal data features", "directive": "data-compliance.md", "layer": "regulated"},
     {"situation": "Dataset or legal position change", "directive": "documentation-governance.md", "layer": "regulated"}
   ]
