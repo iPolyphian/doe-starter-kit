@@ -128,9 +128,9 @@ else
     echo "✓ ~/.claude/CLAUDE.md already exists (not overwritten)"
 fi
 
-# 6. Activate git hooks (only if in a git repo)
-if [ -d "$SCRIPT_DIR/.git" ] || git -C "$SCRIPT_DIR" rev-parse --git-dir > /dev/null 2>&1; then
-    git -C "$SCRIPT_DIR" config core.hooksPath .githooks 2>/dev/null
+# 6. Activate git hooks (only if cwd is a git repo)
+if git rev-parse --git-dir > /dev/null 2>&1; then
+    git config core.hooksPath .githooks 2>/dev/null
     echo "✓ Git hooks activated"
 fi
 
@@ -218,8 +218,8 @@ if [ -f "$SCRIPT_DIR/.github/pull_request_template.md" ] && [ ! -f ".github/pull
     echo "✓ PR template installed to .github/"
 fi
 
-# 10. Set DOE Role in STATE.md
-STATE_FILE="$SCRIPT_DIR/STATE.md"
+# 10. Set DOE Role in project STATE.md
+STATE_FILE="STATE.md"
 if [ -f "$STATE_FILE" ] && grep -q "DOE Role:" "$STATE_FILE"; then
     echo ""
     echo "Are you a DOE contributor? (Most users: no)"
@@ -228,7 +228,12 @@ if [ -f "$STATE_FILE" ] && grep -q "DOE Role:" "$STATE_FILE"; then
     printf "Choice [n]: "
     read -r DOE_ROLE_CHOICE
     if [ "$DOE_ROLE_CHOICE" = "y" ] || [ "$DOE_ROLE_CHOICE" = "Y" ]; then
-        sed -i '' 's/\*\*DOE Role:\*\* consumer/**DOE Role:** creator/' "$STATE_FILE"
+        # Cross-platform sed -i (macOS needs '', Linux doesn't)
+        if sed --version 2>/dev/null | grep -q GNU; then
+            sed -i 's/\*\*DOE Role:\*\* consumer/**DOE Role:** creator/' "$STATE_FILE"
+        else
+            sed -i '' 's/\*\*DOE Role:\*\* consumer/**DOE Role:** creator/' "$STATE_FILE"
+        fi
         echo "✓ DOE Role set to creator"
     else
         echo "✓ DOE Role set to consumer"

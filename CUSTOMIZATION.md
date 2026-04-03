@@ -10,7 +10,7 @@ These files work in any project without modification.
 
 | File | What it does |
 |------|-------------|
-| `global-commands/*.md` | All 24 slash commands — `/stand-up`, `/crack-on`, `/wrap`, `/eod`, `/sitrep`, `/sync-doe`, `/commands`, `/roast`, `/pitch`, `/audit`, `/agent-status`, `/agent-launch`, and more |
+| `global-commands/*.md` | All 31 slash commands — `/stand-up`, `/crack-on`, `/wrap`, `/eod`, `/sitrep`, `/sync-doe`, `/commands`, `/roast`, `/pitch`, `/audit`, `/review`, `/agent-status`, `/agent-launch`, and more |
 | `global-commands/README.md` | Documents all slash commands |
 | `directives/_TEMPLATE.md` | Template for creating new SOP directives |
 | `directives/starter-kit-sync.md` | How to sync improvements back to this repo |

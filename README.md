@@ -42,24 +42,26 @@ The wizard detects your existing code (package.json, go.mod, etc.), infers the f
 
 ## What's Included
 
-**Framework (49 files)**
+**Framework (120+ files)**
 
-- **CLAUDE.md** — 9 operating rules, progressive disclosure triggers, guardrails
+- **CLAUDE.md** — 7 operating rules, progressive disclosure triggers, guardrails
 - **STATE.md** — Session memory (blockers, current position)
-- **Directives** — SOPs for documentation governance, claim auditing, starter kit sync
+- **33 directives** — SOPs for planning, building, delivery, security, testing, architecture, and more
+- **23 execution scripts** — Verification, auditing, scoring, test orchestration, and quality gates
 - **Audit system** — Automated false-positive detection with pre-commit hook
 - **Multi-agent coordination** — Wave management, task claiming, heartbeats, merge protocol for parallel Claude Code sessions (`/agent-status` dashboard). Installs globally to `~/.claude/scripts/` and `~/.claude/hooks/`.
-- **29 slash commands** — session lifecycle, quality checks, visual tools, multi-agent, utilities, and infrastructure (see below)
+- **31 slash commands** — session lifecycle, quality checks, visual tools, multi-agent, utilities, and infrastructure (see below)
 - **Session timer** — `/stand-up` (in kick-off mode) and `/crack-on` start a clock, `/sitrep` and `/wrap` report elapsed time
 - **Gamification** — Session scoring, badges, streaks, leaderboard, themed wrap-up cards
-- **Git hooks** — Pre-commit claim audit, commit message cleanup
-- **Guardrail hooks** — Block secrets, protect directives, prevent dangerous commands
+- **Git hooks** — Pre-commit claim audit, commit message cleanup, pre-push methodology check
+- **7 guardrail hooks** — Block secrets, protect directives, prevent dangerous commands, enforce review gate, confirm PR merge
+- **4 custom agents** — Finder, Adversarial, Referee, ReadOnly for adversarial code review
 - **Context monitoring** — Warns at 60% context usage, stops at 80% for graceful handoff
 
-**Documentation (43 files)**
+**Documentation (55 files)**
 
-- **15 HTML tutorial pages** (`docs/tutorial/`) — Mintlify-style visual guides covering installation, first session, key concepts, commands, daily workflow, feature lifecycle, example apps, tips, and glossary
-- **33 markdown reference docs** (`docs/reference/`) — searchable reference for every command, concept, workflow, file format, and example app
+- **18 HTML tutorial pages** (`docs/tutorial/`) — Mintlify-style visual guides covering installation, first session, key concepts, commands, daily workflow, feature lifecycle, example apps, tips, and glossary
+- **37 markdown reference docs** (`docs/reference/`) — searchable reference for every command, concept, workflow, file format, and example app
 
 **Guides**
 
@@ -68,7 +70,7 @@ The wizard detects your existing code (package.json, go.mod, etc.), infers the f
 
 ## Slash Commands
 
-29 commands in `global-commands/`. Install with `./setup.sh` or copy manually. Run `/commands` inside Claude Code for the full reference and installation health check.
+31 commands in `global-commands/`. Install with `./setup.sh` or copy manually. Run `/commands` inside Claude Code for the full reference and installation health check.
 
 | Category | Commands | Purpose |
 |----------|----------|---------|

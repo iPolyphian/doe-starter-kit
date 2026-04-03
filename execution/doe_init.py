@@ -10,7 +10,6 @@ and outputs a config dict for subsequent installation steps.
 
 import argparse
 import json
-import os
 import shutil
 import subprocess
 import sys
@@ -860,14 +859,12 @@ def setup_ci_git_collaboration(config, kit_dir, project_dir):
             extra_count += 1
 
     # ── Initialise git if needed
-    has_git = (project_dir / ".git").exists()
-    if not has_git:
+    had_git = (project_dir / ".git").exists()
+    if not had_git:
         result = subprocess.run(
             ["git", "init"], cwd=project_dir, capture_output=True,
         )
-        if result.returncode == 0:
-            has_git = True
-        else:
+        if result.returncode != 0:
             print(f"  Warning: git init failed (exit {result.returncode})")
 
     # ── Set git hooks path
@@ -881,7 +878,7 @@ def setup_ci_git_collaboration(config, kit_dir, project_dir):
     rows = [top()]
     rows.append(line("GIT + CI"))
     rows.append(sep())
-    if not has_git:
+    if not had_git:
         rows.append(line("Initialized git repository"))
     if hooks_set:
         rows.append(line("git hooks path -> .githooks/"))

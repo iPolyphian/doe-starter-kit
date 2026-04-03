@@ -93,6 +93,7 @@
   "triggers": [
     {"situation": "Planning/scoping", "directive": "planning-rules.md", "layer": "universal"},
     {"situation": "Building/coding", "directive": "building-rules.md", "layer": "universal"},
+    {"situation": "Completed 4+ steps on current feature", "directive": "building-rules.md", "layer": "universal"},
     {"situation": "Delivering (retro, PR, sign-off, wrap)", "directive": "delivery-rules.md", "layer": "universal"},
     {"situation": "Parallel work / context management", "directive": "context-management.md", "layer": "universal"},
     {"situation": "Self-annealing / learnings curation", "directive": "self-annealing.md", "layer": "universal"},

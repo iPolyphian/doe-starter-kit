@@ -24,7 +24,7 @@ from doe_init import (
     install_layer_files,
     setup_ci_git_collaboration,
     write_doe_version,
-    DETECT_PATTERNS,
+    _FALLBACK_DETECT_PATTERNS,
     FRAMEWORK_PROJECT_TYPE,
 )
 
@@ -95,42 +95,42 @@ print("Test 1: Framework detection")
 # Next.js
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "package.json").write_text('{"dependencies":{"next":"14"}}')
-    k, _ = detect_framework(Path(d))
+    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
     check("detect nextjs", k == "nextjs", f"got {k}")
 
 # Vite
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "package.json").write_text('{"dependencies":{"vite":"5"}}')
-    k, _ = detect_framework(Path(d))
+    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
     check("detect vite", k == "vite", f"got {k}")
 
 # Python
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "pyproject.toml").write_text("[project]\nname='x'\n")
-    k, _ = detect_framework(Path(d))
+    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
     check("detect python", k == "python", f"got {k}")
 
 # Go
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "go.mod").write_text("module example.com/x\ngo 1.21\n")
-    k, _ = detect_framework(Path(d))
+    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
     check("detect go", k == "go", f"got {k}")
 
 # Flutter
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "pubspec.yaml").write_text("name: x\n")
-    k, _ = detect_framework(Path(d))
+    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
     check("detect flutter", k == "flutter", f"got {k}")
 
 # Static HTML
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "index.html").write_text("<html></html>")
-    k, _ = detect_framework(Path(d))
+    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
     check("detect static", k == "static", f"got {k}")
 
 # Empty directory -- no framework detected
 with tempfile.TemporaryDirectory() as d:
-    k, _ = detect_framework(Path(d))
+    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
     check("detect empty directory", k is None, f"got {k}")
 
 

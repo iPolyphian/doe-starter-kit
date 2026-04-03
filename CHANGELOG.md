@@ -7,6 +7,37 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.52.1 (2026-04-03)
+
+### Fixed
+- **Init wizard: dead hooks** — `.claude/settings.json` (hook configuration) was never created. All 7 guardrail hooks were installed as files but never wired up. Now generated with PreToolUse + PostToolUse hooks, stripping kit-contributor-only entries.
+- **Init wizard: missing files** — `.claude/agents/` (4 agent definitions), `.claude/plans/` (multi-agent coordination), `.claude/stats.json`, `ROADMAP.md`, `tasks/archive.md` were never scaffolded despite being referenced by commands and directives.
+- **Init wizard: incomplete manifest** — 23/31 commands, 7/16 execution scripts, 8/24 directives, 3/9 global scripts, pre-push hook, and `data-safety.md` were missing from `manifest.json`. New projects got a fraction of the kit's capabilities.
+- **Init wizard: NameError crash** — `DETECT_PATTERNS` referenced after rename to `_FALLBACK_DETECT_PATTERNS`. Wizard could not reach the confirmation card.
+- **Init wizard: regulated layer** — `data-governance.md` and `legal-framework.md` were promised in the confirmation card but the template files didn't exist. Now created as proper GDPR/compliance scaffolds.
+- **Review gate broken** — `/review` never called `record_review_result.py`, so `enforce_review_gate.py` blocked PR creation with no way to pass. Review command now records the verdict.
+- **setup.sh: STATE.md written to kit repo** — `STATE_FILE` pointed to `$SCRIPT_DIR/STATE.md` (the kit) instead of the project's `STATE.md`. Fixed.
+- **setup.sh: git hooks activated on kit** — `git config core.hooksPath` ran against the kit repo, not the user's project. Fixed.
+- **setup.sh: Linux incompatibility** — `sed -i ''` is macOS-only. Now uses cross-platform detection.
+- **Git init message never shown** — inverted `has_git` condition after successful init.
+- **Test suite crash** — `test_doe_init.py` imported deleted `DETECT_PATTERNS` symbol.
+- **Command paths broken** — `/report-doe-bug` and `/request-doe-feature` referenced `execution/` paths that only exist in the kit, not user projects. Fixed to `~/doe-starter-kit/execution/`.
+
+### Added
+- **`best-practices/` directives** — 5 language-specific best practice files (HTML/CSS, JavaScript, Python, React, TDD) now installed to projects.
+- **Quality Gate trigger** — `"Completed 4+ steps on current feature"` trigger added to manifest. Ensures mid-build verification on long features.
+- **6 new triggers** — subagent-protocol, starter-kit-pull, tdd-and-debugging, multi-agent-coordination, incident-response, quality gate.
+- **Framework detection from scaffold.json** — replaces hardcoded `DETECT_PATTERNS` dict. Single source of truth with fallback.
+- **First-time `~/.claude/CLAUDE.md`** — universal learnings template installed for users who don't have one.
+
+### Changed
+- **SYSTEM-MAP.md** — updated to reflect actual installed files (was documenting 3 hooks when 7 are installed, missing agents/plans/stats.json from project tree).
+- **README.md** — corrected file counts (49→120+, 29→31 commands, 15→18 tutorials, 43→55 docs).
+- **CUSTOMIZATION.md** — corrected command count (24→31).
+- **Commands README** — added `/doe-health` and `/code-trace` documentation.
+
+---
+
 ## v1.52.0 (2026-04-02)
 
 ### Added
