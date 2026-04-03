@@ -454,7 +454,7 @@ def scenario_claude_md_quality(verbose: bool = False):
     _fw_patterns = {
         "nextjs":  [r"\bnpm\b", r"\bnpx\b"],
         "vite":    [r"\bnpm\b", r"\bnpx\b"],
-        "html-app": [r"\bpytest\b", r"\bbuild\.py\b"],
+        "html-app": [r"\bpytest\b", r"\bverify\.py\b"],
         "python":  [r"\bpytest\b", r"\bruff\b"],
         "go":      [r"\bgo\s+(test|build|vet)\b"],
         "flutter": [r"\bflutter\b"],
