@@ -743,6 +743,38 @@ def install_layer_files(config, kit_dir, project_dir):
             tmpl_count += 1
     rows.append(line(f"starter files ({tmpl_count}) ............... done"))
 
+    # 7b. tests/config.json (framework-aware health check config)
+    tests_config = project_dir / "tests" / "config.json"
+    if not tests_config.exists():
+        tests_config.parent.mkdir(parents=True, exist_ok=True)
+        # Map wizard framework to health_check.py SCAN_PROFILES key
+        fw_to_profile = {
+            "nextjs": "nextjs", "vite": "vite", "flutter": "flutter",
+            "static": "html-app", "python": "html-app", "go": "html-app",
+        }
+        # Read build command from scaffold.json
+        scaffold_path = templates_dir / config["framework"] / "scaffold.json"
+        build_cmd = ""
+        if scaffold_path.exists():
+            try:
+                scaffold = json.loads(scaffold_path.read_text())
+                build_cmd = scaffold.get("build_command") or ""
+            except (json.JSONDecodeError, OSError):
+                pass
+        test_config = {
+            "buildCommand": build_cmd,
+            "testTimeout": 30,
+            "projectType": fw_to_profile.get(config["framework"], "html-app"),
+            "routeMode": "hash",
+            "dependencies": [],
+            "appPrefix": "",
+            "routes": [],
+            "initScript": "",
+        }
+        tests_config.write_text(json.dumps(test_config, indent=2) + "\n")
+        total += 1
+        rows.append(line("tests/config.json ................. done"))
+
     # 8. Framework-specific files (.gitignore, .env.example)
     fw_dir = templates_dir / config["framework"]
     fw_count = 0
