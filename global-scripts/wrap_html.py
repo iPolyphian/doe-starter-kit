@@ -2,193 +2,25 @@
 """Generate a session wrap-up HTML page from JSON data.
 
 Usage:
-    python3 execution/wrap_html.py --json '{"title": "...", ...}' --output .tmp/wrap.html
-    echo '{"title": "..."}' | python3 execution/wrap_html.py
+    python3 ~/.claude/scripts/wrap_html.py --json '{"title": "...", ...}' --output .tmp/wrap.html
+    echo '{"title": "..."}' | python3 ~/.claude/scripts/wrap_html.py
 """
 
 import argparse
-import html
 import json
 import os
 import re
 import sys
 
-
-def esc(text):
-    """HTML-escape a string."""
-    return html.escape(str(text))
-
-
-def render_title_card(data):
-    project = esc(data.get("projectName", ""))
-    title = esc(data.get("title", ""))
-    return f"""  <div class="report-label">Session Report</div>
-  <div class="title-card">
-    <div class="project-name">{project}</div>
-    <div class="episode">{title}</div>
-  </div>"""
+from html_builder import (
+    page_scaffold, esc, badge, badge_row, metric_grid, card,
+    timeline as builder_timeline, timeline_legend, data_table, raw,
+    dl_item, pill, check_row, next_card, page_footer, page_header,
+    section, collapsible_js, DOE_COLORS,
+)
 
 
-def _platform_badge(platform):
-    if not platform:
-        return ""
-    p = platform.lower()
-    if p == "win32":
-        return '<span class="badge badge-platform-win">PC</span>'
-    elif p == "darwin":
-        return '<span class="badge badge-platform-mac">Mac</span>'
-    elif p == "linux":
-        return '<span class="badge badge-platform-linux">Linux</span>'
-    return f'<span class="badge badge-platform-linux">{esc(platform)}</span>'
-
-
-def _model_badge(model):
-    if not model:
-        return ""
-    m = model.lower()
-    if "opus" in m:
-        return '<span class="badge badge-model-opus">Opus</span>'
-    elif "sonnet" in m:
-        return '<span class="badge badge-model-sonnet">Sonnet</span>'
-    elif "haiku" in m:
-        return '<span class="badge badge-model-haiku">Haiku</span>'
-    return f'<span class="badge badge-model-sonnet">{esc(model)}</span>'
-
-
-def _tag_badge(tag):
-    if not tag:
-        return ""
-    t = tag.upper()
-    css_map = {
-        "BUILD": "badge-tag-build",
-        "PLAN": "badge-tag-plan",
-        "DEBUG": "badge-tag-debug",
-        "HOUSEKEEPING": "badge-tag-housekeeping",
-        "RESEARCH": "badge-tag-research",
-    }
-    css = css_map.get(t, "badge-tag-housekeeping")
-    return f'<span class="badge {css}">{esc(t)}</span>'
-
-
-def render_session_stats_bar(data):
-    footer = data.get("footer", {})
-    if not footer:
-        return ""
-    session = esc(footer.get("session", ""))
-    streak = esc(footer.get("streak", ""))
-    lifetime = esc(footer.get("lifetimeCommits", ""))
-
-    platform_html = _platform_badge(data.get("platform"))
-    model_html = _model_badge(data.get("model"))
-    tag_html = _tag_badge(data.get("tag"))
-
-    badges = " ".join(b for b in [platform_html, model_html, tag_html] if b)
-    badges_html = f'<span class="badge-group">{badges}</span>' if badges else ""
-
-    return f"""  <div class="session-stats-bar">
-    <span>Session #{session}</span>
-    <span>Streak: {streak} days</span>
-    <span>Lifetime: {lifetime} commits</span>
-    {badges_html}
-  </div>"""
-
-
-def render_narrative(data):
-    summary = data.get("summary", "")
-    breakdowns = data.get("breakdowns", [])
-    # Fallback: old-style narrative array
-    if not summary and not breakdowns:
-        lines = data.get("narrative", [])
-        if not lines:
-            return ""
-        summary = " ".join(lines)
-
-    # Build summary paragraph
-    summary_html = f'    <p class="summary-lead">{esc(summary)}</p>' if summary else ""
-
-    # Build breakdown sections
-    breakdown_html = ""
-    if breakdowns:
-        parts = []
-        for b in breakdowns:
-            heading = esc(b.get("heading", ""))
-            bullets = b.get("bullets", [])
-            bullet_items = "\n".join(f'        <li>{esc(item)}</li>' for item in bullets)
-            parts.append(
-                f'    <div class="breakdown-group">\n'
-                f'      <div class="breakdown-heading">{heading}</div>\n'
-                f'      <ul class="breakdown-bullets">\n{bullet_items}\n      </ul>\n'
-                f'    </div>'
-            )
-        breakdown_html = "\n".join(parts)
-
-    # Vibe sits inline on the header
-    vibe = data.get("vibe")
-    vibe_html = ""
-    if vibe:
-        emoji = vibe.get("emoji", "")
-        text = esc(vibe.get("text", ""))
-        vibe_html = f'<span class="vibe-inline">Vibe: {emoji} {text}</span>'
-
-    return f"""  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">&#x1F4CB;</span>
-      <span class="section-title">Summary</span>
-      {vibe_html}
-    </div>
-    <div class="summary">
-{summary_html}
-{breakdown_html}
-    </div>
-  </div>"""
-
-
-def render_stats(data):
-    m = data.get("metrics", {})
-    if not m:
-        return ""
-    commits = m.get("commits", 0)
-    added = m.get("linesAdded", 0)
-    removed = m.get("linesRemoved", 0)
-    files = m.get("filesTouched", 0)
-    steps = m.get("stepsCompleted", 0)
-    duration = esc(m.get("sessionDuration", ""))
-    agents = m.get("agentsSpawned", 0)
-
-    return f"""  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">&#x1F4CA;</span>
-      <span class="section-title">Metrics</span>
-    </div>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value">{esc(commits)}</div>
-        <div class="stat-label">Commits</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{esc(added)}</div>
-        <div class="stat-label">Lines Added</div>
-        <div class="stat-sub">-{esc(removed)}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{esc(files)}</div>
-        <div class="stat-label">Files Touched</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{esc(steps)}</div>
-        <div class="stat-label">Steps Done</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{duration}</div>
-        <div class="stat-label">Duration</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{esc(agents)}</div>
-        <div class="stat-label">Agents Spawned</div>
-      </div>
-    </div>
-  </div>"""
-
+# ── Helpers ────────────────────────────────────────────────────────────────────
 
 def _parse_dur_mins(dur_str):
     """Parse a duration string like '15m' or '1h 30m' into total minutes."""
@@ -213,108 +45,290 @@ def _parse_hhmm(time_str):
     return None
 
 
-def render_timeline(data):
+def _collapsible_card(title, body, *, meta_html='', collapsed=False, accent=''):
+    """Collapsible card with optional raw HTML in the header meta area.
+
+    Args:
+        accent: Optional highlight colour token name (e.g. 'amber', 'blue').
+            Adds a coloured left border and tinted background.
+    """
+    cls = 'card card-collapsible'
+    if collapsed:
+        cls += ' collapsed'
+
+    style = ''
+    if accent:
+        style = (
+            f' style="border-left: 3px solid var(--{accent}); '
+            f'background: var(--{accent}-bg);"'
+        )
+
+    title_html = f'<span class="card-title">{esc(title)}</span>'
+    if meta_html:
+        title_html = (
+            f'<div style="display: flex; align-items: center; gap: 8px;">'
+            f'{title_html} {meta_html}</div>'
+        )
+
+    return (
+        f'<div class="{cls}"{style}>'
+        f'<div class="card-header">'
+        f'{title_html}'
+        f'<span class="card-chevron">&#9660;</span>'
+        f'</div>'
+        f'<div class="card-collapse-body"><div class="card-body">{body}</div></div>'
+        f'</div>'
+    )
+
+
+# ── Render Functions ───────────────────────────────────────────────────────────
+
+def render_header(data):
+    """Page header: label, title, badge row."""
+    project = data.get("projectName", "")
+    title = data.get("title", "")
+    footer = data.get("footer", {})
+
+    dim = f'/ {title}' if title else ''
+    header = page_header('Session Report', project, dim_title=dim)
+
+    badges = []
+    session = footer.get("session", "")
+    if session:
+        badges.append(badge(f'#{session}', 'accent'))
+
+    streak = footer.get("streak", "")
+    if streak:
+        badges.append(badge(f'{streak}-day streak', 'pass'))
+
+    lifetime = footer.get("lifetimeCommits", "")
+    if lifetime:
+        badges.append(badge(f'{lifetime} lifetime commits', 'dim'))
+
+    platform = data.get("platform", "")
+    if platform:
+        name = {'darwin': 'macOS', 'win32': 'PC', 'linux': 'Linux'}.get(
+            platform.lower(), platform)
+        badges.append(badge(name, 'dim'))
+
+    model = data.get("model", "")
+    if model:
+        m = model.lower()
+        if 'opus' in m:
+            name = 'Opus'
+        elif 'sonnet' in m:
+            name = 'Sonnet'
+        elif 'haiku' in m:
+            name = 'Haiku'
+        else:
+            name = model
+        badges.append(badge(name, 'info'))
+
+    tag = data.get("tag", "")
+    if tag:
+        variant_map = {
+            'BUILD': 'pass', 'PLAN': 'info', 'DEBUG': 'fail',
+            'HOUSEKEEPING': 'dim', 'RESEARCH': 'accent',
+        }
+        badges.append(badge(tag.upper(), variant_map.get(tag.upper(), 'dim')))
+
+    return header + '\n' + badge_row(*badges) if badges else header
+
+
+def render_metrics(data):
+    """Six-column metric grid."""
+    m = data.get("metrics", {})
+    if not m:
+        return ""
+
+    commits = m.get("commits", 0)
+    steps = m.get("stepsCompleted", 0)
+    added = m.get("linesAdded", 0)
+    removed = m.get("linesRemoved", 0)
+    duration = esc(m.get("sessionDuration", ""))
+    files = m.get("filesTouched", 0)
+    agents = m.get("agentsSpawned", 0)
+
+    # Lines +/- needs dual-colour HTML — build metric grid manually
+    def _mc(val, label):
+        return (
+            f'<div class="metric-card">'
+            f'<div class="metric-value">{esc(str(val))}</div>'
+            f'<div class="metric-label">{esc(label)}</div>'
+            f'</div>'
+        )
+
+    lines_card = (
+        f'<div class="metric-card">'
+        f'<div class="metric-value" style="color: var(--green);">+{esc(str(added))}</div>'
+        f'<div style="font-family: \'SF Mono\', \'Fira Code\', \'Consolas\', monospace; '
+        f'font-size: 16px; font-weight: 600; color: var(--rose); margin-top: -2px;">'
+        f'-{esc(str(removed))}</div>'
+        f'<div class="metric-label">Lines +/-</div>'
+        f'</div>'
+    )
+
+    cards = [
+        _mc(commits, 'Commits'),
+        _mc(steps, 'Steps'),
+        lines_card,
+        _mc(duration, 'Duration'),
+        _mc(files, 'Files Touched'),
+        _mc(agents, 'Agents Spawned'),
+    ]
+
+    return f'<div class="metric-grid metric-grid-6">{"".join(cards)}</div>'
+
+
+def render_summary(data):
+    """Collapsible Summary card with breakdowns."""
+    summary = data.get("summary", "")
+    breakdowns = data.get("breakdowns", [])
+
+    # Backward compat: old-style narrative array
+    if not summary and not breakdowns:
+        lines = data.get("narrative", [])
+        if not lines:
+            return ""
+        summary = " ".join(lines)
+
+    parts = []
+    if summary:
+        parts.append(
+            f'<p style="margin-bottom: 16px; color: var(--text);">{esc(summary)}</p>')
+
+    color_map = {
+        'build': '--green', 'review': '--blue',
+        'housekeeping': '--amber', 'debug': '--rose',
+        'research': '--accent',
+    }
+
+    for b in breakdowns:
+        heading = b.get("heading", "")
+        bullets = b.get("bullets", [])
+        color_var = color_map.get(heading.lower(), '--text')
+        inner = '<br>'.join(esc(item) for item in bullets)
+        parts.append(
+            f'<div style="margin-bottom: 14px;">'
+            f'<div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">'
+            f'<span style="color: var({color_var});">{esc(heading)}</span>'
+            f'</div>'
+            f'<div style="padding-left: 14px; font-size: 14px; color: var(--text-dim);">'
+            f'{inner}</div></div>'
+        )
+
+    body = '\n'.join(parts)
+
+    # Vibe inline in header (right-aligned, like old wrap)
+    vibe = data.get("vibe")
+    meta = ''
+    if vibe:
+        emoji = vibe.get("emoji", "")
+        text = esc(vibe.get("text", ""))
+        vibe_str = f'{emoji} {text}'.strip() if emoji else text
+        meta = (
+            f'<span style="margin-left: auto; font-family: \'SF Mono\', monospace; '
+            f'font-size: 12px; color: var(--text-dim); letter-spacing: 0.04em;">'
+            f'Vibe: {vibe_str}</span>'
+        )
+
+    return _collapsible_card('\U0001f4cb Summary', body, meta_html=meta)
+
+
+def render_timeline_section(data):
+    """Collapsible Timeline card."""
     items = data.get("timeline", [])
     if not items:
         return ""
 
-    # Auto-calculate durations from timestamps
-    # Each entry's duration = next entry's time - this entry's time
-    # Last entry's duration = session end - last entry's time
-    parsed_times = []
-    for item in items:
-        parsed_times.append(_parse_hhmm(item.get("time", "")))
-
+    # Compute durations from timestamps
+    parsed_times = [_parse_hhmm(item.get("time", "")) for item in items]
     session_dur_str = data.get("metrics", {}).get("sessionDuration", "")
     total_mins = _parse_dur_mins(session_dur_str) if session_dur_str else 0
 
-    # Calculate per-entry durations from timestamp gaps
     computed_durs = []
-    for i, item in enumerate(items):
+    for i in range(len(items)):
         if parsed_times[i] is None:
             computed_durs.append(0)
             continue
         if i + 1 < len(items) and parsed_times[i + 1] is not None:
             gap = parsed_times[i + 1] - parsed_times[i]
             if gap < 0:
-                gap += 24 * 60  # handle midnight crossing
+                gap += 24 * 60
             computed_durs.append(gap)
         elif total_mins > 0 and parsed_times[0] is not None:
-            # Last entry: use total session duration minus elapsed so far
             elapsed = sum(computed_durs)
             computed_durs.append(max(0, total_mins - elapsed))
         else:
             computed_durs.append(0)
 
-    # Use total_mins from session duration (authoritative), not sum of computed
     if total_mins == 0:
         total_mins = sum(computed_durs)
 
-    rows = []
+    # Build timeline items for builder component
+    color_map = {'start': None, 'major': 'green', 'fix': 'amber'}
+    tl_items = []
     for i, item in enumerate(items):
-        t = esc(item.get("time", ""))
-        desc = esc(item.get("desc", ""))
+        t = item.get("time", "")
+        desc = item.get("desc", "")
         item_type = item.get("type", "")
-        css_class = item_type if item_type in ("start", "major", "fix") else ""
+        color = color_map.get(item_type)
 
         mins = computed_durs[i]
+        dur = ""
         if mins > 0 and item_type != "start":
             dur_str = f"{mins}m" if mins < 60 else f"{mins // 60}h {mins % 60}m"
             pct = round(mins / total_mins * 100) if total_mins > 0 else 0
-            dur_display = f"{dur_str} ({pct}%)" if pct > 0 else dur_str
-        else:
-            dur_display = ""
+            dur = f"{dur_str} ({pct}%)" if pct > 0 else dur_str
 
-        rows.append(
-            f'    <div class="timeline-item {css_class}">'
-            f'<span class="timeline-time">{t}</span>'
-            f'<span class="timeline-desc">{desc}</span>'
-            f'<span class="timeline-dur">{dur_display}</span>'
-            f"</div>"
+        entry = {'time': t, 'text': desc}
+        if color:
+            entry['color'] = color
+        if dur:
+            entry['duration'] = dur
+        tl_items.append(entry)
+
+    tl_html = builder_timeline(tl_items)
+
+    # Legend
+    legend = timeline_legend([
+        (DOE_COLORS['accent'], 'Session start'),
+        (DOE_COLORS['green'], 'Major change'),
+        (DOE_COLORS['amber'], 'Fix'),
+        (DOE_COLORS['text_dim'], 'Normal'),
+    ])
+
+    # Total duration
+    total_html = ''
+    if session_dur_str:
+        total_html = (
+            f'<div style="margin-top: 12px; text-align: right;">'
+            f'<span style="font-family: \'SF Mono\', monospace; font-size: 13px; '
+            f'font-weight: 600;">Total: {esc(session_dur_str)}</span></div>'
         )
 
-    # Total session duration
-    session_dur = data.get("metrics", {}).get("sessionDuration", "")
-    if session_dur:
-        rows.append(
-            f'    <div class="timeline-total">'
-            f'Total: {esc(session_dur)}'
-            f'</div>'
-        )
+    body = tl_html + legend + total_html
+    meta = f'<span class="card-meta">{esc(session_dur_str)}</span>' if session_dur_str else ''
 
-    inner = "\n".join(rows)
-    return f"""  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">&#x23F1;&#xFE0F;</span>
-      <span class="section-title">Timeline</span>
-    </div>
-    <div class="timeline">
-{inner}
-    <div class="timeline-legend">
-      <span class="legend-item"><span class="legend-dot start"></span> Session start</span>
-      <span class="legend-item"><span class="legend-dot major"></span> Major change</span>
-      <span class="legend-item"><span class="legend-dot fix"></span> Fix</span>
-      <span class="legend-item"><span class="legend-dot normal"></span> Normal</span>
-    </div>
-    </div>
-  </div>"""
+    return _collapsible_card('\u23f1\ufe0f Timeline', body, meta_html=meta)
 
 
 def render_commits(data):
+    """Collapsible Commits card with grouped table or flat list."""
     m = data.get("metrics", {})
     commit_log = m.get("commitLog", [])
     if not commit_log:
         return ""
 
     groups = data.get("commitGroups")
+    total_commits = len(commit_log)
 
     if groups:
-        # Build a lookup from hash to commit
+        # Grouped: show each group with its commits
         commit_map = {c.get("hash", ""): c for c in commit_log}
-
         sections = []
         for group in groups:
-            name = esc(group.get("name", "Other"))
+            name = group.get("name", "Other")
             hashes = group.get("commits", [])
             count = len(hashes)
 
@@ -323,130 +337,50 @@ def render_commits(data):
                 c = commit_map.get(h, {})
                 msg = esc(c.get("message", ""))
                 ctype = c.get("type", "normal")
-                css = "commit-test" if ctype in ("test", "fix") else "commit-msg"
+                msg_style = ' style="color: var(--text-dim); font-style: italic;"' if ctype in ("test", "fix") else ''
                 rows.append(
-                    f'      <li class="commit-item">'
-                    f'<span class="commit-hash">{esc(h)}</span>'
-                    f'<span class="{css}">{msg}</span>'
-                    f'</li>'
+                    f'<div style="display: flex; align-items: baseline; gap: 10px; '
+                    f'padding: 4px 0; font-size: 13px;">'
+                    f'<span style="font-family: \'SF Mono\', monospace; font-size: 12px; '
+                    f'color: var(--accent); flex-shrink: 0;">{esc(h)}</span>'
+                    f'<span{msg_style}>{msg}</span>'
+                    f'</div>'
                 )
-            inner_rows = "\n".join(rows)
             sections.append(
-                f'    <div class="commit-group">'
-                f'<div class="commit-group-header">{name} <span class="commit-group-count">({count})</span></div>'
-                f'<ul class="commit-list">\n{inner_rows}\n</ul>'
+                f'<div style="margin-bottom: 16px;">'
+                f'<div style="font-size: 13px; font-weight: 600; margin-bottom: 6px; '
+                f'display: flex; align-items: center; gap: 8px;">'
+                f'{esc(name)} <span style="color: var(--text-dim); font-weight: 400;">({count})</span>'
+                f'</div>'
+                f'{"".join(rows)}'
                 f'</div>'
             )
-        inner = "\n".join(sections)
+        body = ''.join(sections)
+        meta = f'<span class="card-meta">{esc(str(total_commits))} commits in {len(groups)} groups</span>'
     else:
-        # Flat list fallback
-        rows = []
+        # Flat list
+        items = []
         for c in commit_log:
             h = esc(c.get("hash", ""))
             msg = esc(c.get("message", ""))
             ctype = c.get("type", "normal")
-            css = "commit-test" if ctype in ("test", "fix") else "commit-msg"
-            rows.append(
-                f'    <li class="commit-item">'
-                f'<span class="commit-hash">{h}</span>'
-                f'<span class="{css}">{msg}</span>'
-                f'</li>'
+            msg_style = ' style="color: var(--text-dim); font-style: italic;"' if ctype in ("test", "fix") else ''
+            items.append(
+                f'<div style="display: flex; align-items: baseline; gap: 10px; '
+                f'padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px;">'
+                f'<span style="font-family: \'SF Mono\', monospace; font-size: 12px; '
+                f'color: var(--accent); flex-shrink: 0;">{h}</span>'
+                f'<span{msg_style}>{msg}</span>'
+                f'</div>'
             )
-        inner = f'<ul class="commit-list">\n' + "\n".join(rows) + '\n</ul>'
+        body = ''.join(items)
+        meta = f'<span class="card-meta">{esc(str(total_commits))} commits</span>'
 
-    return f"""  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">&#x1F4DD;</span>
-      <span class="section-title">Commits</span>
-    </div>
-{inner}
-  </div>"""
-
-
-def render_today_sessions(data):
-    sessions = data.get("todaySessions", [])
-    if not sessions:
-        return ""
-    rows = []
-    for s in sessions:
-        num = esc(s.get("number", ""))
-        dur = esc(s.get("duration", ""))
-        summary = esc(s.get("summary", ""))
-        rows.append(
-            f'    <div class="today-session-item">'
-            f'<span class="today-session-num">#{num}</span>'
-            f'<span class="today-session-dur">{dur}</span>'
-            f'<span class="today-session-summary">{summary}</span>'
-            f'</div>'
-        )
-    inner = "\n".join(rows)
-    return f"""  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">&#x1F4C5;</span>
-      <span class="section-title">Today&#39;s Sessions</span>
-    </div>
-    <div class="today-sessions">
-{inner}
-    </div>
-  </div>"""
-
-
-def _render_insight_item(item, dot_class, item_kind="decision"):
-    """Render a decision or learning item.
-
-    Decisions use Problem/Solution labels. Learnings use Discovery/Change labels.
-    Supports string (backward compat) or rich object format.
-    """
-    if isinstance(item, dict):
-        title = esc(item.get("title", ""))
-        problem = esc(item.get("problem", ""))
-        solution = esc(item.get("solution", ""))
-        # Fallback: old "context" field renders as-is
-        context = esc(item.get("context", ""))
-        detail_html = ""
-        if problem and solution:
-            if item_kind == "learning":
-                detail_html = (
-                    f'<div class="insight-details">'
-                    f'<div class="insight-detail">'
-                    f'<span class="insight-label discovery">Discovery</span> {problem}'
-                    f'</div>'
-                    f'<div class="insight-detail">'
-                    f'<span class="insight-label change">Change</span> {solution}'
-                    f'</div>'
-                    f'</div>'
-                )
-            else:
-                detail_html = (
-                    f'<div class="insight-details">'
-                    f'<div class="insight-detail">'
-                    f'<span class="insight-label problem">Problem</span> {problem}'
-                    f'</div>'
-                    f'<div class="insight-detail">'
-                    f'<span class="insight-label solution">Solution</span> {solution}'
-                    f'</div>'
-                    f'</div>'
-                )
-        elif context:
-            detail_html = f'<div class="insight-context">{context}</div>'
-        return (
-            f'    <div class="insight-item">'
-            f'<span class="{dot_class}"></span>'
-            f'<div class="insight-content">'
-            f'<div class="insight-title">{title}</div>'
-            f'{detail_html}'
-            f'</div></div>'
-        )
-    return (
-        f'    <div class="insight-item">'
-        f'<span class="{dot_class}"></span>'
-        f'<div class="insight-content">'
-        f'<div class="insight-title">{esc(item)}</div>'
-        f'</div></div>'
-    )
+    return _collapsible_card('\U0001f4dd Commits', body, meta_html=meta)
 
 
 def render_decisions_learnings(data):
+    """Collapsible Decisions + Learnings card (collapsed by default)."""
     decisions = data.get("decisions", [])
     learnings = data.get("learnings", [])
     if isinstance(decisions, str):
@@ -455,29 +389,168 @@ def render_decisions_learnings(data):
         learnings = []
     if not decisions and not learnings:
         return ""
+
     parts = []
-    if decisions:
-        rows = "\n".join(_render_insight_item(d, "decision-dot", "decision") for d in decisions)
-        parts.append(f"""  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">&#x2696;&#xFE0F;</span>
-      <span class="section-title">Decisions</span>
-    </div>
-{rows}
-  </div>""")
-    if learnings:
-        rows = "\n".join(_render_insight_item(l, "learning-dot", "learning") for l in learnings)
-        parts.append(f"""  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">&#x1F4A1;</span>
-      <span class="section-title">Learnings</span>
-    </div>
-{rows}
-  </div>""")
-    return "\n".join(parts)
+    for d in decisions:
+        if isinstance(d, dict):
+            title_text = d.get("title", "")
+            problem = d.get("problem", "")
+            solution = d.get("solution", "")
+            context = d.get("context", "")
+            rows = []
+            if problem:
+                rows.append(('Problem', esc(problem)))
+            if solution:
+                rows.append(('Solution', esc(solution)))
+            if context and not problem:
+                rows.append(('Context', esc(context)))
+            parts.append(dl_item(title_text, rows, pills=[('decision', 'green')]))
+        else:
+            parts.append(dl_item(str(d), [], pills=[('decision', 'green')]))
+
+    for l in learnings:
+        if isinstance(l, dict):
+            title_text = l.get("title", "")
+            problem = l.get("problem", "")
+            solution = l.get("solution", "")
+            context = l.get("context", "")
+            rows = []
+            if problem:
+                rows.append(('Discovery', esc(problem)))
+            if solution:
+                rows.append(('Change', esc(solution)))
+            if context and not problem:
+                rows.append(('Context', esc(context)))
+            parts.append(dl_item(title_text, rows, pills=[('learning', 'accent')]))
+        else:
+            parts.append(dl_item(str(l), [], pills=[('learning', 'accent')]))
+
+    body = ''.join(parts)
+    d_count = len(decisions)
+    l_count = len(learnings)
+    counts = []
+    if d_count:
+        counts.append(f'{d_count} decision{"s" if d_count != 1 else ""}')
+    if l_count:
+        counts.append(f'{l_count} learning{"s" if l_count != 1 else ""}')
+    meta = f'<span class="card-meta">{", ".join(counts)}</span>'
+
+    return _collapsible_card('\u2696\ufe0f Decisions + Learnings', body, meta_html=meta, collapsed=True)
+
+
+def render_checks(data):
+    """System Checks section — bordered blue card with check rows."""
+    checks = data.get("checks")
+    if not checks:
+        return ""
+
+    audit = checks.get("audit", {})
+    doe = checks.get("doeKit", {})
+    rows = []
+
+    # Audit rows
+    p = audit.get("pass", 0)
+    w = audit.get("warn", 0)
+    f = audit.get("fail", 0)
+    if p or w or f:
+        # Status badge
+        if f > 0:
+            status_badge = f'<span class="checks-badge checks-badge-fail">FAIL {f}</span>'
+        elif w > 0:
+            status_badge = f'<span class="checks-badge checks-badge-warn">WARN {w}</span>'
+        else:
+            status_badge = f'<span class="checks-badge checks-badge-pass">PASS {p}</span>'
+        rows.append(
+            f'<div class="checks-row">{status_badge} '
+            f'<span class="checks-label">Claim Audit</span></div>'
+        )
+        for detail in audit.get("details", []):
+            rows.append(
+                f'<div class="checks-row checks-detail">{esc(detail)}</div>'
+            )
+
+    # DOE Kit row
+    version = doe.get("version", "")
+    synced = doe.get("synced", True)
+    if version:
+        if synced:
+            rows.append(
+                f'<div class="checks-row">'
+                f'<span class="checks-badge checks-badge-pass">SYNCED</span> '
+                f'<span class="checks-label">DOE Kit</span> '
+                f'<span class="checks-value">{esc(version)}</span></div>'
+            )
+        else:
+            u_count = doe.get("userCount", 0)
+            c_count = doe.get("creatorCount", 0)
+            uc_parts = []
+            if u_count:
+                uc_parts.append(f'{u_count}u')
+            if c_count:
+                uc_parts.append(f'{c_count}c')
+            uc_label = f' ({" ".join(uc_parts)})' if uc_parts else ''
+            rows.append(
+                f'<div class="checks-row">'
+                f'<span class="checks-badge checks-badge-warn">{esc(version)}*</span> '
+                f'<span class="checks-label">DOE Kit</span> '
+                f'<span class="checks-value">not synced{esc(uc_label)}</span></div>'
+            )
+
+    if not rows:
+        return ""
+
+    # Section header with icon
+    header_badges = ''
+    if w > 0:
+        header_badges += f' <span class="checks-badge checks-badge-warn">{w} WARN</span>'
+    if f > 0:
+        header_badges += f' <span class="checks-badge checks-badge-fail">{f} FAIL</span>'
+
+    inner = '\n'.join(rows)
+    return (
+        f'<div class="section">'
+        f'<div class="section-title" style="margin-bottom: 10px;">'
+        f'\u2705 System Checks{header_badges}</div>'
+        f'<div class="checks-card">\n{inner}\n</div>'
+        f'</div>'
+    )
+
+
+def render_today_sessions(data):
+    """Collapsible Today's Sessions card (collapsed by default)."""
+    sessions = data.get("todaySessions", [])
+    if not sessions:
+        return ""
+
+    rows = []
+    for s in sessions:
+        num = esc(s.get("number", ""))
+        dur = esc(s.get("duration", ""))
+        summary = esc(s.get("summary", ""))
+        time_range = esc(s.get("timeRange", ""))
+        commits = s.get("commits", "")
+
+        commits_html = (
+            f'<span class="session-row-commits">{esc(str(commits))} commits</span>'
+            if commits else ''
+        )
+        rows.append(
+            f'<div class="session-row">'
+            f'<span class="session-row-time">{time_range if time_range else f"#{num}"}</span>'
+            f'<span class="session-row-duration">{dur}</span>'
+            f'<span class="session-row-summary">{summary}</span>'
+            f'{commits_html}'
+            f'</div>'
+        )
+
+    body = ''.join(rows)
+    meta = badge(f'{len(sessions)} sessions', 'dim')
+
+    return _collapsible_card("\U0001f4c5 Today's Sessions", body, meta_html=meta, collapsed=True)
 
 
 def render_awaiting_signoff(data):
+    """Awaiting Sign-off section — amber-bordered expandable details cards."""
     items = data.get("awaitingSignOff", [])
     if not items:
         return ""
@@ -489,500 +562,218 @@ def render_awaiting_signoff(data):
         count = item.get("manualItems", 0)
         groups = item.get("groups", [])
 
-        # Build grouped checklist
+        # Build grouped checklist with checkbox squares
         groups_html = ""
         if groups:
             group_parts = []
             for g in groups:
                 name = esc(g.get("name", ""))
                 gitems = g.get("items", [])
-                items_html = "\n".join(
-                    f'          <li class="signoff-item">{esc(i)}</li>' for i in gitems
+                items_html = '\n'.join(
+                    f'<li class="so-item">{esc(i)}</li>' for i in gitems
                 )
                 group_parts.append(
-                    f'      <div class="signoff-group">'
-                    f'<div class="signoff-group-name">{name}'
-                    f'<span class="signoff-group-count">{len(gitems)}</span></div>'
-                    f'<ul class="signoff-checklist">\n{items_html}\n</ul>'
+                    f'<div class="so-group">'
+                    f'<div class="so-group-name">{name}'
+                    f'<span class="so-group-count">{len(gitems)}</span></div>'
+                    f'<ul class="so-checklist">\n{items_html}\n</ul>'
                     f'</div>'
                 )
-            groups_html = "\n".join(group_parts)
+            groups_html = '\n'.join(group_parts)
 
-        summary_html = f'<div class="signoff-summary">{summary}</div>' if summary else ""
+        summary_html = f'<div class="so-summary">{summary}</div>' if summary else ''
 
         cards.append(
-            f'    <details class="signoff-card">\n'
-            f'      <summary class="signoff-card-header">\n'
-            f'        <span class="signoff-feature">{feature}</span>\n'
-            f'        <span class="signoff-count">{count} items</span>\n'
-            f'      </summary>\n'
-            f'      {summary_html}\n'
+            f'<details class="so-card">\n'
+            f'  <summary class="so-card-header">\n'
+            f'    <span class="so-feature">{feature}</span>\n'
+            f'    <span class="so-count">{count} items</span>\n'
+            f'  </summary>\n'
+            f'  {summary_html}\n'
             f'{groups_html}\n'
-            f'    </details>'
+            f'</details>'
         )
 
-    inner = "\n".join(cards)
+    inner = '\n'.join(cards)
     total_features = len(items)
     total_items = sum(i.get("manualItems", 0) for i in items)
 
-    return f"""  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">&#x270D;&#xFE0F;</span>
-      <span class="section-title">Awaiting Sign-off</span>
-      <span class="signoff-badge">{total_features} features &middot; {total_items} manual items</span>
-    </div>
-{inner}
-  </div>"""
-
-
-def render_checks(data):
-    checks = data.get("checks")
-    if not checks:
-        return ""
-    audit = checks.get("audit", {})
-    doe = checks.get("doeKit", {})
-    rows = []
-    # Audit row
-    p = audit.get("pass", 0)
-    w = audit.get("warn", 0)
-    f = audit.get("fail", 0)
-    if p or w or f:
-        badge = f'<span class="check-pass">PASS {p}</span>'
-        if w > 0:
-            badge += f' <span class="check-warn">WARN {w}</span>'
-        if f > 0:
-            badge += f' <span class="check-fail">FAIL {f}</span>'
-        rows.append(f'    <div class="check-row">{badge} <span class="check-label">Claim Audit</span></div>')
-        # Detail rows for warnings/failures
-        for detail in audit.get("details", []):
-            detail_text = esc(detail)
-            if w > 0 and f == 0:
-                rows.append(f'    <div class="check-row"><span class="check-warn">{detail_text}</span></div>')
-            elif f > 0:
-                rows.append(f'    <div class="check-row"><span class="check-fail">{detail_text}</span></div>')
-    # DOE Kit row
-    version = esc(doe.get("version", ""))
-    synced = doe.get("synced", True)
-    u_count = doe.get("userCount", 0)
-    c_count = doe.get("creatorCount", 0)
-    if version:
-        if synced:
-            rows.append(
-                f'    <div class="check-row"><span class="check-pass">SYNCED</span> '
-                f'<span class="check-label">DOE Kit</span> '
-                f'<span class="check-value">{version}</span></div>'
-            )
-        else:
-            uc_parts = []
-            if u_count: uc_parts.append(f"{u_count}u")
-            if c_count: uc_parts.append(f"{c_count}c")
-            uc_label = f' ({" ".join(uc_parts)})' if uc_parts else ""
-            rows.append(
-                f'    <div class="check-row"><span class="check-warn">{version}*</span> '
-                f'<span class="check-label">DOE Kit</span> '
-                f'<span class="check-value">not synced{esc(uc_label)}</span></div>'
-            )
-    if not rows:
-        return ""
-    inner = "\n".join(rows)
-    return f"""  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">&#x2705;</span>
-      <span class="section-title">Checks</span>
-    </div>
-    <div class="checks">
-{inner}
-    </div>
-  </div>"""
-
-
-def render_footer(data):
-    return """  <div class="footer">
-    <div class="footer-meta">Built with <strong>DOE</strong> &mdash; Directive, Orchestration, Execution</div>
-  </div>"""
+    return (
+        f'<div class="section">'
+        f'<div class="section-title" style="margin-bottom: 10px;">'
+        f'\u270d\ufe0f Awaiting Sign-off '
+        f'<span class="so-header-badge">'
+        f'{total_features} features &middot; {total_items} manual items</span>'
+        f'</div>\n'
+        f'{inner}\n'
+        f'</div>'
+    )
 
 
 def render_next_up(data):
+    """Next Up section with highlighted card."""
     text = data.get("nextUp", "")
     if not text:
         return ""
-    return f"""  <div class="next-up">
-    <div class="next-up-title">Next Up</div>
-    <div class="next-up-desc">{esc(text)}</div>
-  </div>"""
+    return (
+        f'<div class="section">'
+        f'<p class="section-subtitle" style="margin-bottom: 8px;">Next Up</p>'
+        + next_card('Next', esc(text))
+        + '</div>'
+    )
 
 
-BADGE_CSS = r"""
-  .badge { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 10px; letter-spacing: 0.05em; text-transform: uppercase; }
-  .badge-group { display: inline-flex; gap: 0.4rem; align-items: center; }
-  .badge-platform-win { color: #0078D4; background: rgba(0, 120, 212, 0.12); }
-  .badge-platform-mac { color: #555; background: rgba(85, 85, 85, 0.12); }
-  .badge-platform-linux { color: #E95420; background: rgba(233, 84, 32, 0.12); }
-  .badge-model-opus { color: #7C3AED; background: rgba(124, 58, 237, 0.12); }
-  .badge-model-sonnet { color: #D97706; background: rgba(217, 119, 6, 0.12); }
-  .badge-model-haiku { color: #0D9488; background: rgba(13, 148, 136, 0.12); }
-  .badge-tag-build { color: #16a34a; background: rgba(22, 163, 74, 0.12); }
-  .badge-tag-plan { color: #2563eb; background: rgba(37, 99, 235, 0.12); }
-  .badge-tag-debug { color: #dc2626; background: rgba(220, 38, 38, 0.12); }
-  .badge-tag-housekeeping { color: #6b7280; background: rgba(107, 114, 128, 0.12); }
-  .badge-tag-research { color: #7c3aed; background: rgba(124, 58, 237, 0.12); }"""
+# ── CSS ────────────────────────────────────────────────────────────────────────
 
-TOGGLE_CSS = r"""
-  .theme-toggle { position: fixed; top: 1rem; right: 1rem; display: flex; align-items: center; gap: 0.3rem; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 0.3rem 0.5rem; cursor: pointer; z-index: 100; user-select: none; }
-  .toggle-option { font-size: 0.9rem; }
-  .toggle-switch { width: 28px; height: 16px; background: var(--border); border-radius: 8px; position: relative; transition: background 0.2s; }
-  .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--text); transition: transform 0.2s; }
-  body.light .toggle-switch::after { transform: translateX(0); }
-  body:not(.light) .toggle-switch::after { transform: translateX(12px); }
-  .theme-auto-label { position: fixed; top: 3rem; right: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-dim); text-align: center; z-index: 100; cursor: pointer; }
-  .theme-auto-label:hover { color: var(--accent); }"""
+WRAP_CSS = r"""
+/* Wrap-specific CSS (base CSS provided by html_builder via page_scaffold) */
+  .container { max-width: 800px; }
 
-TOGGLE_JS = r"""<script>
-(function() {
-  var KEY = 'doe-theme';
-  var toggle = document.getElementById('themeToggle');
-  var label = document.getElementById('themeAutoLabel');
-  var mode = localStorage.getItem(KEY) || 'auto';
-
-  function getAutoTheme() {
-    var h = new Date().getHours();
-    return (h >= 6 && h < 18) ? 'light' : 'dark';
+  /* ── Today's Sessions ── */
+  .session-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+  }
+  .session-row:last-child { border-bottom: none; }
+  .session-row-time {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px; color: var(--text-dim); flex: 0 0 120px;
+  }
+  .session-row-duration {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px; font-weight: 600; flex: 0 0 60px;
+  }
+  .session-row-summary { flex: 1; }
+  .session-row-commits {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px; color: var(--text-dim); flex: 0 0 90px; text-align: right;
   }
 
-  function applyTheme(theme) {
-    document.body.classList.toggle('light', theme === 'light');
+  /* ── System Checks (blue bordered card) ── */
+  .checks-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem 1.2rem;
   }
-
-  function update() {
-    if (mode === 'auto') {
-      applyTheme(getAutoTheme());
-      label.textContent = 'Auto';
-    } else {
-      applyTheme(mode);
-      label.textContent = 'Reset to auto';
-    }
+  .checks-row {
+    display: flex; align-items: center; gap: 0.8rem;
+    padding: 0.3rem 0; font-size: 0.85rem;
   }
-
-  toggle.addEventListener('click', function() {
-    if (mode === 'auto') {
-      mode = getAutoTheme() === 'light' ? 'dark' : 'light';
-    } else {
-      mode = mode === 'light' ? 'dark' : 'light';
-    }
-    localStorage.setItem(KEY, mode);
-    update();
-  });
-
-  label.addEventListener('click', function(e) {
-    e.stopPropagation();
-    mode = 'auto';
-    localStorage.removeItem(KEY);
-    update();
-  });
-
-  if (mode === 'auto') {
-    applyTheme(getAutoTheme());
-  } else {
-    applyTheme(mode);
+  .checks-detail {
+    padding-left: 4.5rem; font-size: 0.8rem; color: var(--text-dim);
   }
-  label.textContent = mode === 'auto' ? 'Auto' : 'Reset to auto';
-})();
-</script>"""
-
-CSS = r"""  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  :root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --surface2: #1a1a26;
-    --border: #2a2a3a;
-    --text: #e0e0e8;
-    --text-dim: #8888a0;
-    --accent: #6c63ff;
-    --accent-glow: rgba(108, 99, 255, 0.15);
-    --green: #4ade80;
-    --green-dim: rgba(74, 222, 128, 0.1);
-    --amber: #fbbf24;
-    --amber-dim: rgba(251, 191, 36, 0.1);
-    --red: #f87171;
-    --cyan: #67e8f9;
+  .checks-badge {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.75rem; font-weight: 600;
+    padding: 0.15rem 0.5rem; border-radius: 4px;
+    flex-shrink: 0;
   }
+  .checks-badge-pass { color: var(--green); background: var(--green-dim); }
+  .checks-badge-warn { color: var(--amber); background: var(--amber-dim); }
+  .checks-badge-fail { color: var(--rose); background: var(--rose-dim); }
+  .checks-label { color: var(--text-dim); }
+  .checks-value { color: var(--text); }
 
-  body.light {
-    --bg: #f0efe9;
-    --surface: #f8f7f3;
-    --surface2: #eae9e3;
-    --border: #d5d4cc;
-    --text: #1a1a2e;
-    --text-dim: #6b6b80;
-    --accent: #5046e5;
-    --accent-glow: rgba(80, 70, 229, 0.08);
-    --green: #16a34a;
-    --green-dim: rgba(22, 163, 74, 0.08);
-    --amber: #d97706;
-    --amber-dim: rgba(217, 119, 6, 0.08);
-    --red: #dc2626;
-    --cyan: #0891b2;
+  /* ── Awaiting Sign-off (amber bordered expandable cards) ── */
+  .so-card {
+    background: var(--surface); border: 1px solid var(--amber);
+    border-radius: 8px; margin-bottom: 0.8rem;
   }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', -apple-system, sans-serif;
-    line-height: 1.6;
-    min-height: 100vh;
-    padding: 2rem;
+  .so-card:last-child { margin-bottom: 0; }
+  .so-card-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 1.2rem; cursor: pointer; list-style: none;
   }
-
-  .container { max-width: 800px; margin: 0 auto; }
-
-  .report-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    text-align: center;
-    margin: 0 0 1.5rem;
-    position: relative;
+  .so-card-header::-webkit-details-marker { display: none; }
+  .so-card-header::before {
+    content: '\25B6'; font-size: 0.6rem; color: var(--text-dim);
+    margin-right: 0.6rem; transition: transform 0.2s;
   }
-  .report-label::before, .report-label::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 30%;
-    height: 1px;
-    background: var(--border);
+  .so-card[open] > .so-card-header::before { transform: rotate(90deg); }
+  .so-feature {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem; font-weight: 600; color: var(--text); flex: 1;
   }
-  .report-label::before { left: 0; }
-  .report-label::after { right: 0; }
-
-  .title-card {
-    text-align: center;
-    padding: 3rem 2rem;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--surface) 0%, var(--bg) 100%);
-    position: relative;
-    overflow: hidden;
+  .so-count {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.7rem; color: var(--amber); background: var(--amber-dim);
+    padding: 0.15rem 0.5rem; border-radius: 4px; flex-shrink: 0;
   }
-
-  .session-stats-bar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--green);
-    padding: 1rem 0 1.2rem;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 5px;
+  .so-summary {
+    font-size: 0.8rem; color: var(--text-dim); line-height: 1.5;
+    padding: 0 1.2rem 0.8rem; border-bottom: 1px solid var(--border);
   }
-
-  .title-card::before {
-    content: '';
-    position: absolute;
-    top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    background: radial-gradient(ellipse at center, var(--accent-glow) 0%, transparent 70%);
-    pointer-events: none;
+  .so-group { padding: 0.6rem 1.2rem; }
+  .so-group:last-child { padding-bottom: 1rem; }
+  .so-group-name {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-dim); margin-bottom: 0.3rem;
+    display: flex; align-items: center; gap: 0.4rem;
   }
-
-  .project-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 2.8rem; font-weight: 700;
-    letter-spacing: 0.6em; text-transform: uppercase;
-    color: var(--text); margin-bottom: 0.5rem; position: relative;
+  .so-group-count {
+    font-size: 0.6rem; font-weight: 400; color: var(--amber);
+    background: var(--amber-dim); padding: 0.05rem 0.35rem; border-radius: 3px;
   }
-
-  .episode {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1rem; color: var(--accent);
-    letter-spacing: 0.15em; text-transform: uppercase; position: relative;
+  .so-checklist { list-style: none; padding: 0; margin: 0; }
+  .so-item {
+    font-size: 0.8rem; color: var(--text-dim); line-height: 1.6;
+    padding: 0.15rem 0 0.15rem 1.2rem; position: relative;
   }
+  .so-item::before {
+    content: '\25A1'; position: absolute; left: 0;
+    color: var(--amber); font-size: 0.7rem;
+  }
+  .so-header-badge {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.7rem; color: var(--amber); margin-left: 8px;
+  }
+"""
 
-  .summary { padding: 0; }
-  .summary p { color: var(--text); font-size: 0.95rem; line-height: 1.8; margin-bottom: 0.5rem; }
-  .summary p:last-child { margin-bottom: 0; }
-  .summary-lead { font-size: 0.95rem; color: var(--text); line-height: 1.8; padding-bottom: 1rem; }
-  .breakdown-group { margin-bottom: 0.6rem; margin-top: 0.6rem; }
-  .breakdown-group:last-child { margin-bottom: 0; }
-  .breakdown-heading { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.3rem; }
-  .breakdown-bullets { list-style: none; padding: 0; margin: 0; }
-  .breakdown-bullets li { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; padding-left: 1rem; position: relative; }
-  .breakdown-bullets li::before { content: '\2022'; position: absolute; left: 0; color: var(--border); }
 
-  .section { margin-bottom: 2rem; }
-  .section-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
-  .section-icon { font-size: 1.1rem; }
-  .section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); }
-
-  .vibe-inline { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.05em; }
-
-  .commit-list { list-style: none; }
-  .commit-item { display: flex; align-items: baseline; gap: 0.8rem; padding: 0.4rem 0; font-size: 0.85rem; border-bottom: 1px solid rgba(42, 42, 58, 0.5); }
-  .commit-item:last-child { border-bottom: none; }
-  .commit-hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.75rem; flex-shrink: 0; }
-  .commit-msg { color: var(--text); }
-  .commit-test { color: var(--text-dim); font-style: italic; }
-
-  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 0.5rem; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center; }
-  .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.8rem; font-weight: 700; color: var(--text); }
-  .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-top: 0.2rem; }
-  .stat-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--green); margin-top: 0.2rem; }
-
-  .timeline { position: relative; padding-left: 1.5rem; }
-  .timeline::before { content: ''; position: absolute; left: 0.35rem; top: 0.5rem; bottom: 0.5rem; width: 2px; background: var(--border); }
-  .timeline-item { position: relative; padding: 0.5rem 0 0.5rem 1rem; display: flex; align-items: baseline; gap: 1rem; }
-  .timeline-item::before { content: ''; position: absolute; left: -1.2rem; top: 0.85rem; width: 8px; height: 8px; border-radius: 50%; background: var(--border); border: 2px solid var(--bg); }
-  .timeline-item.start::before { background: var(--accent); }
-  .timeline-item.major::before { background: var(--green); }
-  .timeline-item.fix::before { background: var(--amber); }
-  .timeline-time { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); flex-shrink: 0; width: 3rem; }
-  .timeline-desc { font-size: 0.85rem; color: var(--text); flex: 1; }
-  .timeline-dur { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-dim); flex-shrink: 0; text-align: right; min-width: 5rem; }
-
-  .insight-item { display: flex; align-items: flex-start; gap: 0.8rem; padding: 0.6rem 0; border-bottom: 1px solid rgba(42, 42, 58, 0.5); }
-  .insight-item:last-child { border-bottom: none; }
-  .insight-content { flex: 1; }
-  .insight-title { font-size: 0.85rem; font-weight: 500; color: var(--text); line-height: 1.4; }
-  .insight-context { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; margin-top: 0.3rem; }
-  .insight-details { padding: 0.3rem 0 0 0; margin-top: 0.3rem; display: flex; flex-direction: column; gap: 0.4rem; }
-  .insight-detail { font-size: 0.8rem; color: var(--text); line-height: 1.5; display: flex; align-items: baseline; gap: 0.6rem; }
-  .insight-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.1rem 0.45rem; border-radius: 3px; flex-shrink: 0; }
-  .insight-label.problem { color: var(--amber); background: var(--amber-dim); }
-  .insight-label.solution { color: var(--green); background: var(--green-dim); }
-  .insight-label.discovery { color: var(--accent); background: var(--accent-glow); }
-  .insight-label.change { color: var(--cyan); background: rgba(103, 232, 249, 0.1); }
-  .learning-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 0.55rem; }
-  .decision-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); flex-shrink: 0; margin-top: 0.55rem; }
-
-  .checks { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; }
-  .check-row { display: flex; align-items: center; gap: 0.8rem; padding: 0.3rem 0; font-size: 0.85rem; }
-  .check-pass { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--green); background: var(--green-dim); padding: 0.15rem 0.5rem; border-radius: 4px; }
-  .check-warn { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--amber); background: var(--amber-dim); padding: 0.15rem 0.5rem; border-radius: 4px; }
-  .check-fail { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--red); background: rgba(248, 113, 113, 0.1); padding: 0.15rem 0.5rem; border-radius: 4px; }
-  .check-label { color: var(--text-dim); }
-  .check-value { color: var(--text); }
-
-  .footer { border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 2rem; text-align: center; }
-  .footer-checks { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 0.8rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--green); }
-  .footer-meta { font-size: 0.8rem; color: var(--text-dim); }
-  .footer-meta strong { color: var(--accent); font-weight: 600; }
-
-  .next-up { background: var(--accent-glow); border: 1px solid rgba(108, 99, 255, 0.3); border-radius: 8px; padding: 1rem 1.5rem; margin-top: 1.5rem; }
-  .next-up-title { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.4rem; }
-  .next-up-desc { font-size: 0.9rem; color: var(--text); line-height: 1.6; }
-
-  .timeline-total { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); text-align: right; padding-top: 0.5rem; margin-top: 0.5rem; border-top: 1px solid var(--border); }
-  .timeline-legend { display: flex; gap: 1.2rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--border); }
-  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
-  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .legend-dot.start { background: var(--accent); }
-  .legend-dot.major { background: var(--green); }
-  .legend-dot.fix { background: var(--amber); }
-  .legend-dot.normal { background: var(--border); }
-
-  .commit-group { margin-bottom: 1rem; }
-  .commit-group:last-child { margin-bottom: 0; }
-  .commit-group-header { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; color: var(--accent); margin-bottom: 0.4rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--border); }
-  .commit-group-count { font-weight: 400; color: var(--text-dim); }
-
-  .signoff-card { background: var(--surface); border: 1px solid var(--amber); border-radius: 8px; margin-bottom: 0.8rem; }
-  .signoff-card:last-child { margin-bottom: 0; }
-  .signoff-card-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; cursor: pointer; list-style: none; }
-  .signoff-card-header::-webkit-details-marker { display: none; }
-  .signoff-card-header::before { content: '\25B6'; font-size: 0.6rem; color: var(--text-dim); margin-right: 0.6rem; transition: transform 0.2s; }
-  .signoff-card[open] > .signoff-card-header::before { transform: rotate(90deg); }
-  .signoff-feature { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: var(--text); flex: 1; }
-  .signoff-count { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--amber); background: var(--amber-dim); padding: 0.15rem 0.5rem; border-radius: 4px; flex-shrink: 0; }
-  .signoff-summary { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; padding: 0 1.2rem 0.8rem; border-bottom: 1px solid var(--border); }
-  .signoff-group { padding: 0.6rem 1.2rem; }
-  .signoff-group:last-child { padding-bottom: 1rem; }
-  .signoff-group-name { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.4rem; }
-  .signoff-group-count { font-size: 0.6rem; font-weight: 400; color: var(--amber); background: var(--amber-dim); padding: 0.05rem 0.35rem; border-radius: 3px; }
-  .signoff-checklist { list-style: none; padding: 0; margin: 0; }
-  .signoff-item { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; padding: 0.15rem 0 0.15rem 1.2rem; position: relative; }
-  .signoff-item::before { content: '\25A1'; position: absolute; left: 0; color: var(--amber); font-size: 0.7rem; }
-  .signoff-badge { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--amber); }
-
-  .today-sessions { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 1.2rem; }
-  .today-session-item { display: flex; align-items: baseline; gap: 0.8rem; padding: 0.4rem 0; font-size: 0.85rem; border-bottom: 1px solid rgba(42, 42, 58, 0.5); }
-  .today-session-item:last-child { border-bottom: none; }
-  .today-session-num { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.75rem; flex-shrink: 0; width: 2.5rem; }
-  .today-session-dur { font-family: 'JetBrains Mono', monospace; color: var(--text-dim); font-size: 0.75rem; flex-shrink: 0; width: 4rem; }
-  .today-session-summary { color: var(--text); flex: 1; }"""
-
+# ── Assembly ───────────────────────────────────────────────────────────────────
 
 def build_html(data):
     """Build the complete HTML string from the data dict."""
-    theme = data.get("theme", "dark")
-    body_class = ' class="light"' if theme == "light" else ""
     episode = esc(data.get("episode", ""))
     title = esc(data.get("title", ""))
 
     sections = [
-        render_title_card(data),
-        render_session_stats_bar(data),
-        render_narrative(data),       # includes vibe at bottom
-        render_timeline(data),
-        render_stats(data),
+        render_header(data),
+        render_metrics(data),
+        render_summary(data),
+        render_timeline_section(data),
         render_commits(data),
         render_decisions_learnings(data),
         render_checks(data),
-        render_awaiting_signoff(data),
         render_today_sessions(data),
+        render_awaiting_signoff(data),
         render_next_up(data),
-        render_footer(data),
+        '<div class="page-footer">Built with <strong>DOE</strong> &mdash; Directive, Orchestration, Execution</div>',
     ]
-    body = "\n".join(s for s in sections if s)
+    body = '<div class="container">\n' + "\n".join(s for s in sections if s) + '\n</div>'
 
-    return f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Session {episode} — {title}</title>
-<style>
-{CSS}
-{BADGE_CSS}
-{TOGGLE_CSS}
-</style>
-</head>
-<body{body_class}>
-<div class="theme-toggle" id="themeToggle">
-  <span class="toggle-option">&#x2600;&#xFE0F;</span>
-  <span class="toggle-switch"></span>
-  <span class="toggle-option">&#x1F319;</span>
-</div>
-<div class="theme-auto-label" id="themeAutoLabel">Auto</div>
-<div class="container">
-{body}
-</div>
-{TOGGLE_JS}
-</body>
-</html>
-"""
+    return page_scaffold(
+        f'Session {episode} \u2014 {title}',
+        body,
+        css=WRAP_CSS,
+        js=collapsible_js(),
+        theme_toggle=True,
+    )
 
 
 def main():
     parser = argparse.ArgumentParser(description="Generate session wrap-up HTML")
     parser.add_argument("--json", dest="json_str", help="JSON data as a string argument")
-    parser.add_argument("--theme", choices=["light", "dark"], default="dark", help="Color theme")
-    parser.add_argument("--output", default=".tmp/wrap.html", help="Output HTML file path (default: .tmp/wrap.html)")
+    parser.add_argument("--theme", choices=["light", "dark"], default="dark",
+                        help="Color theme (legacy, auto-detected now)")
+    parser.add_argument("--output", default=".tmp/wrap.html",
+                        help="Output HTML file path (default: .tmp/wrap.html)")
     args = parser.parse_args()
 
     if args.json_str:
         data = json.loads(args.json_str)
     else:
         data = json.load(sys.stdin)
-
-    data["theme"] = args.theme
 
     html_out = build_html(data)
 

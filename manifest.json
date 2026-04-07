@@ -39,7 +39,8 @@
         "run_test_suite.py",
         "scan_docs.py",
         "slack_notify.py",
-        "verify_tests.py"
+        "verify_tests.py",
+        "check_pending_prs.py"
       ],
       "hooks": ["pre-commit", "commit-msg", "pre-push"],
       "commands": [

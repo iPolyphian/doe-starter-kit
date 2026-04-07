@@ -7,6 +7,28 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.54.0 (2026-04-07)
+
+### Added
+- **FRAMEWORKS registry** -- unified source of truth for 40 frameworks (6 Tier 1 with full templates, 34 Tier 2 with `_generic` fallback). Replaces 4 separate data structures (DETECT_PATTERNS, FRAMEWORK_OPTIONS, FRAMEWORK_PROJECT_TYPE, get_init_command dict). Computed shims preserve backwards compatibility.
+- **11 project types** (was 5) -- desktop, browser extension, library/package, monorepo, hardware/IoT, plus "Other" with free-text on every selection.
+- **"Other" escape hatch** -- every type and framework list ends with "Other (I'll describe it)" with free-text prompt. Custom text embedded verbatim in CLAUDE.md.
+- **templates/_generic/** -- fallback template directory for Tier 2 frameworks. Contains scaffold.json, .gitignore, .env.example.
+- **Platform targets** -- new `card_platform_targets()` question for desktop/mobile projects. Multi-select (macOS, Windows, Linux, iOS, Android, Web). Injected into CLAUDE.md.
+- **execution/check_pending_prs.py** -- pre-commit hook validates ## Pending PRs in todo.md against `gh pr list`. Blocks stale entries (merged PRs), warns about missing entries (open PRs). Skips gracefully offline.
+- **global-scripts/html_builder.py** -- shared HTML generation library (25+ components). Colour tokens, card components, status badges, progress bars, metric grids, data tables. Single source for DOE visual language.
+
+### Changed
+- **doe_init wizard flow** -- framework selection decoupled from project type ("Show all" option reveals full categorised list). Detection override opens full list without re-asking project type. Types with no dedicated frameworks skip straight to free-text.
+- **Card functions return tuples** -- `card_project_type()` and `card_framework()` return `(key, custom_text)` instead of string. `run_wizard()` unpacks both.
+- **write_doe_version()** -- switched from positional format to key=value format for forwards compatibility with future `doe update`.
+- **get_active_layers()** -- browser_extension projects now get public_facing layer.
+- **global-scripts/wrap_html.py** -- refactored to use html_builder (eliminated duplicated CSS).
+- **global-scripts/eod_html.py** -- refactored to use html_builder (eliminated duplicated CSS).
+- **manifest.json** -- added check_pending_prs.py to universal execution list.
+- **.githooks/pre-commit** -- added Pending PRs sync validation section.
+- **Test suite** -- 356 checks (was 142). 6 new tests: _other framework, _other project type, platform targets, new project types, registry regression guard, registry consistency.
+
 ## v1.53.1 (2026-04-07)
 
 ### Fixed

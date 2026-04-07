@@ -1,0 +1,12 @@
+{
+  "framework_name": "Generic",
+  "directory_docs": {
+    "src/": "Source code"
+  },
+  "package_manager": null,
+  "build_command": null,
+  "dev_command": null,
+  "test_commands": [],
+  "init_command": null,
+  "detect": {}
+}

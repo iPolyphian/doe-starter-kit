@@ -82,11 +82,284 @@ def ask_yn(prompt, default="n"):
     return raw.lower() in ("y", "")  if default == "y" else raw.lower() == "y"
 
 
+# ── Unified Framework Registry ───────────────────────────────────────────
+#
+# Single source of truth for all frameworks. Replaces the former separate
+# DETECT_PATTERNS, FRAMEWORK_OPTIONS, FRAMEWORK_PROJECT_TYPE, and
+# get_init_command() dicts. Tier 1 = full template dir. Tier 2 = _generic.
+#
+# Keys: name (display), desc (one-liner), types (project types this applies
+# to), tier (1=full template, 2=generic), template (template dir name),
+# detect (optional, marker files for auto-detection), init_cmd (optional,
+# framework init command), recommended_for (optional, types where this is
+# the default recommendation).
+
+FRAMEWORKS = {
+    # ── Tier 1: Full template support (existing 6) ──────────────────────
+    "nextjs": {
+        "name": "Next.js", "desc": "Server rendering, Vercel-native",
+        "types": ["web", "api"], "tier": 1, "template": "nextjs",
+        "detect": {"files": ["package.json"], "package_contains": "next"},
+        "init_cmd": "npx create-next-app .",
+        "recommended_for": ["web"],
+    },
+    "vite": {
+        "name": "Vite/React", "desc": "Lightweight SPA, fast dev server",
+        "types": ["web"], "tier": 1, "template": "vite",
+        "detect": {"files": ["package.json"], "package_contains": "vite"},
+        "init_cmd": "npm create vite@latest .",
+    },
+    "static": {
+        "name": "Static HTML", "desc": "No framework, just files",
+        "types": ["web", "static_site"], "tier": 1, "template": "static",
+        "detect": {"files": ["index.html"]},
+        "recommended_for": ["static_site"],
+    },
+    "python": {
+        "name": "Python", "desc": "FastAPI/Flask, simple and fast",
+        "types": ["api", "cli"], "tier": 1, "template": "python",
+        "detect": {"files": ["pyproject.toml", "requirements.txt"]},
+        "init_cmd": "pip install fastapi uvicorn",
+        "recommended_for": ["api", "cli"],
+    },
+    "go": {
+        "name": "Go", "desc": "Compiled, concurrent, small binary",
+        "types": ["api", "cli"], "tier": 1, "template": "go",
+        "detect": {"files": ["go.mod"]},
+        "init_cmd": "go mod init",
+    },
+    "flutter": {
+        "name": "Flutter", "desc": "Cross-platform, single codebase",
+        "types": ["mobile"], "tier": 1, "template": "flutter",
+        "detect": {"files": ["pubspec.yaml"]},
+        "init_cmd": "flutter create .",
+        "recommended_for": ["mobile"],
+    },
+    # ── Tier 2: Web ─────────────────────────────────────────────────────
+    "sveltekit": {
+        "name": "SvelteKit", "desc": "Compiled, fast, Svelte-based",
+        "types": ["web"], "tier": 2, "template": "_generic",
+        "init_cmd": "npx sv create .",
+    },
+    "astro": {
+        "name": "Astro", "desc": "Content-focused, island architecture",
+        "types": ["web", "static_site"], "tier": 2, "template": "_generic",
+        "init_cmd": "npm create astro@latest .",
+    },
+    "remix": {
+        "name": "Remix", "desc": "Full-stack React, nested routes",
+        "types": ["web"], "tier": 2, "template": "_generic",
+        "init_cmd": "npx create-remix@latest .",
+    },
+    "nuxt": {
+        "name": "Nuxt", "desc": "Vue framework, server rendering",
+        "types": ["web"], "tier": 2, "template": "_generic",
+        "init_cmd": "npx nuxi init .",
+    },
+    "angular": {
+        "name": "Angular", "desc": "Enterprise SPA, TypeScript-first",
+        "types": ["web"], "tier": 2, "template": "_generic",
+        "init_cmd": "npx @angular/cli new . --skip-git",
+    },
+    "django": {
+        "name": "Django", "desc": "Batteries-included Python web",
+        "types": ["web", "api"], "tier": 2, "template": "_generic",
+        "init_cmd": "pip install django && django-admin startproject app .",
+    },
+    "rails": {
+        "name": "Ruby on Rails", "desc": "Convention over configuration",
+        "types": ["web", "api"], "tier": 2, "template": "_generic",
+        "init_cmd": "rails new . --skip-git",
+    },
+    "laravel": {
+        "name": "Laravel", "desc": "PHP framework, elegant syntax",
+        "types": ["web", "api"], "tier": 2, "template": "_generic",
+        "init_cmd": "composer create-project laravel/laravel .",
+    },
+    # ── Tier 2: API / backend ───────────────────────────────────────────
+    "node_express": {
+        "name": "Node/Express", "desc": "Minimal Node.js web framework",
+        "types": ["api"], "tier": 2, "template": "_generic",
+        "init_cmd": "npm init -y && npm install express",
+    },
+    "node_hono": {
+        "name": "Node/Hono", "desc": "Ultrafast, edge-ready, Web Standard",
+        "types": ["api"], "tier": 2, "template": "_generic",
+        "init_cmd": "npm create hono@latest .",
+    },
+    "rust_axum": {
+        "name": "Rust/Axum", "desc": "Async Rust, Tokio-based",
+        "types": ["api"], "tier": 2, "template": "_generic",
+        "init_cmd": "cargo init",
+    },
+    "ruby_rails": {
+        "name": "Rails API", "desc": "Rails in API-only mode",
+        "types": ["api"], "tier": 2, "template": "_generic",
+        "init_cmd": "rails new . --api --skip-git",
+    },
+    "java_spring": {
+        "name": "Java/Spring Boot", "desc": "Enterprise Java, opinionated",
+        "types": ["api"], "tier": 2, "template": "_generic",
+    },
+    "dotnet_api": {
+        "name": "C#/.NET", "desc": "Cross-platform, high performance",
+        "types": ["api"], "tier": 2, "template": "_generic",
+        "init_cmd": "dotnet new webapi",
+    },
+    "elixir_phoenix": {
+        "name": "Elixir/Phoenix", "desc": "Functional, real-time, BEAM VM",
+        "types": ["api"], "tier": 2, "template": "_generic",
+        "init_cmd": "mix phx.new . --no-ecto",
+    },
+    # ── Tier 2: Mobile ──────────────────────────────────────────────────
+    "swiftui_ios": {
+        "name": "SwiftUI (iOS)", "desc": "Native iOS, declarative UI",
+        "types": ["mobile"], "tier": 2, "template": "_generic",
+    },
+    "kotlin_android": {
+        "name": "Kotlin (Android)", "desc": "Native Android, Jetpack Compose",
+        "types": ["mobile"], "tier": 2, "template": "_generic",
+    },
+    "react_native": {
+        "name": "React Native/Expo", "desc": "Cross-platform, React-based",
+        "types": ["mobile"], "tier": 2, "template": "_generic",
+        "init_cmd": "npx create-expo-app .",
+    },
+    "dotnet_maui": {
+        "name": ".NET MAUI", "desc": "Cross-platform, C#, Xamarin successor",
+        "types": ["mobile"], "tier": 2, "template": "_generic",
+        "init_cmd": "dotnet new maui",
+    },
+    # ── Tier 2: CLI ─────────────────────────────────────────────────────
+    "rust_cli": {
+        "name": "Rust", "desc": "Fast CLI, single binary",
+        "types": ["cli"], "tier": 2, "template": "_generic",
+        "init_cmd": "cargo init",
+    },
+    "node_ts_cli": {
+        "name": "Node/TypeScript", "desc": "TypeScript CLI, npm distribution",
+        "types": ["cli"], "tier": 2, "template": "_generic",
+        "init_cmd": "npm init -y && npm install typescript tsx",
+    },
+    "bash_cli": {
+        "name": "Bash/Shell", "desc": "Shell scripts, no compilation",
+        "types": ["cli"], "tier": 2, "template": "_generic",
+    },
+    "c_cpp_cli": {
+        "name": "C/C++", "desc": "Systems programming, compiled",
+        "types": ["cli"], "tier": 2, "template": "_generic",
+    },
+    # ── Tier 2: Desktop ─────────────────────────────────────────────────
+    "electron": {
+        "name": "Electron", "desc": "Cross-platform desktop, web tech",
+        "types": ["desktop"], "tier": 2, "template": "_generic",
+        "init_cmd": "npm init -y && npm install electron",
+    },
+    "tauri": {
+        "name": "Tauri", "desc": "Lightweight desktop, Rust + web frontend",
+        "types": ["desktop"], "tier": 2, "template": "_generic",
+        "init_cmd": "npm create tauri-app@latest .",
+    },
+    "swiftui_desktop": {
+        "name": "SwiftUI (macOS)", "desc": "Native macOS, declarative UI",
+        "types": ["desktop"], "tier": 2, "template": "_generic",
+    },
+    "qt": {
+        "name": "Qt", "desc": "Cross-platform C++/Python, mature toolkit",
+        "types": ["desktop"], "tier": 2, "template": "_generic",
+    },
+    "dotnet_wpf": {
+        "name": ".NET WPF/WinForms", "desc": "Windows-native desktop",
+        "types": ["desktop"], "tier": 2, "template": "_generic",
+    },
+    # ── Tier 2: Browser extension ───────────────────────────────────────
+    "chrome_ext": {
+        "name": "Chrome Extension", "desc": "Manifest V3, Chrome Web Store",
+        "types": ["browser_extension"], "tier": 2, "template": "_generic",
+    },
+    "firefox_ext": {
+        "name": "Firefox WebExtension", "desc": "Cross-browser extension API",
+        "types": ["browser_extension"], "tier": 2, "template": "_generic",
+    },
+    # ── Tier 2: Package / library ───────────────────────────────────────
+    "npm_package": {
+        "name": "npm package", "desc": "JavaScript/TypeScript library",
+        "types": ["package"], "tier": 2, "template": "_generic",
+        "init_cmd": "npm init -y",
+    },
+    "pypi_package": {
+        "name": "PyPI package", "desc": "Python library, pip installable",
+        "types": ["package"], "tier": 2, "template": "_generic",
+    },
+    "cargo_crate": {
+        "name": "Cargo crate", "desc": "Rust library, crates.io",
+        "types": ["package"], "tier": 2, "template": "_generic",
+        "init_cmd": "cargo init --lib",
+    },
+    # ── Special: "Other" escape hatch ───────────────────────────────────
+    "_other": {
+        "name": "Other", "desc": "I'll describe my stack",
+        "types": ["*"], "tier": 2, "template": "_generic",
+    },
+}
+
+
+# ── Computed shims (backwards compatibility) ─────────────────────────────
+# These reproduce the exact shapes of the former standalone dicts so that
+# existing code (detect_framework, card_framework, tests) keeps working.
+
+DETECT_PATTERNS = {}
+for _k, _v in FRAMEWORKS.items():
+    _det = _v.get("detect")
+    if _det and _det.get("files"):
+        _entry = {"files": _det["files"], "name": _v["name"]}
+        if "package_contains" in _det:
+            _entry["package_contains"] = _det["package_contains"]
+        DETECT_PATTERNS[_k] = _entry
+
+FRAMEWORK_OPTIONS = {}
+for _k, _v in FRAMEWORKS.items():
+    if _v["tier"] > 1 or _k == "_other":
+        continue
+    for _t in _v["types"]:
+        _star = " *" if _t in _v.get("recommended_for", []) else ""
+        _entry = (_k, f"{_v['name']}{_star}", _v["desc"])
+        FRAMEWORK_OPTIONS.setdefault(_t, []).append(_entry)
+
+PROJECT_TYPES = [
+    ("web", "Web app"),
+    ("api", "API / backend"),
+    ("mobile", "Mobile app"),
+    ("cli", "CLI tool / library"),
+    ("static_site", "Static site / docs"),
+    ("desktop", "Desktop app"),
+    ("browser_extension", "Browser extension"),
+    ("package", "Library / package"),
+    ("monorepo", "Monorepo / multi-project"),
+    ("hardware_iot", "Hardware / IoT / embedded"),
+    ("other", "Other (I'll describe it)"),
+]
+
+# Types with zero dedicated frameworks -- skip card_framework, prompt free-text
+_FREE_TEXT_TYPES = {"monorepo", "hardware_iot"}
+
+FRAMEWORK_PROJECT_TYPE = {}
+for _k, _v in FRAMEWORKS.items():
+    if "*" not in _v["types"]:
+        FRAMEWORK_PROJECT_TYPE[_k] = _v["types"][0]
+
+
 # ── Framework detection ──────────────────────────────────────────────────
 
 
 def load_detect_patterns(kit_dir):
-    """Load detection patterns from scaffold.json files in each template directory."""
+    """Load detection patterns from scaffold.json files in each template directory.
+
+    Returns a dict matching the shape of DETECT_PATTERNS, or empty dict if
+    no scaffold.json files are found. This is a Tier 1 override -- scaffold.json
+    is the source of truth when present; the registry-computed DETECT_PATTERNS
+    is the fallback.
+    """
     patterns = {}
     templates_dir = kit_dir / "templates" if kit_dir else None
     if templates_dir and templates_dir.is_dir():
@@ -105,62 +378,18 @@ def load_detect_patterns(kit_dir):
     return patterns
 
 
-# Fallback if scaffold.json files aren't available (e.g. running standalone)
-_FALLBACK_DETECT_PATTERNS = {
-    "nextjs": {"files": ["package.json"], "package_contains": "next", "name": "Next.js"},
-    "vite": {"files": ["package.json"], "package_contains": "vite", "name": "Vite/React"},
-    "python": {"files": ["pyproject.toml", "requirements.txt"], "name": "Python"},
-    "go": {"files": ["go.mod"], "name": "Go"},
-    "flutter": {"files": ["pubspec.yaml"], "name": "Flutter"},
-    "static": {"files": ["index.html"], "name": "Static HTML"},
-}
-
-# Project type → framework options (ordered, first is recommended)
-FRAMEWORK_OPTIONS = {
-    "web": [
-        ("nextjs", "Next.js *", "Server rendering, Vercel-native"),
-        ("vite", "Vite/React", "Lightweight SPA, fast dev server"),
-        ("static", "Static HTML", "No framework, just files"),
-    ],
-    "api": [
-        ("python", "Python *", "FastAPI/Flask, simple and fast"),
-        ("go", "Go", "Compiled, concurrent, small binary"),
-    ],
-    "mobile": [
-        ("flutter", "Flutter *", "Cross-platform, single codebase"),
-    ],
-    "cli": [
-        ("python", "Python *", "Scripting, quick iteration"),
-        ("go", "Go", "Compiled binary, no runtime"),
-    ],
-    "static_site": [
-        ("static", "Static HTML *", "No framework, just files"),
-    ],
-}
-
-PROJECT_TYPES = [
-    ("web", "Web app"),
-    ("api", "API / backend"),
-    ("mobile", "Mobile app"),
-    ("cli", "CLI tool / library"),
-    ("static_site", "Static site / docs"),
-]
+# Alias: fallback when scaffold.json files aren't available
+_FALLBACK_DETECT_PATTERNS = DETECT_PATTERNS
 
 
-# Framework → default project type (used when framework is auto-detected)
-FRAMEWORK_PROJECT_TYPE = {
-    "nextjs": "web",
-    "vite": "web",
-    "python": "api",
-    "go": "api",
-    "flutter": "mobile",
-    "static": "web",
-}
+def detect_framework(project_dir, detect_patterns=None):
+    """Detect framework from existing project files. Returns (key, name) or (None, None).
 
-
-def detect_framework(project_dir, detect_patterns):
-    """Detect framework from existing project files. Returns (key, name) or (None, None)."""
-    for key, pattern in detect_patterns.items():
+    If detect_patterns is provided, uses those; otherwise falls back to the
+    module-level DETECT_PATTERNS (computed from the FRAMEWORKS registry).
+    """
+    patterns = detect_patterns or DETECT_PATTERNS
+    for key, pattern in patterns.items():
         for f in pattern["files"]:
             fpath = project_dir / f
             if fpath.exists():
@@ -176,7 +405,7 @@ def detect_framework(project_dir, detect_patterns):
     return None, None
 
 
-def detect_project_state(project_dir, detect_patterns):
+def detect_project_state(project_dir, detect_patterns=None):
     """Detect what exists in the project directory."""
     has_git = (project_dir / ".git").exists()
     is_empty = not any(project_dir.iterdir()) if project_dir.exists() else True
@@ -225,7 +454,7 @@ def card_welcome(kit_version, project_dir, state):
 
 
 def card_project_type():
-    """Card 1: What are you building? Returns project type key."""
+    """Card 1: What are you building? Returns (key, custom_text) tuple."""
     rows = [top()]
     rows.append(line("What are you building?"))
     rows.append(sep())
@@ -237,29 +466,111 @@ def card_project_type():
     valid = [str(i) for i in range(1, len(PROJECT_TYPES) + 1)]
     choice = ask("> ", valid=valid)
     idx = int(choice) - 1
-    return PROJECT_TYPES[idx][0]
+    key = PROJECT_TYPES[idx][0]
+
+    if key == "other":
+        custom = ask("  Describe your project type: ")
+        return key, custom
+    return key, ""
 
 
-def card_framework(project_type):
-    """Card 2: Framework selection. Returns framework key."""
-    options = FRAMEWORK_OPTIONS.get(project_type, FRAMEWORK_OPTIONS["web"])
+def _build_framework_options(project_type, show_all=False):
+    """Build the framework options list from the registry.
+
+    Returns list of (key, display_label, description) tuples.
+    When show_all=True, returns ALL frameworks grouped by type.
+    When False, returns frameworks matching project_type + _other.
+    """
+    if show_all:
+        # Group by primary type, Tier 1 first within each group
+        type_order = [k for k, _ in PROJECT_TYPES if k not in ("other",)]
+        groups = {}
+        for fk, fv in FRAMEWORKS.items():
+            if fk == "_other":
+                continue
+            primary = fv["types"][0]
+            groups.setdefault(primary, []).append((fk, fv))
+        result = []
+        for t in type_order:
+            items = groups.get(t, [])
+            if not items:
+                continue
+            # Sort: Tier 1 first, then Tier 2, alphabetical within tier
+            items.sort(key=lambda x: (x[1]["tier"], x[1]["name"]))
+            type_label = dict(PROJECT_TYPES).get(t, t)
+            result.append(("__header__", type_label, ""))
+            for fk, fv in items:
+                star = " *" if project_type in fv.get("recommended_for", []) else ""
+                result.append((fk, f"{fv['name']}{star}", fv["desc"]))
+        result.append(("_other", "Other", "I'll describe my stack"))
+        return result
+
+    # Type-filtered view
+    result = []
+    for fk, fv in FRAMEWORKS.items():
+        if fk == "_other":
+            continue
+        if project_type not in fv["types"] and "*" not in fv["types"]:
+            continue
+        star = " *" if project_type in fv.get("recommended_for", []) else ""
+        result.append((fk, f"{fv['name']}{star}", fv["desc"]))
+    # Sort: Tier 1 recommended first, then Tier 1 others, then Tier 2
+    def sort_key(item):
+        fv = FRAMEWORKS.get(item[0], {})
+        is_rec = 0 if project_type in fv.get("recommended_for", []) else 1
+        return (fv.get("tier", 2), is_rec, fv.get("name", ""))
+    result.sort(key=sort_key)
+    result.append(("_other", "Other", "I'll describe my stack"))
+    return result
+
+
+def card_framework(project_type, show_all=False):
+    """Card 2: Framework selection. Returns (key, custom_text) tuple.
+
+    show_all=True shows all frameworks grouped by type (used for detection
+    override). Default shows type-filtered list with [0] Show all option.
+    """
+    options = _build_framework_options(project_type, show_all=show_all)
 
     rows = [top()]
     rows.append(header("FRAMEWORK", "recommended: *"))
     rows.append(sep())
-    for i, (key, label, desc) in enumerate(options, 1):
-        # Truncate if needed to fit W
-        text = f"[{i}] {label:15s} {desc}"
-        if len(text) > W - 2:
-            text = text[:W - 5] + "..."
+    num = 1
+    num_map = {}  # number -> (key, name, desc)
+    for key, label, desc in options:
+        if key == "__header__":
+            rows.append(line(f"  -- {label} --"))
+            continue
+        if show_all:
+            text = f"[{num}] {label}"
+        else:
+            text = f"[{num}] {label:15s} {desc}"
+        if len(text) > MAX_CONTENT:
+            text = text[:MAX_CONTENT - 3] + "..."
         rows.append(line(text))
+        num_map[str(num)] = (key, label, desc)
+        num += 1
+
+    if not show_all:
+        rows.append(line(""))
+        rows.append(line("[0] Show all frameworks"))
+
     rows.append(bot())
     print_card(rows)
 
-    valid = [str(i) for i in range(1, len(options) + 1)]
-    choice = ask("> ", valid=valid, default="1")
-    idx = int(choice) - 1
-    return options[idx][0]
+    valid_nums = list(num_map.keys())
+    if not show_all:
+        valid_nums.append("0")
+    choice = ask("> ", valid=valid_nums, default="1")
+
+    if choice == "0":
+        return card_framework(project_type, show_all=True)
+
+    key = num_map[choice][0]
+    if key == "_other":
+        custom = ask("  Describe your framework/stack: ")
+        return "_other", custom
+    return key, ""
 
 
 def card_framework_confirm(framework_name):
@@ -276,6 +587,44 @@ def card_framework_confirm(framework_name):
 
     choice = ask("Accept? [Y/n] ", valid=["y", "n", "Y", "N", ""], default="y")
     return choice.lower() != "n"
+
+
+def card_platform_targets():
+    """Card: Platform targets for desktop/mobile. Returns list of platform strings."""
+    platforms = [
+        ("macos", "macOS"),
+        ("windows", "Windows"),
+        ("linux", "Linux"),
+        ("ios", "iOS"),
+        ("android", "Android"),
+        ("web", "Web"),
+    ]
+    rows = [top()]
+    rows.append(line("PLATFORM TARGETS"))
+    rows.append(sep())
+    rows.append(line("Which platforms are you targeting?"))
+    rows.append(line("(comma-separated, e.g. 1,3,5)"))
+    rows.append(line(""))
+    for i, (key, label) in enumerate(platforms, 1):
+        rows.append(line(f"[{i}] {label}"))
+    rows.append(line(f"[{len(platforms) + 1}] All"))
+    rows.append(bot())
+    print_card(rows)
+
+    raw = ask("> ", default=str(len(platforms) + 1))
+    nums = [n.strip() for n in raw.split(",")]
+    all_num = str(len(platforms) + 1)
+    if all_num in nums:
+        return [k for k, _ in platforms]
+    result = []
+    for n in nums:
+        try:
+            idx = int(n) - 1
+            if 0 <= idx < len(platforms):
+                result.append(platforms[idx][0])
+        except ValueError:
+            continue
+    return result if result else [platforms[0][0]]  # default to first if empty
 
 
 def card_setup():
@@ -342,29 +691,43 @@ def card_data():
     return True, has_personal_data
 
 
+def _resolve_framework_name(config):
+    """Get display name for the framework from config."""
+    fw = config["framework"]
+    if fw == "_other":
+        return config.get("framework_custom") or "Custom"
+    return FRAMEWORKS.get(fw, {}).get("name", fw)
+
+
+def _resolve_type_name(config):
+    """Get display name for the project type from config."""
+    pt = config["project_type"]
+    if pt == "other":
+        return config.get("project_type_custom") or "Custom"
+    return dict(PROJECT_TYPES).get(pt, pt).replace("_", " ")
+
+
 def card_confirmation(config):
     """Card 5: Confirmation before writing. Returns True to proceed."""
-    framework_name = _FALLBACK_DETECT_PATTERNS.get(config["framework"], {}).get("name", config["framework"])
+    framework_name = _resolve_framework_name(config)
     collab = config["collaboration_mode"]
     parts = [framework_name]
-    if config["project_type"]:
-        parts.append(config["project_type"].replace("_", " "))
+    type_name = _resolve_type_name(config)
+    if type_name:
+        parts.append(type_name)
     parts.append(collab)
     if config["has_database"]:
         parts.append("database")
+    targets = config.get("platform_targets", [])
+    if targets:
+        parts.append(", ".join(targets))
 
     summary = ", ".join(parts)
     if len(summary) > W - 16:
         summary = summary[:W - 19] + "..."
 
     # Compute file counts based on active layers
-    layers = ["universal"]
-    if config["project_type"] in ("web", "static_site"):
-        layers.append("public_facing")
-    if config["has_database"]:
-        layers.append("data_handling")
-    if config["has_personal_data"]:
-        layers.append("regulated")
+    layers = get_active_layers(config)
 
     rows = [top()]
     rows.append(header(f"DOE INIT -- {summary}"))
@@ -406,7 +769,7 @@ def card_confirmation(config):
 
 def card_done(kit_version, project_dir, config, file_count):
     """Card 7: Done."""
-    framework_name = _FALLBACK_DETECT_PATTERNS.get(config["framework"], {}).get("name", config["framework"])
+    framework_name = _resolve_framework_name(config)
 
     rows = [top()]
     rows.append(header(f"DONE -- DOE v{kit_version}"))
@@ -438,32 +801,33 @@ def card_done(kit_version, project_dir, config, file_count):
 
 
 def get_init_command(framework):
-    """Get the recommended framework init command."""
-    commands = {
-        "nextjs": "npx create-next-app .",
-        "vite": "npm create vite@latest .",
-        "python": "pip install fastapi uvicorn",
-        "go": "go mod init",
-        "flutter": "flutter create .",
-    }
-    return commands.get(framework)
+    """Get the recommended framework init command from the registry."""
+    return FRAMEWORKS.get(framework, {}).get("init_cmd")
 
 
 # ── Version stamping ─────────────────────────────────────────────────────
 
 def write_doe_version(project_dir, config, kit_version):
-    """Write .doe-version file with config choices."""
+    """Write .doe-version file with config choices in key=value format."""
     lines = [
-        kit_version,
-        config["framework"],
-        config["collaboration_mode"],
+        f"version={kit_version}",
+        f"project_type={config['project_type']}",
+        f"framework={config['framework']}",
+        f"collaboration={config['collaboration_mode']}",
     ]
+    if config.get("project_type_custom"):
+        lines.append(f"project_type_custom={config['project_type_custom']}")
+    if config.get("framework_custom"):
+        lines.append(f"framework_custom={config['framework_custom']}")
 
-    # Active layers
-    if config["has_database"]:
-        lines.append("data_handling")
-    if config["has_personal_data"]:
-        lines.append("regulated")
+    active = get_active_layers(config)
+    non_universal = [l for l in active if l != "universal"]
+    if non_universal:
+        lines.append(f"layers={','.join(non_universal)}")
+
+    targets = config.get("platform_targets", [])
+    if targets:
+        lines.append(f"platform_targets={','.join(targets)}")
 
     version_file = project_dir / ".doe-version"
     version_file.write_text("\n".join(lines) + "\n")
@@ -474,7 +838,7 @@ def write_doe_version(project_dir, config, kit_version):
 def get_active_layers(config):
     """Determine which capability layers are active based on config."""
     layers = ["universal"]
-    if config.get("project_type") in ("web", "static_site"):
+    if config.get("project_type") in ("web", "static_site", "browser_extension"):
         layers.append("public_facing")
     if config.get("has_database"):
         layers.append("data_handling")
@@ -539,10 +903,22 @@ def generate_claude_md(config, kit_dir):
     if commands_section.exists():
         parts.append(commands_section.read_text())
 
-    # 3. Framework section
+    # 3. Framework section (Tier 1 from template, Tier 2 generated dynamically)
     fw_section = templates_dir / framework / "claude_section.md"
     if fw_section.exists():
         parts.append(fw_section.read_text())
+    elif framework == "_other":
+        custom = config.get("framework_custom", "Custom stack")
+        parts.append(f"## Framework\n\n{custom}\n\nCustom stack -- refer to project README for build commands and directory structure.\n")
+    else:
+        fw_data = FRAMEWORKS.get(framework, {})
+        parts.append(f"## Framework: {fw_data.get('name', framework)}\n\n{fw_data.get('desc', '')}.\n")
+
+    # 3b. Platform targets (if set)
+    targets = config.get("platform_targets", [])
+    if targets:
+        target_str = ", ".join(targets)
+        parts.append(f"## Platform Targets\n\nTarget platforms: {target_str}. Build and test for all listed platforms.\n")
 
     # 4. Directory structure
     parts.append((claude_sections / "20_structure.md").read_text())
@@ -659,7 +1035,7 @@ def install_layer_files(config, kit_dir, project_dir):
     # 5. Claude Code hooks (.claude/hooks/)
     claude_hooks_src = kit_dir / ".claude" / "hooks"
     ch_count = 0
-    # guard_kit_writes.py is kit-contributor-only — skip for user projects
+    # guard_kit_writes.py is kit-contributor-only -- skip for user projects
     skip_hooks = {"guard_kit_writes.py"}
     if claude_hooks_src.is_dir():
         for f in claude_hooks_src.iterdir():
@@ -702,7 +1078,7 @@ def install_layer_files(config, kit_dir, project_dir):
     if settings_src.exists() and not settings_dst.exists():
         settings_dst.parent.mkdir(parents=True, exist_ok=True)
         kit_settings = json.loads(settings_src.read_text())
-        # Copy hooks config only — strip kit-specific keys (enabledPlugins)
+        # Copy hooks config only -- strip kit-specific keys (enabledPlugins)
         # and kit-contributor-only hooks (guard_kit_writes.py)
         project_hooks = {}
         for event, matchers in kit_settings.get("hooks", {}).items():
@@ -752,8 +1128,11 @@ def install_layer_files(config, kit_dir, project_dir):
             "nextjs": "nextjs", "vite": "vite", "flutter": "flutter",
             "static": "html-app", "python": "html-app", "go": "html-app",
         }
-        # Read build command from scaffold.json
-        scaffold_path = templates_dir / config["framework"] / "scaffold.json"
+        # Read build command from scaffold.json (with _generic fallback)
+        fw_template = config["framework"]
+        scaffold_path = templates_dir / fw_template / "scaffold.json"
+        if not scaffold_path.exists():
+            scaffold_path = templates_dir / "_generic" / "scaffold.json"
         build_cmd = ""
         if scaffold_path.exists():
             try:
@@ -777,6 +1156,8 @@ def install_layer_files(config, kit_dir, project_dir):
 
     # 8. Framework-specific files (.gitignore, .env.example)
     fw_dir = templates_dir / config["framework"]
+    if not fw_dir.is_dir():
+        fw_dir = templates_dir / "_generic"
     fw_count = 0
     for name in [".gitignore", ".env.example"]:
         src = fw_dir / name
@@ -977,25 +1358,34 @@ def run_wizard(kit_dir, project_dir):
 
     # Card 1: Project type (skip if framework auto-detected)
     project_type = None
+    project_type_custom = ""
     if state["framework_key"]:
         # Auto-detected -- infer project type from framework
         project_type = FRAMEWORK_PROJECT_TYPE.get(state["framework_key"], "web")
     else:
-        project_type = card_project_type()
+        project_type, project_type_custom = card_project_type()
 
-    # Card 2: Framework (skip if auto-detected, confirm otherwise)
+    # Card 2: Framework
     framework = None
+    framework_custom = ""
     if state["framework_key"]:
         accepted = card_framework_confirm(state["framework_name"])
         if accepted:
             framework = state["framework_key"]
         else:
-            # User wants to override -- always ask project type so they
-            # aren't stuck with the inferred type (e.g. mobile only has Flutter)
-            project_type = card_project_type()
-            framework = card_framework(project_type)
+            # User declined detection -- show full list, keep inferred type
+            framework, framework_custom = card_framework(project_type, show_all=True)
+    elif project_type == "other" or project_type in _FREE_TEXT_TYPES:
+        # "Other" type or type with no dedicated frameworks -- free-text directly
+        custom = ask("  Describe your framework/stack: ")
+        framework, framework_custom = "_other", custom
     else:
-        framework = card_framework(project_type)
+        framework, framework_custom = card_framework(project_type)
+
+    # Card 2b: Platform targets (desktop/mobile only)
+    platform_targets = []
+    if project_type in ("desktop", "mobile"):
+        platform_targets = card_platform_targets()
 
     # Card 3: Solo/team
     collab = card_setup()
@@ -1006,12 +1396,15 @@ def run_wizard(kit_dir, project_dir):
     # Build config dict
     config = {
         "project_type": project_type,
+        "project_type_custom": project_type_custom,
         "framework": framework,
+        "framework_custom": framework_custom,
         "collaboration_mode": collab["mode"],
         "github_users": collab["github_users"],
         "security_owner": collab["security_owner"],
         "has_database": has_database,
         "has_personal_data": has_personal_data,
+        "platform_targets": platform_targets,
         "detected_framework": state["framework_key"],
         "project_dir": str(project_dir),
         "kit_dir": str(kit_dir),

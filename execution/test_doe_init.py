@@ -24,13 +24,15 @@ from doe_init import (
     install_layer_files,
     setup_ci_git_collaboration,
     write_doe_version,
-    _FALLBACK_DETECT_PATTERNS,
+    DETECT_PATTERNS,
     FRAMEWORK_PROJECT_TYPE,
+    FRAMEWORKS,
+    PROJECT_TYPES,
 )
 
 KIT_DIR = Path(__file__).resolve().parent.parent
 ACTUAL_KIT = Path.home() / "doe-starter-kit"
-FRAMEWORKS = ["nextjs", "python", "go", "flutter", "vite", "static"]
+TIER1_FRAMEWORKS = ["nextjs", "python", "go", "flutter", "vite", "static"]
 
 passed = 0
 failed = 0
@@ -46,16 +48,21 @@ def check(name, condition, detail=""):
 
 
 def make_config(framework, collab="solo", database=False, personal=False,
-                is_empty=True):
-    project_type = FRAMEWORK_PROJECT_TYPE.get(framework, "web")
+                is_empty=True, project_type=None, framework_custom="",
+                project_type_custom="", platform_targets=None):
+    if project_type is None:
+        project_type = FRAMEWORK_PROJECT_TYPE.get(framework, "web")
     return {
         "project_type": project_type,
+        "project_type_custom": project_type_custom,
         "framework": framework,
+        "framework_custom": framework_custom,
         "collaboration_mode": collab,
         "github_users": ["alice", "bob"] if collab == "team" else [],
         "security_owner": "alice" if collab == "team" else "",
         "has_database": database,
         "has_personal_data": personal,
+        "platform_targets": platform_targets or [],
         "detected_framework": None,
         "project_dir": "",
         "kit_dir": str(KIT_DIR),
@@ -81,20 +88,9 @@ def _fake_home():
 
 
 def run_sandboxed(func, *args, **kwargs):
-    """Run with stdout suppressed AND global writes sandboxed.
-
-    Creates a fresh temp directory per call so that read-only files
-    written by shutil.copy2 in a previous invocation don't cause
-    PermissionError when a later framework tries to overwrite them.
-    """
-    fresh_dir = tempfile.mkdtemp(prefix="doe-test-home-")
-    fresh_home = Path(fresh_dir)
-
-    def _per_call_home():
-        return fresh_home
-
+    """Run with stdout suppressed AND global writes sandboxed."""
     buf = io.StringIO()
-    with patch.object(Path, "home", staticmethod(_per_call_home)):
+    with patch.object(Path, "home", staticmethod(_fake_home)):
         with redirect_stdout(buf):
             return func(*args, **kwargs)
 
@@ -106,42 +102,42 @@ print("Test 1: Framework detection")
 # Next.js
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "package.json").write_text('{"dependencies":{"next":"14"}}')
-    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
+    k, _ = detect_framework(Path(d))
     check("detect nextjs", k == "nextjs", f"got {k}")
 
 # Vite
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "package.json").write_text('{"dependencies":{"vite":"5"}}')
-    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
+    k, _ = detect_framework(Path(d))
     check("detect vite", k == "vite", f"got {k}")
 
 # Python
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "pyproject.toml").write_text("[project]\nname='x'\n")
-    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
+    k, _ = detect_framework(Path(d))
     check("detect python", k == "python", f"got {k}")
 
 # Go
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "go.mod").write_text("module example.com/x\ngo 1.21\n")
-    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
+    k, _ = detect_framework(Path(d))
     check("detect go", k == "go", f"got {k}")
 
 # Flutter
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "pubspec.yaml").write_text("name: x\n")
-    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
+    k, _ = detect_framework(Path(d))
     check("detect flutter", k == "flutter", f"got {k}")
 
 # Static HTML
 with tempfile.TemporaryDirectory() as d:
     (Path(d) / "index.html").write_text("<html></html>")
-    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
+    k, _ = detect_framework(Path(d))
     check("detect static", k == "static", f"got {k}")
 
 # Empty directory -- no framework detected
 with tempfile.TemporaryDirectory() as d:
-    k, _ = detect_framework(Path(d), _FALLBACK_DETECT_PATTERNS)
+    k, _ = detect_framework(Path(d))
     check("detect empty directory", k is None, f"got {k}")
 
 
@@ -149,7 +145,7 @@ with tempfile.TemporaryDirectory() as d:
 
 print("Test 2: New project (empty directory) -- 6 frameworks")
 
-for fw in FRAMEWORKS:
+for fw in TIER1_FRAMEWORKS:
     with tempfile.TemporaryDirectory() as d:
         project_dir = Path(d)
         config = make_config(fw, is_empty=True)
@@ -363,6 +359,189 @@ with tempfile.TemporaryDirectory() as d:
     claude_md = (project_dir / "CLAUDE.md").read_text()
     check("regulated: CLAUDE.md has compliance trigger",
           "data-compliance" in claude_md)
+
+
+# ── Test 8: "Other" framework ───────────────────────────────────────────
+
+print("Test 8: Other framework (Tier 2 fallback)")
+
+with tempfile.TemporaryDirectory() as d:
+    project_dir = Path(d)
+    config = make_config("_other", project_type="other",
+                         framework_custom="Tauri + Svelte",
+                         project_type_custom="macOS menu bar app")
+    config["project_dir"] = str(project_dir)
+
+    # CLAUDE.md should contain custom framework text
+    claude_md = generate_claude_md(config, KIT_DIR)
+    check("other_fw: CLAUDE.md generated", len(claude_md) > 100)
+    check("other_fw: custom text in CLAUDE.md", "Tauri + Svelte" in claude_md)
+
+    # Install should fall back to _generic
+    count = run_sandboxed(install_layer_files, config, KIT_DIR, project_dir)
+    check("other_fw: install count > 0", count > 0, f"count={count}")
+    check("other_fw: CLAUDE.md exists", (project_dir / "CLAUDE.md").exists())
+
+    # .doe-version should record custom text in key=value format
+    write_doe_version(project_dir, config, "1.54.0")
+    dv = project_dir / ".doe-version"
+    check("other_fw: .doe-version exists", dv.exists())
+    if dv.exists():
+        content = dv.read_text()
+        check("other_fw: version in .doe-version", "version=1.54.0" in content)
+        check("other_fw: framework in .doe-version", "framework=_other" in content)
+        check("other_fw: custom in .doe-version",
+              "framework_custom=Tauri + Svelte" in content)
+
+
+# ── Test 9: "Other" project type ────────────────────────────────────────
+
+print("Test 9: Other project type")
+
+with tempfile.TemporaryDirectory() as d:
+    project_dir = Path(d)
+    config = make_config("python", project_type="other",
+                         project_type_custom="embedded firmware")
+    config["project_dir"] = str(project_dir)
+
+    # CLAUDE.md should generate without error
+    try:
+        claude_md = generate_claude_md(config, KIT_DIR)
+        check("other_type: CLAUDE.md generated", len(claude_md) > 100)
+    except Exception as e:
+        check("other_type: CLAUDE.md generation", False, str(e))
+
+    # .doe-version should record custom type
+    write_doe_version(project_dir, config, "1.54.0")
+    dv = project_dir / ".doe-version"
+    if dv.exists():
+        content = dv.read_text()
+        check("other_type: project_type in .doe-version",
+              "project_type=other" in content)
+        check("other_type: custom type in .doe-version",
+              "project_type_custom=embedded firmware" in content)
+
+
+# ── Test 10: Platform targets ───────────────────────────────────────────
+
+print("Test 10: Platform targets")
+
+with tempfile.TemporaryDirectory() as d:
+    project_dir = Path(d)
+    config = make_config("electron", project_type="desktop",
+                         platform_targets=["macos", "windows"])
+    config["project_dir"] = str(project_dir)
+
+    claude_md = generate_claude_md(config, KIT_DIR)
+    check("platforms: Platform Targets in CLAUDE.md",
+          "Platform Targets" in claude_md)
+    check("platforms: macos in CLAUDE.md", "macos" in claude_md)
+    check("platforms: windows in CLAUDE.md", "windows" in claude_md)
+
+    # .doe-version should record targets
+    write_doe_version(project_dir, config, "1.54.0")
+    dv = project_dir / ".doe-version"
+    if dv.exists():
+        content = dv.read_text()
+        check("platforms: targets in .doe-version",
+              "platform_targets=macos,windows" in content)
+
+    # No targets = no section
+    config2 = make_config("nextjs", platform_targets=[])
+    claude_md2 = generate_claude_md(config2, KIT_DIR)
+    check("platforms: no section when empty",
+          "Platform Targets" not in claude_md2)
+
+
+# ── Test 11: New project types ──────────────────────────────────────────
+
+print("Test 11: New project types")
+
+type_keys = [k for k, _ in PROJECT_TYPES]
+check("types: has 11 entries", len(PROJECT_TYPES) == 11,
+      f"got {len(PROJECT_TYPES)}")
+check("types: desktop in list", "desktop" in type_keys)
+check("types: browser_extension in list", "browser_extension" in type_keys)
+check("types: package in list", "package" in type_keys)
+check("types: other in list", "other" in type_keys)
+
+# Tier 2 framework falls back to _generic
+with tempfile.TemporaryDirectory() as d:
+    project_dir = Path(d)
+    config = make_config("electron", project_type="desktop")
+    config["project_dir"] = str(project_dir)
+
+    claude_md = generate_claude_md(config, KIT_DIR)
+    check("types: Electron in CLAUDE.md", "Electron" in claude_md)
+
+    count = run_sandboxed(install_layer_files, config, KIT_DIR, project_dir)
+    check("types: desktop install > 0", count > 0)
+
+# browser_extension gets public_facing layer
+config_ext = make_config("chrome_ext", project_type="browser_extension")
+layers = get_active_layers(config_ext)
+check("types: browser_ext has public_facing", "public_facing" in layers)
+
+
+# ── Test 12: Registry regression guard ──────────────────────────────────
+
+print("Test 12: Registry regression")
+
+# DETECT_PATTERNS must still have exactly the original 6 entries
+original_keys = {"nextjs", "vite", "python", "go", "flutter", "static"}
+check("regression: DETECT_PATTERNS count", len(DETECT_PATTERNS) == 6,
+      f"got {len(DETECT_PATTERNS)}")
+check("regression: DETECT_PATTERNS keys",
+      set(DETECT_PATTERNS.keys()) == original_keys,
+      f"got {set(DETECT_PATTERNS.keys())}")
+
+# Each original entry has correct name
+check("regression: nextjs name", DETECT_PATTERNS["nextjs"]["name"] == "Next.js")
+check("regression: vite name", DETECT_PATTERNS["vite"]["name"] == "Vite/React")
+check("regression: python name", DETECT_PATTERNS["python"]["name"] == "Python")
+check("regression: go name", DETECT_PATTERNS["go"]["name"] == "Go")
+check("regression: flutter name", DETECT_PATTERNS["flutter"]["name"] == "Flutter")
+check("regression: static name", DETECT_PATTERNS["static"]["name"] == "Static HTML")
+
+# FRAMEWORK_PROJECT_TYPE original 6 must still be correct
+check("regression: FPT nextjs", FRAMEWORK_PROJECT_TYPE["nextjs"] == "web")
+check("regression: FPT python", FRAMEWORK_PROJECT_TYPE["python"] == "api")
+check("regression: FPT go", FRAMEWORK_PROJECT_TYPE["go"] == "api")
+check("regression: FPT flutter", FRAMEWORK_PROJECT_TYPE["flutter"] == "mobile")
+check("regression: FPT vite", FRAMEWORK_PROJECT_TYPE["vite"] == "web")
+check("regression: FPT static", FRAMEWORK_PROJECT_TYPE["static"] == "web")
+
+
+# ── Test 13: Registry consistency ───────────────────────────────────────
+
+print("Test 13: Registry consistency")
+
+valid_type_keys = {k for k, _ in PROJECT_TYPES} | {"*"}
+required_keys = {"name", "desc", "types", "tier", "template"}
+
+for fk, fv in FRAMEWORKS.items():
+    # Required keys present
+    missing = required_keys - set(fv.keys())
+    check(f"registry: {fk} has required keys", not missing,
+          f"missing: {missing}")
+    # types values are valid
+    for t in fv.get("types", []):
+        check(f"registry: {fk} type '{t}' valid", t in valid_type_keys,
+              f"not in PROJECT_TYPES")
+    # template dir exists or is _generic
+    tmpl = fv.get("template", "")
+    if tmpl == "_generic":
+        check(f"registry: {fk} template _generic exists",
+              (ACTUAL_KIT / "templates" / "_generic").is_dir()
+              if ACTUAL_KIT.exists() else True)
+    else:
+        check(f"registry: {fk} template '{tmpl}' exists",
+              kit_file_exists(f"templates/{tmpl}/scaffold.json"),
+              f"Tier {fv.get('tier')} but no template dir")
+
+check("registry: 35+ entries", len(FRAMEWORKS) >= 35,
+      f"got {len(FRAMEWORKS)}")
+check("registry: has _other", "_other" in FRAMEWORKS)
 
 
 # ── Cleanup ──────────────────────────────────────────────────────────────

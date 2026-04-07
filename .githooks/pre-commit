@@ -273,6 +273,20 @@ if [ "${SKIP_RETRO_GATE:-0}" != "1" ]; then
     fi
 fi
 
+# ─── Pending PRs sync check (blocks stale, warns missing) ───
+# Validates ## Pending PRs in todo.md against `gh pr list`.
+# Skip with: SKIP_PENDING_PR_CHECK=1 git commit ...
+
+if [ "${SKIP_PENDING_PR_CHECK:-0}" != "1" ]; then
+    TODO_STAGED=$(echo "$STAGED_FILES" | grep -c "tasks/todo.md" || true)
+    if [ "$TODO_STAGED" -gt "0" ]; then
+        python3 execution/check_pending_prs.py 2>&1
+        if [ $? -ne 0 ]; then
+            exit 1
+        fi
+    fi
+fi
+
 # ─── Contract verification (solo mode gate) ───
 # Checks current todo.md step's contract criteria are all [x] before allowing commit.
 # Skip with: SKIP_CONTRACT_CHECK=1 git commit -m '...'
