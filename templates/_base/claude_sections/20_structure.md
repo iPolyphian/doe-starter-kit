@@ -7,5 +7,5 @@ tasks/         # todo.md + plans
 .githooks/     # Git hooks (activate: git config core.hooksPath .githooks)
 docs/          # Visual documents -- version-controlled
 .tmp/          # Temporary files (disposable)
-STATE.md  ROADMAP.md  learnings.md  .env
+STATE.md  ROADMAP.md  learnings.md  CHANGELOG.md  .env
 ```

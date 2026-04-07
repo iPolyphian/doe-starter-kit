@@ -7,6 +7,17 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.53.0 (2026-04-07)
+
+### Added
+- **todo.md: contract Verify: patterns spec** -- formal specification of 4 executable verification patterns (`run:`, `file: exists`, `file: contains`, `html: has`), `[auto]` vs `[manual]` guidance, and validation rules. Previously the template just said "must have a Contract: block" with no detail on what valid patterns look like.
+- **todo.md: retro as mandatory final step** -- quick/full escalation rules, wave deferral format, and when to escalate from quick to full retro.
+- **todo.md: Pending PRs detailed format** -- entry format spec (heading, summary, contains, detail table, post-merge checklist), merge order pointer, conflict tracking. Previously just an empty section.
+- **todo.md: collapsible details for complex features** -- `<details><summary>` for 3+ step features with plan file linking.
+- **todo.md: general format improvements** -- "this file tracks immediate work only" preamble, progress tracking belongs here not in plans, format is changeable.
+- **manifest.json: 2 new triggers** -- "External data / API integration" (universal, points to building-rules.md) and "Legal (email, donations, content)" (regulated layer, points to documentation-governance.md).
+- **20_structure.md: added CHANGELOG.md** to directory structure listing.
+
 ## v1.52.11 (2026-04-07)
 
 ### Fixed
