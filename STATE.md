@@ -16,7 +16,7 @@ Keep each section short. Replace stale info, don't accumulate. Max ~30 lines of 
 ## Current Position
 <!-- What feature/step is in progress. Updated at session start and end. -->
 
-**DOE Role:** consumer
+**DOE Role:** creator
 <!-- consumer = you use DOE to build projects. creator = you contribute improvements back to the starter kit. -->
 <!-- Set during setup.sh. Only affects what /wrap shows you — consumers see /pull-doe suggestions only. -->
 

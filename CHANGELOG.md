@@ -7,6 +7,15 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.52.10 (2026-04-07)
+
+### Fixed
+- **audit_claims.py: false router WARNs** — `check_router_coverage` didn't recognize directory triggers (`adversarial-review/`, `best-practices/`), causing 7 false WARNs on every fresh init. Added `dir_refs` matching from `test_methodology.py`.
+- **audit_claims.py: false cross-ref WARNs** — `check_cross_reference_consistency` lacked home-directory (`~/.claude/`) and kit-directory fallback paths, causing 8 false WARNs. Also skips `_TEMPLATE.md` files now.
+- **data-safety.md: monty-specific content** — replaced "Monty" with "the system" and removed 2 monty-specific `.claude/plans/` cross-references that don't exist in other projects.
+- **manifest.json: chrome-verification framework gate** — removed `frameworks` restriction from chrome-verification trigger. The `public_facing` layer gate is sufficient; framework filter caused install/trigger mismatch.
+- **10_methodology.md: missing rule pointers** — added `->` directive pointers to Core Behaviour rules 2, 3, and 5.
+
 ## v1.52.1 (2026-04-03)
 
 ### Fixed

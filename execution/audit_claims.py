@@ -719,11 +719,16 @@ def check_router_coverage(report: AuditReport):
         if not p.name.startswith("_")
     ]
 
+    # Build set of referenced directories (e.g. "directives/adversarial-review/")
+    dir_refs = set(re.findall(r"`(directives/[^`]+/)`", triggers_text))
+
     covered = []
     uncovered = []
     for d in sorted(all_directives):
         rel = str(d.relative_to(PROJECT_ROOT))
         if rel in triggers_text or d.stem in triggers_text or d.name in triggers_text:
+            covered.append(rel)
+        elif any(rel.startswith(dr) for dr in dir_refs):
             covered.append(rel)
         else:
             uncovered.append(rel)
@@ -909,13 +914,31 @@ def check_cross_reference_consistency(report: AuditReport):
     issue_count = 0
     ref_pattern = re.compile(r"`((?:directives|execution|\.claude)/[^`]+)`")
 
+    # Kit directory (fallback for layer-conditional directive refs)
+    kit_dir = Path(os.path.expanduser("~/doe-starter-kit"))
+
+    def _ref_exists(ref: str) -> bool:
+        """Check if a reference resolves to a real path."""
+        if "*" in ref:
+            return True  # Glob patterns can't be resolved
+        # Project-relative
+        if (PROJECT_ROOT / ref).exists():
+            return True
+        # Home-relative (.claude/ -> ~/.claude/)
+        if ref.startswith(".claude/"):
+            if (Path.home() / ref).exists():
+                return True
+        # Layer-conditional: directive exists in the kit but not this project
+        if ref.startswith("directives/") and kit_dir.exists():
+            if (kit_dir / ref).exists():
+                return True
+        return False
+
     claude_md = PROJECT_ROOT / "CLAUDE.md"
     if claude_md.exists():
         text = claude_md.read_text(encoding="utf-8")
         for ref in ref_pattern.findall(text):
-            full = PROJECT_ROOT / ref
-            expanded = Path(os.path.expanduser(ref))
-            if not full.exists() and not expanded.exists() and ref not in exempt_files:
+            if ref not in exempt_files and not _ref_exists(ref):
                 issue_count += 1
                 report.add(Finding(Severity.WARN, "cross_reference_consistency",
                                    f"missing file referenced in CLAUDE.md: {ref}",
@@ -924,12 +947,12 @@ def check_cross_reference_consistency(report: AuditReport):
     directives_dir = PROJECT_ROOT / "directives"
     if directives_dir.exists():
         for d in sorted(directives_dir.rglob("*.md")):
+            if d.name.startswith("_"):
+                continue
             text = d.read_text(encoding="utf-8")
             rel = str(d.relative_to(PROJECT_ROOT))
             for ref in ref_pattern.findall(text):
-                full = PROJECT_ROOT / ref
-                expanded = Path(os.path.expanduser(ref))
-                if not full.exists() and not expanded.exists() and ref not in exempt_files:
+                if ref not in exempt_files and not _ref_exists(ref):
                     issue_count += 1
                     report.add(Finding(Severity.WARN, "cross_reference_consistency",
                                        f"missing file: {ref}",

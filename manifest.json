@@ -115,7 +115,7 @@
     {"situation": "New functions / debugging", "directive": "best-practices/tdd-and-debugging.md", "layer": "universal"},
     {"situation": "Parallel sessions / wave setup", "directive": ".claude/plans/multi-agent-coordination.md", "layer": "universal"},
     {"situation": "Security incident", "directive": "incident-response.md", "layer": "universal"},
-    {"situation": "[APP] feature", "directive": "chrome-verification.md", "layer": "public_facing", "frameworks": ["nextjs", "vite", "static"]},
+    {"situation": "[APP] feature", "directive": "chrome-verification.md", "layer": "public_facing"},
     {"situation": "Data safety / handling", "directive": "data-safety.md", "layer": "data_handling"},
     {"situation": "Personal data features", "directive": "data-compliance.md", "layer": "regulated"},
     {"situation": "Dataset or legal position change", "directive": "documentation-governance.md", "layer": "regulated"}

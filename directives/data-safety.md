@@ -24,7 +24,7 @@ Prevent accidental or AI-caused destruction, exposure, or corruption of data acr
 
 **Production data is irreplaceable regulated data. Every rule below exists to protect it.**
 
-Once Monty collects personal data (membership, canvass responses, donations), that data is subject to UK GDPR retention requirements and PPERA record-keeping obligations. Losing it is not just an inconvenience -- it is a reportable data breach (72-hour ICO notification window) and potential regulatory violation. Even before personal data enters the system, treating all data as irreplaceable builds the right habits.
+Once the system collects personal data (membership, canvass responses, donations), that data is subject to UK GDPR retention requirements and PPERA record-keeping obligations. Losing it is not just an inconvenience -- it is a reportable data breach (72-hour ICO notification window) and potential regulatory violation. Even before personal data enters the system, treating all data as irreplaceable builds the right habits.
 
 ### Data Controller Liability
 
@@ -43,7 +43,7 @@ This remains true until a formal, documented handover of data controllership to 
 - Disclose full register data to an unauthorised person
 - Fail to comply with security requirements for register data
 
-Political parties may use the full register for electoral purposes, but merging it with commercial data, sharing it with third parties, or using it for non-electoral purposes is criminal. If Monty integrates electoral register data:
+Political parties may use the full register for electoral purposes, but merging it with commercial data, sharing it with third parties, or using it for non-electoral purposes is criminal. If the system integrates electoral register data:
 - It must be stored separately from other data, with its own access controls
 - Access must be logged and auditable
 - It must never be included in seed data, test data, backups shared outside the secure environment, or any non-production system
@@ -430,5 +430,3 @@ This is not just a workflow preference -- in a regulated data context, complex m
 - `legal-framework.md` -- Legal obligations including ICO breach notification
 - `data-governance.md` -- Dataset register, retention periods, provenance
 - `.claude/hooks/block_dangerous_commands.py` -- Technical enforcement of destructive operation blocking
-- `.claude/plans/supabase-demo-backend.md` -- Database architecture with RLS and data classification
-- `.claude/plans/doe-security-fundamentals.md` -- Broader security framework including threat model
