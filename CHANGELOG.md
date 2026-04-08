@@ -7,6 +7,29 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.55.0 (2026-04-08)
+<!-- hero -->
+The most comprehensive documentation update since the tutorials launched. Eight new concept sections on the Key Concepts page cover everything from DAGs to adversarial review. A brand-new Migration Guide walks users through upgrading from any DOE version with per-era checklists and CLAUDE.md before/after examples. The What's New page — generated from CHANGELOG.md and auto-regenerated on every release — gives every DOE user a single place to see what changed.
+<!-- /hero -->
+
+### Added
+- **Migration Guide** (`docs/tutorial/migration-guide.html`) — comprehensive upgrade page with Find Your Version, 10-era overview table, 4 migration paths (v1.47 LOW, v1.49 HIGH, v1.51 MEDIUM, v1.52 MEDIUM), CLAUDE.md before/after, fresh-start vs surgical-upgrade decision tree, post-migration verification checklist
+- **What's New page** (`docs/tutorial/whats-new.html`) — Conductor-inspired changelog page generated from CHANGELOG.md. Version badges, hero prose sections for major releases, expand/collapse by month for older releases, APP/INFRA tag badges, dark mode
+- **What's New generator** (`execution/generate_whats_new.py`) — deterministic Python script, stdlib only. Parses both CHANGELOG heading formats, extracts hero blocks, renders HTML matching tutorial styling. Wired into `/sync-doe` Step 10
+- **8 Key Concepts sections** — Thin Router, Phase-Based Directives, Dependency Graphs (DAGs), Rationalisation Tables, Adversarial Review, Defence in Depth, Deterministic Hooks, Context Recovery
+- **6 CHANGELOG hero blocks** — v1.42.0 (Quality Stack), v1.44.0 (PR Workflow), v1.48.0 (Agent Discipline), v1.49.0 (CFA), v1.51.4 (Security), v1.52.0 (Init Wizard)
+- **Missing v1.44.0 CHANGELOG entry** — PR Workflow Migration tag existed but changelog entry was never written
+- **CLAUDE.md trigger** — `Updating CHANGELOG.md -> regenerate whats-new.html`
+
+### Changed
+- **CUSTOMIZATION.md** — expanded "Upgrading from Older Kit Versions" from v1.49-only section to comprehensive per-era migration guides with checklists for v1.47, v1.49, v1.51, v1.52. Added version identification section and link to tutorial
+- **commands.html** — DOE KIT version v1.36.0 updated to v1.54.2 in terminal mockup
+- **new-project.html** — DONE version v1.51.7 updated to v1.54.2. Project types expanded from 5 to 12 (added desktop, browser ext, library, monorepo, hardware, other). Framework card shows "Show all" (40 frameworks) and "Other" escape hatch
+- **tips-and-mistakes.html** — example project version v1.28.0 updated to v1.50.0
+- **Sidebar** — "What's New" added as first link (before Getting Started), "Migration Guide" added to Reference section across all 20 tutorial pages
+- **starter-kit-sync.md** — `generate_whats_new.py` added to Step 10 (after version stamp, before git add)
+- **Footer versions** — stamped to v1.55.0 across all 20 pages
+
 ## v1.54.0 (2026-04-07)
 
 ### Added
