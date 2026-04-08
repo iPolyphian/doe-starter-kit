@@ -7,6 +7,14 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.55.3 (2026-04-08)
+
+### Fixed
+- **CLAUDE.md: 3 unrouted directives** — added triggers for `chrome-verification.md` (APP features with visual output), `data-safety.md` (database/SQL/data protection), `incident-response.md` (security incidents)
+- **CLAUDE.md: Rule 7 pointer** — "Shared-file awareness" now points to `directives/context-management.md`
+- **test_methodology.py: DAG validation path** — now checks both `execution/dispatch_dag.py` and `~/.claude/scripts/dispatch_dag.py` (global install since v1.52)
+- **test_methodology.py: cross-reference checker** — `.claude/` paths now checked against kit directory as fallback (fixes false WARN on `.claude/plans/multi-agent-coordination.md` for existing projects that haven't run init wizard)
+
 ## v1.55.2 (2026-04-08)
 
 ### Changed

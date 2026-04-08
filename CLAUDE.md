@@ -17,7 +17,7 @@ IMPORTANT: Never do execution inline when a script exists. Check `execution/` fi
 4. **Verify before delivering.** Run it, test it, confirm it matches spec. -> `directives/delivery-rules.md`
 5. **Explain simply.** No jargon without context. Trade-offs in terms the user can evaluate.
 6. **One task, one session.** Feature branches, commit per step. -> `directives/building-rules.md`
-7. **Shared-file awareness.** In parallel: check contention on STATE.md, learnings.md, todo.md, CLAUDE.md.
+7. **Shared-file awareness.** In parallel: check contention on STATE.md, learnings.md, todo.md, CLAUDE.md. -> `directives/context-management.md`
 
 ## Directory Structure
 ```
@@ -60,7 +60,9 @@ First session on a brand new project: load `directives/planning-rules.md` + `dir
 - Personal data features -> `directives/data-compliance.md` (DPIA is hard blocker)
 - New functions / debugging -> `directives/best-practices/tdd-and-debugging.md`
 - DOE feature request -> `/request-doe-feature`
-
+- [APP] feature with visual output -> `directives/chrome-verification.md`
+- Database / SQL / data protection -> `directives/data-safety.md`
+- Security incident or breach -> `directives/incident-response.md`
 - Updating CHANGELOG.md -> regenerate whats-new.html: `python3 execution/generate_whats_new.py`
 
 <!-- Add project-specific triggers here as the system grows -->

@@ -750,11 +750,14 @@ def scenario_scale_consistency(verbose: bool = False):
 
 def scenario_dag_validation(verbose: bool = False):
     """Run dispatch_dag.py --validate and check it passes."""
+    # Check both locations: project execution/ and global ~/.claude/scripts/
     executor = PROJECT_ROOT / "execution" / "dispatch_dag.py"
+    if not executor.exists():
+        executor = Path.home() / ".claude" / "scripts" / "dispatch_dag.py"
     vlines = []
 
     if not executor.exists():
-        return _result("WARN", "execution/dispatch_dag.py not found", vlines)
+        return _result("WARN", "dispatch_dag.py not found (checked execution/ and ~/.claude/scripts/)", vlines)
 
     try:
         result = subprocess.run(
@@ -872,8 +875,8 @@ def scenario_cross_reference_consistency(verbose: bool = False):
         expanded = Path(_os.path.expanduser(ref))
         if expanded.exists():
             return True
-        # Layer-conditional: directive exists in the kit but not this project
-        if ref.startswith("directives/") and kit_dir.exists():
+        # Layer-conditional: file exists in the kit but not this project
+        if kit_dir.exists() and (ref.startswith("directives/") or ref.startswith(".claude/")):
             kit_path = kit_dir / ref
             if kit_path.exists():
                 return True

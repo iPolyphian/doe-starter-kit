@@ -793,7 +793,7 @@
 
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
-      <a class="sidebar-brand" href="index.html">DOE Starter Kit <span class="sidebar-version">v1.55.2</span></a>
+      <a class="sidebar-brand" href="index.html">DOE Starter Kit <span class="sidebar-version">v1.55.3</span></a>
       <div class="sidebar-nav">
 
         <div class="sidebar-section">
@@ -868,6 +868,20 @@
 
         <h1>What's New</h1>
         <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">Every release of the DOE Starter Kit, newest first.</p>
+
+        <div class="release" id="v1-55-3">
+          <div class="release-header">
+            <span class="version-badge">v1.55.3</span>
+            <span class="release-date">8 April 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>CLAUDE.md: 3 unrouted directives</strong> — added triggers for <code>chrome-verification.md</code> (APP features with visual output), <code>data-safety.md</code> (database/SQL/data protection), <code>incident-response.md</code> (security incidents)</li>
+            <li><strong>CLAUDE.md: Rule 7 pointer</strong> — &quot;Shared-file awareness&quot; now points to <code>directives/context-management.md</code></li>
+            <li><strong>test_methodology.py: DAG validation path</strong> — now checks both <code>execution/dispatch_dag.py</code> and <code>~/.claude/scripts/dispatch_dag.py</code> (global install since v1.52)</li>
+            <li><strong>test_methodology.py: cross-reference checker</strong> — <code>.claude/</code> paths now checked against kit directory as fallback (fixes false WARN on <code>.claude/plans/multi-agent-coordination.md</code> for existing projects that haven&#x27;t run init wizard)</li>
+          </ul>
+        </div>
 
         <div class="release" id="v1-55-2">
           <div class="release-header">
@@ -958,6 +972,10 @@
           </ul>
         </div>
 
+        <details class="month-group">
+
+          <summary>April 2026 (14 releases)</summary>
+
         <div class="release release-compact" id="v1-53-1">
           <div class="release-header">
             <span class="version-badge">v1.53.1</span>
@@ -970,10 +988,6 @@
             <li><strong>manifest.json: bad legal trigger</strong> &mdash; removed &quot;Legal (email, donations, content)&quot; trigger that pointed to documentation-governance.md (a document-versioning directive, not legal guidance).</li>
           </ul>
         </div>
-
-        <details class="month-group">
-
-          <summary>April 2026 (13 releases)</summary>
 
         <div class="release" id="v1-53-0">
           <div class="release-header">
@@ -3122,7 +3136,7 @@
           </a>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.55.2</footer>
+        <footer class="site-footer">DOE Starter Kit v1.55.3</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->
