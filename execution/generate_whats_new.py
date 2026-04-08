@@ -1035,7 +1035,7 @@ def generate_page(entries):
 
         <div class="sidebar-section">
           <div class="sidebar-section-title">What's New</div>
-          <a class="sidebar-link active" href="whats-new.html">What's New</a>
+          <a class="sidebar-link active" href="whats-new.html">Changelog</a>
         </div>
 
         <div class="sidebar-section">
