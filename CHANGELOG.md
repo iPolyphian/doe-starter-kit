@@ -7,6 +7,14 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.55.1 (2026-04-08)
+
+### Fixed
+- **What's New generator** — version now read dynamically from `git describe --tags` instead of hardcoded. Sync-doe order swapped: generate before stamp so the stamper catches the generated file.
+
+### Added
+- **Completed-feature warning hook** (`check_completed_feature.py`) — PostToolUse hook fires after any edit to todo.md. Warns immediately when all steps in ## Current are [x] but feature not moved to Done/Awaiting Sign-off.
+
 ## v1.55.0 (2026-04-08)
 <!-- hero -->
 The most comprehensive documentation update since the tutorials launched. Eight new concept sections on the Key Concepts page cover everything from DAGs to adversarial review. A brand-new Migration Guide walks users through upgrading from any DOE version with per-era checklists and CLAUDE.md before/after examples. The What's New page — generated from CHANGELOG.md and auto-regenerated on every release — gives every DOE user a single place to see what changed.

@@ -1,0 +1,4 @@
+{
+  "buildCommand": "python3 execution/generate_whats_new.py",
+  "outputDirectory": "docs/tutorial"
+}

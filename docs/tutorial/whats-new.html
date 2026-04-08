@@ -793,7 +793,7 @@
 
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
-      <a class="sidebar-brand" href="index.html">DOE Starter Kit <span class="sidebar-version">v1.55.0</span></a>
+      <a class="sidebar-brand" href="index.html">DOE Starter Kit <span class="sidebar-version">v1.55.1</span></a>
       <div class="sidebar-nav">
 
         <div class="sidebar-section">
@@ -867,6 +867,21 @@
 
         <h1>What's New</h1>
         <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">Every release of the DOE Starter Kit, newest first.</p>
+
+        <div class="release release-compact" id="v1-55-1">
+          <div class="release-header">
+            <span class="version-badge">v1.55.1</span>
+            <span class="release-date">8 April 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>What&#x27;s New generator</strong> — version now read dynamically from <code>git describe --tags</code> instead of hardcoded. Sync-doe order swapped: generate before stamp so the stamper catches the generated file.</li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Completed-feature warning hook</strong> (<code>check_completed_feature.py</code>) — PostToolUse hook fires after any edit to todo.md. Warns immediately when all steps in ## Current are [x] but feature not moved to Done/Awaiting Sign-off.</li>
+          </ul>
+        </div>
 
         <div class="release" id="v1-55-0">
           <div class="release-header">
@@ -955,6 +970,10 @@
           </ul>
         </div>
 
+        <details class="month-group">
+
+          <summary>April 2026 (12 releases)</summary>
+
         <div class="release release-compact" id="v1-52-11">
           <div class="release-header">
             <span class="version-badge">v1.52.11</span>
@@ -965,10 +984,6 @@
             <li><strong>todo.md template: missing sections</strong> — added <code>## Awaiting Sign-off</code> and <code>## Pending PRs</code> sections with format rule documentation. These existed in mature projects but were never in the kit template, so fresh inits lacked them.</li>
           </ul>
         </div>
-
-        <details class="month-group">
-
-          <summary>April 2026 (11 releases)</summary>
 
         <div class="release" id="v1-52-10">
           <div class="release-header">
@@ -3089,7 +3104,7 @@
           </a>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.55.0</footer>
+        <footer class="site-footer">DOE Starter Kit v1.55.1</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->
