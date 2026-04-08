@@ -285,6 +285,23 @@ Superpowers-inspired discipline enforcement for AI agents. Rationalisation table
 - **Rule 6** rewritten for branch+PR workflow — feature branches, commit per step on branch, `gh pr create` at retro, CI must pass before merge, no direct commits to main
 - **Rule 11** updated — retro step now includes PR creation with template auto-filled from contract criteria
 
+## v1.44.0 (2026-03-19)
+<!-- hero -->
+DOE moves from direct-to-main commits to a proper branch-based PR workflow. Feature branches, CI gating with GitHub Actions, branch protection on main, snagging as pre-merge gate with Chrome visual verification, and a complete multi-agent coordination protocol. The master-to-main branch rename, PR template, and session command updates ship together. Released as DOE kit v1.44.0.
+<!-- /hero -->
+
+### Added
+- **Branch-based PR workflow** — feature branches, commit per step on branch, `gh pr create` at retro, CI must pass before merge, no direct commits to main
+- **GitHub Action for AI PR review** — automated adversarial review on pull requests
+- **Snagging as pre-merge gate** — Chrome visual verification integrated into snagging workflow
+- **PR template** — auto-filled from contract criteria during retro
+- **Multi-agent coordination protocol** — wave protocol rewrite for branch-based workflow
+- **DOE tutorial page** (`docs/tutorial/pr-workflow.html`) — PR workflow documentation
+
+### Changed
+- **master to main branch rename** — all references updated across commands and documentation
+- **Session commands** (stand-up, crack-on, sitrep, wrap) — updated for branch-based workflow with PR awareness
+
 ## v1.43.0 (2026-03-19)
 
 ### Documentation

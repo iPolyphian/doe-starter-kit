@@ -1139,7 +1139,7 @@
 
         <details class="month-group">
 
-          <summary>March 2026 (120 releases)</summary>
+          <summary>March 2026 (121 releases)</summary>
 
         <div class="release" id="v1-48-0">
           <div class="release-header">
@@ -1231,6 +1231,28 @@
           <ul>
             <li><strong>Rule 6</strong> rewritten for branch+PR workflow — feature branches, commit per step on branch, <code>gh pr create</code> at retro, CI must pass before merge, no direct commits to main</li>
             <li><strong>Rule 11</strong> updated — retro step now includes PR creation with template auto-filled from contract criteria</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-44-0">
+          <div class="release-header">
+            <span class="version-badge">v1.44.0</span>
+            <span class="release-date">19 March 2026</span>
+          </div>
+          <p class="release-hero">DOE moves from direct-to-main commits to a proper branch-based PR workflow. Feature branches, CI gating with GitHub Actions, branch protection on main, snagging as pre-merge gate with Chrome visual verification, and a complete multi-agent coordination protocol. The master-to-main branch rename, PR template, and session command updates ship together. Released as DOE kit v1.44.0.</p>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Branch-based PR workflow</strong> — feature branches, commit per step on branch, <code>gh pr create</code> at retro, CI must pass before merge, no direct commits to main</li>
+            <li><strong>GitHub Action for AI PR review</strong> — automated adversarial review on pull requests</li>
+            <li><strong>Snagging as pre-merge gate</strong> — Chrome visual verification integrated into snagging workflow</li>
+            <li><strong>PR template</strong> — auto-filled from contract criteria during retro</li>
+            <li><strong>Multi-agent coordination protocol</strong> — wave protocol rewrite for branch-based workflow</li>
+            <li><strong>DOE tutorial page</strong> (<code>docs/tutorial/pr-workflow.html</code>) — PR workflow documentation</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>master to main branch rename</strong> — all references updated across commands and documentation</li>
+            <li><strong>Session commands</strong> (stand-up, crack-on, sitrep, wrap) — updated for branch-based workflow with PR awareness</li>
           </ul>
         </div>
 
