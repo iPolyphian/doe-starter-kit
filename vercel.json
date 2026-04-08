@@ -1,4 +1,0 @@
-{
-  "buildCommand": "python3 execution/generate_whats_new.py || echo 'Generator skipped — serving committed HTML'",
-  "outputDirectory": "docs/tutorial"
-}
