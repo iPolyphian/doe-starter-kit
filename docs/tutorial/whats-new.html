@@ -793,7 +793,7 @@
 
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
-      <a class="sidebar-brand" href="index.html">DOE Starter Kit <span class="sidebar-version">v1.55.1</span></a>
+      <a class="sidebar-brand" href="index.html">DOE Starter Kit <span class="sidebar-version">v1.55.2</span></a>
       <div class="sidebar-nav">
 
         <div class="sidebar-section">
@@ -868,6 +868,23 @@
 
         <h1>What's New</h1>
         <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">Every release of the DOE Starter Kit, newest first.</p>
+
+        <div class="release" id="v1-55-2">
+          <div class="release-header">
+            <span class="version-badge">v1.55.2</span>
+            <span class="release-date">8 April 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>CLAUDE.md migration section</strong> — expanded from 3-bullet callout to 7-step hands-on walkthrough with &quot;what goes where&quot; mapping table, CFA verification, recovery guidance, and timing advice</li>
+            <li><strong>All 20 sidebars synced</strong> — Core Concepts links (Thin Router, Adversarial Review, Defence in Depth), What&#x27;s New section title, and Migration Guide now identical across every page</li>
+            <li><strong>Sidebar versions</strong> stamped to v1.55.2 across all pages</li>
+          </ul>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>vercel.json reverted</strong> — build command failed (Python3 not available in Vercel static deploy). Serving committed HTML via dashboard config instead</li>
+          </ul>
+        </div>
 
         <div class="release release-compact" id="v1-55-1">
           <div class="release-header">
@@ -954,6 +971,10 @@
           </ul>
         </div>
 
+        <details class="month-group">
+
+          <summary>April 2026 (13 releases)</summary>
+
         <div class="release" id="v1-53-0">
           <div class="release-header">
             <span class="version-badge">v1.53.0</span>
@@ -970,10 +991,6 @@
             <li><strong>20_structure.md: added CHANGELOG.md</strong> to directory structure listing.</li>
           </ul>
         </div>
-
-        <details class="month-group">
-
-          <summary>April 2026 (12 releases)</summary>
 
         <div class="release release-compact" id="v1-52-11">
           <div class="release-header">
@@ -3105,7 +3122,7 @@
           </a>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.55.1</footer>
+        <footer class="site-footer">DOE Starter Kit v1.55.2</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->
