@@ -30,7 +30,8 @@
       --accent-blue: #3B82F6;
       --accent-rose: #F43F5E;
       --sidebar-w: 260px;
-      --content-max: 760px;
+      --toc-w: 220px;
+      --content-max: 720px;
       --radius: 8px;
       --radius-lg: 12px;
       --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
@@ -72,197 +73,694 @@
       transition: background 0.2s, color 0.2s;
     }
 
-    .layout { display: flex; min-height: 100vh; }
+    /* -- Layout -- */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
 
+    /* -- Sidebar -- */
     .sidebar {
-      position: fixed; top: 0; left: 0;
-      width: var(--sidebar-w); height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
       background: var(--bg-sidebar);
       border-right: 1px solid var(--border);
-      overflow-y: auto; z-index: 100;
-      display: flex; flex-direction: column;
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
       transition: transform 0.25s ease, background 0.2s, border-color 0.2s;
     }
+
     .sidebar-brand {
-      display: block; padding: 20px 16px 16px;
-      font-size: 14px; font-weight: 700;
-      color: var(--text-primary); text-decoration: none;
+      display: block;
+      padding: 20px 16px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
       border-bottom: 1px solid var(--border);
-      letter-spacing: -0.01em; transition: color 0.15s; flex-shrink: 0;
+      letter-spacing: -0.01em;
+      transition: color 0.15s;
+      flex-shrink: 0;
     }
     .sidebar-brand:hover { color: var(--accent); }
     .sidebar-version { font-weight: 400; font-size: 11px; color: var(--text-muted); margin-left: 4px; }
-    .sidebar-nav { flex: 1; padding: 16px 10px 24px; overflow-y: auto; }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 10px 24px;
+      overflow-y: auto;
+    }
+
     .sidebar-section { margin-bottom: 20px; }
+
     .sidebar-section-title {
-      font-size: 11px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.06em; color: var(--text-muted); padding: 0 4px; margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 0 4px;
+      margin-bottom: 6px;
     }
+
     .sidebar-link {
-      display: block; padding: 5px 8px; border-radius: 6px;
-      font-size: 13px; color: var(--text-sidebar); text-decoration: none;
-      line-height: 1.4; transition: background 0.1s, color 0.1s;
+      display: block;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-sidebar);
+      text-decoration: none;
+      line-height: 1.4;
+      transition: background 0.1s, color 0.1s;
     }
-    .sidebar-link:hover { background: var(--border-light); color: var(--text-sidebar-active); }
-    .sidebar-link.active { background: var(--accent-light); color: var(--accent); font-weight: 500; }
+    .sidebar-link:hover {
+      background: var(--border-light);
+      color: var(--text-sidebar-active);
+    }
+    .sidebar-link.active {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .sidebar-link.nested {
+      padding-left: 20px;
+      font-size: 12.5px;
+    }
 
+    /* -- Hamburger (mobile) -- */
     .hamburger {
-      display: none; position: fixed; top: 14px; left: 14px; z-index: 200;
-      width: 36px; height: 36px; background: var(--bg-card);
-      border: 1px solid var(--border); border-radius: var(--radius);
-      cursor: pointer; align-items: center; justify-content: center;
-      flex-direction: column; gap: 5px; padding: 0; transition: background 0.2s;
+      display: none;
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 200;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+      padding: 0;
+      transition: background 0.2s;
     }
-    .hamburger span { display: block; width: 18px; height: 2px; background: var(--text-primary); border-radius: 2px; }
+    .hamburger span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--text-primary);
+      border-radius: 2px;
+    }
 
+    /* -- Dark mode button -- */
     .theme-btn {
-      position: fixed; top: 14px; right: 14px; z-index: 200;
-      width: 36px; height: 36px; background: var(--bg-card);
-      border: 1px solid var(--border); border-radius: var(--radius);
-      cursor: pointer; font-size: 16px; display: flex;
-      align-items: center; justify-content: center;
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 200;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: background 0.2s, border-color 0.2s;
     }
     .theme-btn:hover { background: var(--bg-card-hover); }
 
+    /* -- Sidebar overlay (mobile) -- */
     .sidebar-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.4); z-index: 99;
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 99;
     }
     .sidebar-overlay.visible { display: block; }
 
+    /* -- Content area -- */
     .content-area {
-      margin-left: var(--sidebar-w); flex: 1;
-      display: flex; justify-content: center; padding: 40px 48px; min-width: 0;
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 40px 48px;
+      min-width: 0;
     }
-    .content { max-width: var(--content-max); width: 100%; }
 
+    .content {
+      max-width: var(--content-max);
+      width: 100%;
+    }
+
+    /* -- Typography -- */
     .content h1 {
-      font-size: 32px; font-weight: 700; line-height: 1.2;
-      margin-bottom: 8px; letter-spacing: -0.02em; color: var(--text-primary);
-    }
-    .content p { color: var(--text-secondary); margin-bottom: 16px; }
-    .content a { color: var(--accent); text-decoration: underline; }
-    .content code {
-      font-family: var(--font-mono); font-size: 13px;
-      background: var(--bg-sidebar); padding: 2px 6px;
-      border-radius: 4px; border: 1px solid var(--border);
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
     }
 
-    /* ── Release entries ── */
-    .release {
-      margin-bottom: 32px; padding-bottom: 24px;
+    .content h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
       border-bottom: 1px solid var(--border);
-    }
-    .release-header {
-      display: flex; align-items: center; margin-bottom: 12px;
-    }
-    .version-badge {
-      display: inline-block; font-family: var(--font-mono);
-      font-size: 14px; font-weight: 600;
-      background: var(--accent-light); color: var(--accent);
-      padding: 4px 12px; border-radius: 20px; letter-spacing: -0.01em;
-    }
-    .release-date {
-      font-size: 13px; color: var(--text-muted); margin-left: 12px;
-    }
-    .release-hero {
-      font-size: 15px; color: var(--text-secondary); line-height: 1.7;
-      margin: 12px 0 16px; padding: 16px 20px;
-      background: linear-gradient(135deg, var(--accent-light), var(--bg-card));
-      border-left: 3px solid var(--accent);
-      border-radius: 0 var(--radius) var(--radius) 0;
-    }
-    .release h4 {
-      font-size: 13px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.04em; color: var(--accent-green); margin: 16px 0 8px;
-    }
-    .release h4.changed { color: var(--accent-blue); }
-    .release h4.fixed { color: var(--accent-amber); }
-    .release h4.removed { color: var(--accent-rose); }
-    .release h4.docs { color: var(--text-muted); }
-    .release ul { margin: 0 0 8px 20px; padding: 0; }
-    .release li {
-      font-size: 14px; color: var(--text-secondary);
-      margin-bottom: 4px; line-height: 1.6;
-    }
-    .release li code {
-      font-size: 12px; padding: 1px 5px;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
     }
 
-    /* ── Month groups (collapsed) ── */
-    .month-group {
-      margin-bottom: 16px; border: 1px solid var(--border);
-      border-radius: var(--radius-lg); overflow: hidden;
+    .content h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
     }
-    .month-group summary {
-      padding: 14px 20px; font-size: 15px; font-weight: 600;
-      color: var(--text-primary); cursor: pointer;
-      background: var(--bg-sidebar); transition: background 0.1s;
+
+    .content p {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .content ul, .content ol {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      padding-left: 20px;
+    }
+    .content li { margin-bottom: 6px; }
+
+    .content a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+    .content a:hover { text-decoration: underline; }
+
+    .content code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      background: var(--bg-sidebar);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* -- Cards -- */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .m-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      background: var(--bg-card);
+      transition: all 0.15s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .m-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-1px);
+      text-decoration: none;
+    }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .card-icon.indigo { background: var(--accent-light); color: var(--accent); }
+    .card-icon.green  { background: #ECFDF5; color: var(--accent-green); }
+    .card-icon.amber  { background: #FEF3C7; color: var(--accent-amber); }
+    .card-icon.blue   { background: #DBEAFE; color: var(--accent-blue); }
+    .card-icon.rose   { background: #FFE4E6; color: var(--accent-rose); }
+
+    [data-theme="dark"] .card-icon.indigo { background: #312E81; }
+    [data-theme="dark"] .card-icon.green  { background: #064E3B; }
+    [data-theme="dark"] .card-icon.amber  { background: #78350F; }
+    [data-theme="dark"] .card-icon.blue   { background: #1E3A5F; }
+    [data-theme="dark"] .card-icon.rose   { background: #4C0519; }
+
+    .m-card h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+    .m-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* -- Terminal -- */
+    .terminal {
+      background: #0F172A;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin: 24px 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #1E293B;
+    }
+    .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .terminal-dot.red    { background: #EF4444; }
+    .terminal-dot.yellow { background: #F59E0B; }
+    .terminal-dot.green  { background: #22C55E; }
+    .terminal-title {
+      margin-left: 8px;
+      font-size: 12px;
+      color: #64748B;
+      font-family: var(--font-mono);
+    }
+    .terminal pre {
+      padding: 20px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: #CBD5E1;
+      overflow-x: auto;
+      margin: 0;
+    }
+    .t-comment { color: #64748B; }
+    .t-prompt  { color: #F59E0B; }
+    .t-cmd     { color: #6EE7B7; }
+
+    /* -- Callout -- */
+    .callout {
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: flex;
+      gap: 10px;
+      line-height: 1.5;
+    }
+    .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .callout.tip {
+      background: var(--bg-callout-tip);
+      border: 1px solid #BBF7D0;
+      color: #166534;
+    }
+    [data-theme="dark"] .callout.tip { border-color: #064E3B; color: #6EE7B7; }
+    .callout strong { font-weight: 600; }
+    .callout a { color: inherit; font-weight: 500; }
+    .callout .callout-body { color: inherit; }
+
+    /* -- Steps -- */
+    .steps {
+      margin: 24px 0;
+      padding: 0;
       list-style: none;
     }
-    .month-group summary::-webkit-details-marker { display: none; }
-    .month-group summary::before {
-      content: "\25B6"; display: inline-block; margin-right: 10px;
-      font-size: 11px; color: var(--text-muted);
-      transition: transform 0.2s;
+    .step {
+      position: relative;
+      padding-left: 48px;
+      padding-bottom: 24px;
+      border-left: 2px solid var(--border);
+      margin-left: 14px;
     }
-    .month-group[open] summary::before { transform: rotate(90deg); }
-    .month-group summary:hover { background: var(--bg-card-hover); }
-    .month-group .release {
-      margin: 0; padding: 20px 24px; border-bottom: 1px solid var(--border);
+    .step:last-child { border-left: 2px solid transparent; padding-bottom: 0; }
+    .step-number {
+      position: absolute;
+      left: -15px;
+      top: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .month-group .release:last-child { border-bottom: none; }
+    .step h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+    .step p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0 0 8px;
+    }
+    .step code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--bg-sidebar);
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+    }
+    .step a { color: var(--accent); }
 
-    /* ── Pagination ── */
+    /* -- Code block -- */
+    .code-block {
+      background: var(--bg-code);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 12px 0 16px;
+      overflow-x: auto;
+    }
+    .code-block pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      color: #CBD5E1;
+    }
+
+    /* -- Plain English box -- */
+    .plain-english {
+      background: linear-gradient(135deg, var(--accent-light), var(--bg-card));
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    .plain-english h4 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .plain-english p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    /* -- Diagram container -- */
+    .diagram {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 16px 12px;
+      margin: 24px 0;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+      overflow-x: auto;
+    }
+    .diagram svg {
+      width: 100%;
+      height: auto;
+    }
+
+    /* -- Pagination -- */
     .pagination {
-      display: flex; gap: 16px; margin-top: 48px;
-      padding-top: 24px; border-top: 1px solid var(--border);
+      display: flex;
+      gap: 16px;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
     }
     .pagination a {
-      flex: 1; display: block; padding: 16px;
-      border: 1px solid var(--border); border-radius: var(--radius-lg);
-      text-decoration: none; color: inherit; transition: all 0.15s;
+      flex: 1;
+      display: block;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.15s;
     }
     .pagination a:hover {
-      border-color: var(--accent); box-shadow: var(--shadow-card);
+      border-color: var(--accent);
+      box-shadow: var(--shadow-card);
       text-decoration: none;
     }
     .pg-label {
-      font-size: 11px; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
     }
-    .pg-title { font-size: 14px; font-weight: 500; color: var(--accent); }
+    .pg-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+    .pagination .next { text-align: right; }
 
+    /* -- Footer -- */
     .site-footer {
-      margin-top: 48px; padding-top: 24px;
+      margin-top: 48px;
+      padding-top: 24px;
       border-top: 1px solid var(--border);
-      font-size: 12px; color: var(--text-muted); text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
     }
 
+    /* -- Responsive -- */
     @media (max-width: 900px) {
       .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
       .sidebar.open { transform: translateX(0); }
       .content-area { margin-left: 0; padding: 24px 20px; padding-top: 60px; }
       .hamburger { display: flex; }
     }
+
+    @media (max-width: 600px) {
+      .card-grid { grid-template-columns: 1fr; }
+      .card-grid.cols-3 { grid-template-columns: 1fr; }
+    }
+
+    @media (min-width: 601px) and (max-width: 900px) {
+      .card-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* -- Right-side TOC -- */
+    .toc {
+      width: var(--toc-w);
+      min-width: var(--toc-w);
+      position: fixed;
+      right: 24px;
+      top: 120px;
+      font-size: 12px;
+    }
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .toc-link {
+      display: block;
+      padding: 3px 0 3px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid var(--border);
+      transition: all 0.1s;
+    }
+    .toc-link:hover {
+      color: var(--text-secondary);
+      border-color: var(--text-muted);
+    }
+    .toc-link.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    @media (min-width: 1201px) {
+      .content-area { padding-right: calc(var(--toc-w) + 48px); }
+    }
+    @media (max-width: 1200px) {
+      .toc { display: none; }
+      .content-area { padding-right: 0 !important; }
+    }
+
+    /* -- Release-specific styles -- */
+    .version-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: -0.01em;
+    }
+    .release-date {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-left: 12px;
+    }
+    .release-hero {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 12px 0 16px;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, var(--accent-light), var(--bg-card));
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    .release {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .release-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .release h4 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent-green);
+      margin: 16px 0 8px;
+    }
+    .release h4.changed { color: var(--accent-blue); }
+    .release h4.fixed { color: var(--accent-amber); }
+    .release h4.removed { color: var(--accent-rose); }
+    .release ul {
+      margin: 0 0 8px 20px;
+      padding: 0;
+    }
+    .release li {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      line-height: 1.6;
+    }
+    .release li code {
+      font-size: 12px;
+      padding: 1px 5px;
+    }
+
+    /* -- Tag badges -- */
+    .tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 10px;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+    .tag.app {
+      background: #DBEAFE;
+      color: #1D4ED8;
+    }
+    .tag.infra {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+    [data-theme="dark"] .tag.app {
+      background: #1E3A5F;
+      color: #93C5FD;
+    }
+    [data-theme="dark"] .tag.infra {
+      background: #78350F;
+      color: #FDE68A;
+    }
+
+    /* -- Month groups (collapsed) -- */
+    .month-group {
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .month-group summary {
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      background: var(--bg-sidebar);
+      transition: background 0.1s;
+      list-style: none;
+    }
+    .month-group summary::-webkit-details-marker { display: none; }
+    .month-group summary::before {
+      content: "\25B6";
+      display: inline-block;
+      margin-right: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+    .month-group[open] summary::before { transform: rotate(90deg); }
+    .month-group summary:hover { background: var(--bg-card-hover); }
+    .month-group .release {
+      margin: 0;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .month-group .release:last-child { border-bottom: none; }
   </style>
 </head>
 <body>
 
+  <!-- Mobile hamburger -->
   <button class="hamburger" id="hamburger" aria-label="Open menu">
     <span></span><span></span><span></span>
   </button>
+
+  <!-- Dark mode toggle -->
   <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">&#9789;</button>
+
+  <!-- Sidebar overlay -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <div class="layout">
 
+    <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
       <a class="sidebar-brand" href="index.html">DOE Starter Kit <span class="sidebar-version">v1.54.2</span></a>
       <div class="sidebar-nav">
 
         <div class="sidebar-section">
+          <div class="sidebar-section-title">What's New</div>
           <a class="sidebar-link active" href="whats-new.html">What's New</a>
         </div>
 
@@ -277,10 +775,15 @@
         <div class="sidebar-section">
           <div class="sidebar-section-title">Core Concepts</div>
           <a class="sidebar-link" href="key-concepts.html">DOE Architecture</a>
+          <a class="sidebar-link nested" href="key-concepts.html#directives">Directives</a>
+          <a class="sidebar-link nested" href="key-concepts.html#execution">Execution Scripts</a>
           <a class="sidebar-link" href="first-session.html#state">Sessions &amp; State</a>
           <a class="sidebar-link" href="context.html">Context &amp; Sessions</a>
           <a class="sidebar-link" href="key-concepts.html#contracts">Contracts</a>
           <a class="sidebar-link" href="key-concepts.html#self-annealing">Self-Annealing</a>
+          <a class="sidebar-link" href="key-concepts.html#thin-router">Thin Router</a>
+          <a class="sidebar-link" href="key-concepts.html#adversarial-review">Adversarial Review</a>
+          <a class="sidebar-link" href="key-concepts.html#defence-in-depth">Defence in Depth</a>
         </div>
 
         <div class="sidebar-section">
@@ -288,12 +791,16 @@
           <a class="sidebar-link" href="commands.html">Session Lifecycle</a>
           <a class="sidebar-link" href="commands.html#quality">Quality &amp; Review</a>
           <a class="sidebar-link" href="commands.html#reports">Visual Reports</a>
+          <a class="sidebar-link nested" href="commands.html#planning">Planning &amp; Ideas</a>
+          <a class="sidebar-link nested" href="commands.html#multiagent">Advanced</a>
+          <a class="sidebar-link nested" href="commands.html#maintenance">Maintenance</a>
         </div>
 
         <div class="sidebar-section">
           <div class="sidebar-section-title">Workflows</div>
           <a class="sidebar-link" href="daily-flow.html">A Day with DOE</a>
           <a class="sidebar-link" href="workflows.html">Feature Lifecycle</a>
+          <a class="sidebar-link" href="workflows.html#planning">Planning &amp; Prompts</a>
           <a class="sidebar-link" href="multi-agent.html">Multi-Agent</a>
         </div>
 
@@ -307,23 +814,22 @@
 
         <div class="sidebar-section">
           <div class="sidebar-section-title">Reference</div>
-          <a class="sidebar-link" href="testing.html">Testing &amp; Quality</a>
-          <a class="sidebar-link" href="pr-workflow.html">PR Workflow</a>
           <a class="sidebar-link" href="tips-and-mistakes.html">Tips &amp; Mistakes</a>
-          <a class="sidebar-link" href="migration-guide.html">Migration Guide</a>
           <a class="sidebar-link" href="faq.html">FAQ</a>
           <a class="sidebar-link" href="ide-setup.html">IDE Compatibility</a>
+          <a class="sidebar-link nested" href="ide-setup.html#cursor">Cursor Setup</a>
           <a class="sidebar-link" href="glossary.html">Glossary</a>
         </div>
 
       </div>
     </nav>
 
+    <!-- Main Content -->
     <div class="content-area">
       <div class="content">
 
         <h1>What's New</h1>
-        <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">Every release of the DOE Starter Kit, newest first. 138 releases and counting.</p>
+        <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">Every release of the DOE Starter Kit, newest first.</p>
 
         <div class="release" id="v1-54-0">
           <div class="release-header">
@@ -333,8 +839,8 @@
           <h4>Added</h4>
           <ul>
             <li><strong>FRAMEWORKS registry</strong> &mdash; unified source of truth for 40 frameworks (6 Tier 1 with full templates, 34 Tier 2 with <code>_generic</code> fallback). Replaces 4 separate data structures (DETECT_PATTERNS, FRAMEWORK_OPTIONS, FRAMEWORK_PROJECT_TYPE, get_init_command dict). Computed shims preserve backwards compatibility.</li>
-            <li><strong>11 project types</strong> (was 5) &mdash; desktop, browser extension, library/package, monorepo, hardware/IoT, plus "Other" with free-text on every selection.</li>
-            <li><strong>"Other" escape hatch</strong> &mdash; every type and framework list ends with "Other (I'll describe it)" with free-text prompt. Custom text embedded verbatim in CLAUDE.md.</li>
+            <li><strong>11 project types</strong> (was 5) &mdash; desktop, browser extension, library/package, monorepo, hardware/IoT, plus &quot;Other&quot; with free-text on every selection.</li>
+            <li><strong>&quot;Other&quot; escape hatch</strong> &mdash; every type and framework list ends with &quot;Other (I&#x27;ll describe it)&quot; with free-text prompt. Custom text embedded verbatim in CLAUDE.md.</li>
             <li><strong>templates/_generic/</strong> &mdash; fallback template directory for Tier 2 frameworks. Contains scaffold.json, .gitignore, .env.example.</li>
             <li><strong>Platform targets</strong> &mdash; new <code>card_platform_targets()</code> question for desktop/mobile projects. Multi-select (macOS, Windows, Linux, iOS, Android, Web). Injected into CLAUDE.md.</li>
             <li><strong>execution/check_pending_prs.py</strong> &mdash; pre-commit hook validates ## Pending PRs in todo.md against <code>gh pr list</code>. Blocks stale entries (merged PRs), warns about missing entries (open PRs). Skips gracefully offline.</li>
@@ -342,7 +848,7 @@
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong>doe_init wizard flow</strong> &mdash; framework selection decoupled from project type ("Show all" option reveals full categorised list). Detection override opens full list without re-asking project type. Types with no dedicated frameworks skip straight to free-text.</li>
+            <li><strong>doe_init wizard flow</strong> &mdash; framework selection decoupled from project type (&quot;Show all&quot; option reveals full categorised list). Detection override opens full list without re-asking project type. Types with no dedicated frameworks skip straight to free-text.</li>
             <li><strong>Card functions return tuples</strong> &mdash; <code>card_project_type()</code> and <code>card_framework()</code> return <code>(key, custom_text)</code> instead of string. <code>run_wizard()</code> unpacks both.</li>
             <li><strong>write_doe_version()</strong> &mdash; switched from positional format to key=value format for forwards compatibility with future <code>doe update</code>.</li>
             <li><strong>get_active_layers()</strong> &mdash; browser_extension projects now get public_facing layer.</li>
@@ -361,9 +867,9 @@
           </div>
           <h4 class="fixed">Fixed</h4>
           <ul>
-            <li><strong>building-rules.md: monty-specific content</strong> &mdash; removed <code>execution/build.py</code> trigger (project-specific), replaced "PCON24 constituency codes" and "vote shares" examples with generic equivalents.</li>
-            <li><strong>20_structure.md: phantom CHANGELOG.md</strong> &mdash; removed CHANGELOG.md from directory structure listing since <code>doe init</code> doesn't create it.</li>
-            <li><strong>manifest.json: bad legal trigger</strong> &mdash; removed "Legal (email, donations, content)" trigger that pointed to documentation-governance.md (a document-versioning directive, not legal guidance).</li>
+            <li><strong>building-rules.md: monty-specific content</strong> &mdash; removed <code>execution/build.py</code> trigger (project-specific), replaced &quot;PCON24 constituency codes&quot; and &quot;vote shares&quot; examples with generic equivalents.</li>
+            <li><strong>20_structure.md: phantom CHANGELOG.md</strong> &mdash; removed CHANGELOG.md from directory structure listing since <code>doe init</code> doesn&#x27;t create it.</li>
+            <li><strong>manifest.json: bad legal trigger</strong> &mdash; removed &quot;Legal (email, donations, content)&quot; trigger that pointed to documentation-governance.md (a document-versioning directive, not legal guidance).</li>
           </ul>
         </div>
 
@@ -374,12 +880,12 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong>todo.md: contract Verify: patterns spec</strong> &mdash; formal specification of 4 executable verification patterns (<code>run:</code>, <code>file: exists</code>, <code>file: contains</code>, <code>html: has</code>), <code>[auto]</code> vs <code>[manual]</code> guidance, and validation rules. Previously the template just said "must have a Contract: block" with no detail on what valid patterns look like.</li>
+            <li><strong>todo.md: contract Verify: patterns spec</strong> &mdash; formal specification of 4 executable verification patterns (<code>run:</code>, <code>file: exists</code>, <code>file: contains</code>, <code>html: has</code>), <code>[auto]</code> vs <code>[manual]</code> guidance, and validation rules. Previously the template just said &quot;must have a Contract: block&quot; with no detail on what valid patterns look like.</li>
             <li><strong>todo.md: retro as mandatory final step</strong> &mdash; quick/full escalation rules, wave deferral format, and when to escalate from quick to full retro.</li>
             <li><strong>todo.md: Pending PRs detailed format</strong> &mdash; entry format spec (heading, summary, contains, detail table, post-merge checklist), merge order pointer, conflict tracking. Previously just an empty section.</li>
-            <li><strong>todo.md: collapsible details for complex features</strong> &mdash; <code><details><summary></code> for 3+ step features with plan file linking.</li>
-            <li><strong>todo.md: general format improvements</strong> &mdash; "this file tracks immediate work only" preamble, progress tracking belongs here not in plans, format is changeable.</li>
-            <li><strong>manifest.json: 2 new triggers</strong> &mdash; "External data / API integration" (universal, points to building-rules.md) and "Legal (email, donations, content)" (regulated layer, points to documentation-governance.md).</li>
+            <li><strong>todo.md: collapsible details for complex features</strong> &mdash; <code>&lt;details&gt;&lt;summary&gt;</code> for 3+ step features with plan file linking.</li>
+            <li><strong>todo.md: general format improvements</strong> &mdash; &quot;this file tracks immediate work only&quot; preamble, progress tracking belongs here not in plans, format is changeable.</li>
+            <li><strong>manifest.json: 2 new triggers</strong> &mdash; &quot;External data / API integration&quot; (universal, points to building-rules.md) and &quot;Legal (email, donations, content)&quot; (regulated layer, points to documentation-governance.md).</li>
             <li><strong>20_structure.md: added CHANGELOG.md</strong> to directory structure listing.</li>
           </ul>
         </div>
@@ -402,11 +908,11 @@
           </div>
           <h4 class="fixed">Fixed</h4>
           <ul>
-            <li><strong>audit_claims.py: false router WARNs</strong> — <code>check_router_coverage</code> didn't recognize directory triggers (<code>adversarial-review/</code>, <code>best-practices/</code>), causing 7 false WARNs on every fresh init. Added <code>dir_refs</code> matching from <code>test_methodology.py</code>.</li>
+            <li><strong>audit_claims.py: false router WARNs</strong> — <code>check_router_coverage</code> didn&#x27;t recognize directory triggers (<code>adversarial-review/</code>, <code>best-practices/</code>), causing 7 false WARNs on every fresh init. Added <code>dir_refs</code> matching from <code>test_methodology.py</code>.</li>
             <li><strong>audit_claims.py: false cross-ref WARNs</strong> — <code>check_cross_reference_consistency</code> lacked home-directory (<code>~/.claude/</code>) and kit-directory fallback paths, causing 8 false WARNs. Also skips <code>_TEMPLATE.md</code> files now.</li>
-            <li><strong>data-safety.md: monty-specific content</strong> — replaced "Monty" with "the system" and removed 2 monty-specific <code>.claude/plans/</code> cross-references that don't exist in other projects.</li>
+            <li><strong>data-safety.md: monty-specific content</strong> — replaced &quot;Monty&quot; with &quot;the system&quot; and removed 2 monty-specific <code>.claude/plans/</code> cross-references that don&#x27;t exist in other projects.</li>
             <li><strong>manifest.json: chrome-verification framework gate</strong> — removed <code>frameworks</code> restriction from chrome-verification trigger. The <code>public_facing</code> layer gate is sufficient; framework filter caused install/trigger mismatch.</li>
-            <li><strong>10_methodology.md: missing rule pointers</strong> — added <code>-></code> directive pointers to Core Behaviour rules 2, 3, and 5.</li>
+            <li><strong>10_methodology.md: missing rule pointers</strong> — added <code>-&gt;</code> directive pointers to Core Behaviour rules 2, 3, and 5.</li>
           </ul>
         </div>
 
@@ -423,13 +929,13 @@
           <ul>
             <li><strong>Init wizard: dead hooks</strong> — <code>.claude/settings.json</code> (hook configuration) was never created. All 7 guardrail hooks were installed as files but never wired up. Now generated with PreToolUse + PostToolUse hooks, stripping kit-contributor-only entries.</li>
             <li><strong>Init wizard: missing files</strong> — <code>.claude/agents/</code> (4 agent definitions), <code>.claude/plans/</code> (multi-agent coordination), <code>.claude/stats.json</code>, <code>ROADMAP.md</code>, <code>tasks/archive.md</code> were never scaffolded despite being referenced by commands and directives.</li>
-            <li><strong>Init wizard: incomplete manifest</strong> — 23/31 commands, 7/16 execution scripts, 8/24 directives, 3/9 global scripts, pre-push hook, and <code>data-safety.md</code> were missing from <code>manifest.json</code>. New projects got a fraction of the kit's capabilities.</li>
+            <li><strong>Init wizard: incomplete manifest</strong> — 23/31 commands, 7/16 execution scripts, 8/24 directives, 3/9 global scripts, pre-push hook, and <code>data-safety.md</code> were missing from <code>manifest.json</code>. New projects got a fraction of the kit&#x27;s capabilities.</li>
             <li><strong>Init wizard: NameError crash</strong> — <code>DETECT_PATTERNS</code> referenced after rename to <code>_FALLBACK_DETECT_PATTERNS</code>. Wizard could not reach the confirmation card.</li>
-            <li><strong>Init wizard: regulated layer</strong> — <code>data-governance.md</code> and <code>legal-framework.md</code> were promised in the confirmation card but the template files didn't exist. Now created as proper GDPR/compliance scaffolds.</li>
+            <li><strong>Init wizard: regulated layer</strong> — <code>data-governance.md</code> and <code>legal-framework.md</code> were promised in the confirmation card but the template files didn&#x27;t exist. Now created as proper GDPR/compliance scaffolds.</li>
             <li><strong>Review gate broken</strong> — <code>/review</code> never called <code>record_review_result.py</code>, so <code>enforce_review_gate.py</code> blocked PR creation with no way to pass. Review command now records the verdict.</li>
-            <li><strong>setup.sh: STATE.md written to kit repo</strong> — <code>STATE_FILE</code> pointed to <code>$SCRIPT_DIR/STATE.md</code> (the kit) instead of the project's <code>STATE.md</code>. Fixed.</li>
-            <li><strong>setup.sh: git hooks activated on kit</strong> — <code>git config core.hooksPath</code> ran against the kit repo, not the user's project. Fixed.</li>
-            <li><strong>setup.sh: Linux incompatibility</strong> — <code>sed -i ''</code> is macOS-only. Now uses cross-platform detection.</li>
+            <li><strong>setup.sh: STATE.md written to kit repo</strong> — <code>STATE_FILE</code> pointed to <code>$SCRIPT_DIR/STATE.md</code> (the kit) instead of the project&#x27;s <code>STATE.md</code>. Fixed.</li>
+            <li><strong>setup.sh: git hooks activated on kit</strong> — <code>git config core.hooksPath</code> ran against the kit repo, not the user&#x27;s project. Fixed.</li>
+            <li><strong>setup.sh: Linux incompatibility</strong> — <code>sed -i &#x27;&#x27;</code> is macOS-only. Now uses cross-platform detection.</li>
             <li><strong>Git init message never shown</strong> — inverted <code>has_git</code> condition after successful init.</li>
             <li><strong>Test suite crash</strong> — <code>test_doe_init.py</code> imported deleted <code>DETECT_PATTERNS</code> symbol.</li>
             <li><strong>Command paths broken</strong> — <code>/report-doe-bug</code> and <code>/request-doe-feature</code> referenced <code>execution/</code> paths that only exist in the kit, not user projects. Fixed to <code>~/doe-starter-kit/execution/</code>.</li>
@@ -437,10 +943,10 @@
           <h4>Added</h4>
           <ul>
             <li><strong><code>best-practices/</code> directives</strong> — 5 language-specific best practice files (HTML/CSS, JavaScript, Python, React, TDD) now installed to projects.</li>
-            <li><strong>Quality Gate trigger</strong> — <code>"Completed 4+ steps on current feature"</code> trigger added to manifest. Ensures mid-build verification on long features.</li>
+            <li><strong>Quality Gate trigger</strong> — <code>&quot;Completed 4+ steps on current feature&quot;</code> trigger added to manifest. Ensures mid-build verification on long features.</li>
             <li><strong>6 new triggers</strong> — subagent-protocol, starter-kit-pull, tdd-and-debugging, multi-agent-coordination, incident-response, quality gate.</li>
             <li><strong>Framework detection from scaffold.json</strong> — replaces hardcoded <code>DETECT_PATTERNS</code> dict. Single source of truth with fallback.</li>
-            <li><strong>First-time <code>~/.claude/CLAUDE.md</code></strong> — universal learnings template installed for users who don't have one.</li>
+            <li><strong>First-time <code>~/.claude/CLAUDE.md</code></strong> — universal learnings template installed for users who don&#x27;t have one.</li>
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
@@ -456,7 +962,7 @@
             <span class="version-badge">v1.52.0</span>
             <span class="release-date">2 April 2026</span>
           </div>
-          <p class="release-hero">DOE becomes a conversation, not a copy-paste. The init wizard replaces blind setup.sh with an 8-card interactive flow that detects your framework, asks what you're building, and scaffolds a project with exactly the files you need. Composable capability layers (universal, public-facing, data-handling, regulated) mean a static HTML site and a GDPR-regulated SaaS app both start from the same wizard — they just get different files.</p>
+          <p class="release-hero">DOE becomes a conversation, not a copy-paste. The init wizard replaces blind setup.sh with an 8-card interactive flow that detects your framework, asks what you&#x27;re building, and scaffolds a project with exactly the files you need. Composable capability layers (universal, public-facing, data-handling, regulated) mean a static HTML site and a GDPR-regulated SaaS app both start from the same wizard — they just get different files.</p>
           <h4>Added</h4>
           <ul>
             <li><strong>DOE Init Wizard</strong> (<code>execution/doe_init.py</code>) — conversational scaffolding tool replacing blind setup.sh copy. 8-card bordered UX, framework auto-detection, composable CLAUDE.md generation, additive capability layers (universal, public-facing, data-handling, regulated). Supports Next.js, Vite, Python, Go, Flutter, static HTML.</li>
@@ -504,7 +1010,7 @@
           </ul>
           <h4>Added</h4>
           <ul>
-            <li><strong>Step-marking enforcement</strong> (<code>commit-msg</code> hook) — blocks commits with "Step N" or version tag <code>(vX.Y.Z)</code> in the message unless <code>tasks/todo.md</code> is staged. Skip: <code>SKIP_STEP_MARK_CHECK=1</code>.</li>
+            <li><strong>Step-marking enforcement</strong> (<code>commit-msg</code> hook) — blocks commits with &quot;Step N&quot; or version tag <code>(vX.Y.Z)</code> in the message unless <code>tasks/todo.md</code> is staged. Skip: <code>SKIP_STEP_MARK_CHECK=1</code>.</li>
             <li><strong>Main-branch protection</strong> (<code>pre-commit</code> hook) — blocks direct commits to main/master locally (allows merge commits). Skip: <code>SKIP_MAIN_PROTECTION=1</code>.</li>
             <li><strong>Steps-complete PR gate</strong> (<code>enforce_review_gate.py</code>) — blocks <code>gh pr create</code> on feature branches if not all steps in ## Current are complete. Prevents mid-feature PRs.</li>
           </ul>
@@ -582,7 +1088,7 @@
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong>eod_html.py</strong> — DOE Kit sync indicator now shows user/creator change counts (e.g. "not synced (3u 2c)")</li>
+            <li><strong>eod_html.py</strong> — DOE Kit sync indicator now shows user/creator change counts (e.g. &quot;not synced (3u 2c)&quot;)</li>
           </ul>
         </div>
 
@@ -593,7 +1099,7 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong>todo.md structural linter</strong> (<code>execution/lint_todo.py</code>) — enforces contract existence on every step, retro as last step, [APP] features require [manual] criteria</li>
+            <li><strong>todo.md structural linter</strong> (<code>execution/lint_todo.py</code>) — enforces contract existence on every step, retro as last step, <span class="tag app">APP</span> features require [manual] criteria</li>
             <li><strong>Quality gate runner</strong> (<code>execution/quality_gate.py</code>) — wrapper for mid-feature checkpoints (<code>--checkpoint</code>) and pre-retro gates (<code>--pre-retro</code>), writes markers to <code>.tmp/</code></li>
             <li><strong>Invariant bootstrap</strong> (<code>execution/bootstrap_invariants.py</code>) — scans completed contracts and promotes lasting patterns to <code>tests/invariants.txt</code></li>
             <li><strong>Invariants template</strong> (<code>tests/invariants.txt</code>) — empty file with format docs, ready for project-specific invariants</li>
@@ -625,7 +1131,7 @@
             <li><strong>CLAUDE.md</strong> — rewritten from ~113-line monolith to ~55-line thin router. Rules replaced with one-liner pointers to phase directives. Trigger table replaces Progressive Disclosure section</li>
             <li><strong>SYSTEM-MAP.md</strong> — updated to document CFA architecture (phase directives, agents, DAG executor, pre-push hook)</li>
             <li><strong>crack-on.md</strong> — dependency analysis from DAG executor, session blocking for large features</li>
-            <li><strong>test_methodology.py</strong> — <code>--scenario</code> flag now accepts multiple values (<code>action="append"</code>)</li>
+            <li><strong>test_methodology.py</strong> — <code>--scenario</code> flag now accepts multiple values (<code>action=&quot;append&quot;</code>)</li>
           </ul>
         </div>
 
@@ -675,13 +1181,13 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong>TDD & debugging directive</strong> (<code>directives/best-practices/tdd-and-debugging.md</code>) — Red-Green-Refactor enforcement with 7-excuse rationalisation table, 4-phase systematic debugging protocol (Investigate, Pattern Analysis, Hypothesis Testing, Implementation). Includes "when to test" decision table by code type</li>
-            <li><strong>Chrome verification directive</strong> (<code>directives/chrome-verification.md</code>) — protocol for using Claude Code's Chrome MCP integration to auto-verify <code>[manual]</code> contract items. DOM checks, console checks, layout screenshots, with graceful degradation</li>
-            <li><strong>4 CLAUDE.md triggers</strong> — TDD enforcement on new code, systematic debugging on failures, Chrome verification in snagging, Chrome prompt in crack-on for [APP] features</li>
+            <li><strong>TDD &amp; debugging directive</strong> (<code>directives/best-practices/tdd-and-debugging.md</code>) — Red-Green-Refactor enforcement with 7-excuse rationalisation table, 4-phase systematic debugging protocol (Investigate, Pattern Analysis, Hypothesis Testing, Implementation). Includes &quot;when to test&quot; decision table by code type</li>
+            <li><strong>Chrome verification directive</strong> (<code>directives/chrome-verification.md</code>) — protocol for using Claude Code&#x27;s Chrome MCP integration to auto-verify <code>[manual]</code> contract items. DOM checks, console checks, layout screenshots, with graceful degradation</li>
+            <li><strong>4 CLAUDE.md triggers</strong> — TDD enforcement on new code, systematic debugging on failures, Chrome verification in snagging, Chrome prompt in crack-on for <span class="tag app">APP</span> features</li>
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong>crack-on</strong> — Chrome enablement prompt for [APP] features. Does not auto-enable (context cost); just asks</li>
+            <li><strong>crack-on</strong> — Chrome enablement prompt for <span class="tag app">APP</span> features. Does not auto-enable (context cost); just asks</li>
             <li><strong>snagging</strong> — new Chrome verification Step 5 between test generation and report. Auto-verifies DOM, console, and layout items; leaves subjective items as <code>[manual]</code></li>
           </ul>
           <h4 class="fixed">Fixed</h4>
@@ -700,7 +1206,7 @@
             <li><strong>DOE Kit sync check simplified</strong> — stand-up, crack-on, and wrap now use version-only comparison (kit tag vs STATE.md). No more file diffs or u/c classification. Eliminates false positives from project-specific customisations</li>
             <li><strong>/sync-doe reverted to direct push</strong> — commits directly to kit main instead of creating a sync branch + PR. The sync procedure itself is the quality gate</li>
             <li><strong>/wrap session-specific sync reminder</strong> — at session end, checks if kit-syncable files were modified THIS session and shows a targeted reminder. Replaces the persistent outbound push detection</li>
-            <li><strong>/pull-doe self-correcting</strong> — always updates STATE.md version after sync, even on "already up to date". Prevents stale version mismatches</li>
+            <li><strong>/pull-doe self-correcting</strong> — always updates STATE.md version after sync, even on &quot;already up to date&quot;. Prevents stale version mismatches</li>
           </ul>
           <h4>Added</h4>
           <ul>
@@ -733,7 +1239,7 @@
             <span class="version-badge">v1.43.0</span>
             <span class="release-date">19 March 2026</span>
           </div>
-          <h4 class="docs">Documentation</h4>
+          <h4 class="changed">Documentation</h4>
           <ul>
             <li><strong>Testing tutorial rewrite</strong>: 3 inline SVG diagrams (filter funnel, runs-when timeline, tool map), updated catches/misses table, expanded baselines explanation</li>
             <li><strong>Maestro getting-started section</strong>: Full mobile testing onboarding (install, flows, template, custom flow guide, config)</li>
@@ -753,14 +1259,14 @@
             <span class="version-badge">v1.42.0</span>
             <span class="release-date">18 March 2026</span>
           </div>
-          <p class="release-hero">Quality Stack goes universal. Testing infrastructure now auto-detects and supports 16 project types — from Next.js to Flutter to Go. Maestro handles mobile UI testing with YAML flows. Framework-aware orchestration, multi-language health checks, and config-driven portability mean the same /snagging command works regardless of what you're building.</p>
+          <p class="release-hero">Quality Stack goes universal. Testing infrastructure now auto-detects and supports 16 project types — from Next.js to Flutter to Go. Maestro handles mobile UI testing with YAML flows. Framework-aware orchestration, multi-language health checks, and config-driven portability mean the same /snagging command works regardless of what you&#x27;re building.</p>
           <h4>Added</h4>
           <ul>
             <li><strong>Multi-framework testing</strong> — Quality Stack now supports 16 project types: static HTML, Next.js, Vite/React, Angular, Nuxt, Vue, SvelteKit, Remix, Astro, React Native, Expo, Flutter, Python, Go, PHP/Laravel, and Ruby/Rails. Auto-detects framework from project files and configures testing accordingly.</li>
             <li><strong>Maestro mobile testing</strong> — React Native, Expo, and Flutter projects use Maestro for YAML-based UI testing. Bootstrap installs Maestro CLI automatically. Template flows in <code>.maestro/</code> (app-launch + navigation).</li>
             <li><strong>Framework-aware orchestrator</strong> — <code>run_test_suite.py</code> reads <code>projectType</code> from <code>tests/config.json</code>, uses framework-specific build and serve commands. Adapters for all web frameworks, PHP built-in server, Rails, Go, and Python/Django.</li>
             <li><strong>Multi-language health check</strong> — <code>health_check.py</code> scans 10+ languages with per-framework scan paths, stub patterns, TODO detection, and empty function detection. Supports <code>.js</code>, <code>.jsx</code>, <code>.ts</code>, <code>.tsx</code>, <code>.vue</code>, <code>.svelte</code>, <code>.astro</code>, <code>.py</code>, <code>.go</code>, <code>.php</code>, <code>.rb</code>, <code>.dart</code> files.</li>
-            <li><strong>Path routing support</strong> — <code>routeMode</code> field in <code>tests/config.json</code> — <code>"hash"</code> (default) or <code>"path"</code> (Next.js, Vite, SvelteKit, etc). helpers.js uses root path for path-based routing.</li>
+            <li><strong>Path routing support</strong> — <code>routeMode</code> field in <code>tests/config.json</code> — <code>&quot;hash&quot;</code> (default) or <code>&quot;path&quot;</code> (Next.js, Vite, SvelteKit, etc). helpers.js uses root path for path-based routing.</li>
             <li><strong>Distribution fix</strong> — <code>setup.sh</code> copies Quality Stack execution scripts and test infrastructure to new projects. <code>/pull-doe</code> syncs Quality Stack files between kit and project.</li>
             <li><strong>Snagging auto-bootstrap</strong> — <code>/snagging</code> automatically runs <code>--bootstrap</code> on first use instead of telling the user to do it manually.</li>
             <li><strong>Snagging copy dropdown</strong> — Copy Results + Copy Bugs + Export section consolidated into a single dropdown menu with failure count badge.</li>
@@ -768,7 +1274,7 @@
           <h4 class="changed">Changed</h4>
           <ul>
             <li><strong>Generator multi-framework</strong> — <code>generate_test_checklist.py</code> handles <code>maestro_results</code> with framework-specific tile labels, shows <code>projectType</code> badge in automated results header.</li>
-            <li><strong>Health check per-language patterns</strong> — TODO/FIXME detection uses <code>#</code> for Python/Ruby, <code>//</code> for JS/Go/Dart, <code><!--</code> for Vue/Svelte/Astro templates. Empty function detection uses language-specific syntax (<code>def...pass</code> for Python, <code>func...{}</code> for Go, etc).</li>
+            <li><strong>Health check per-language patterns</strong> — TODO/FIXME detection uses <code>#</code> for Python/Ruby, <code>//</code> for JS/Go/Dart, <code>&lt;!--</code> for Vue/Svelte/Astro templates. Empty function detection uses language-specific syntax (<code>def...pass</code> for Python, <code>func...{}</code> for Go, etc).</li>
           </ul>
         </div>
 
@@ -790,9 +1296,9 @@
           </div>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong><code>/report-doe-bug</code> enhanced issue template</strong> — added Component field (searchable by DOE command/script), Error Output section (sanitised traceback), What Was Tried section, User's Description section, Project Type in environment table.</li>
+            <li><strong><code>/report-doe-bug</code> enhanced issue template</strong> — added Component field (searchable by DOE command/script), Error Output section (sanitised traceback), What Was Tried section, User&#x27;s Description section, Project Type in environment table.</li>
             <li><strong>Duplicate escalation</strong> — structured duplicate comment format with version/severity/description. Adds +1 reaction to issues for sorting by most-affected. Auto-escalates priority labels: 2+ duplicate reports → <code>priority:high</code>, 5+ → <code>priority:critical</code>.</li>
-            <li><strong>Simplified project type question</strong> — "web app or mobile app?" instead of framework-specific options. Labels: <code>project:web</code> / <code>project:mobile</code>.</li>
+            <li><strong>Simplified project type question</strong> — &quot;web app or mobile app?&quot; instead of framework-specific options. Labels: <code>project:web</code> / <code>project:mobile</code>.</li>
             <li><strong>Draft card</strong> — now shows Component, Error Output, and What Was Tried sections in the preview.</li>
           </ul>
         </div>
@@ -859,7 +1365,7 @@
           </div>
           <h4 class="fixed">Fixed</h4>
           <ul>
-            <li><strong>SVG diagrams across 3 pages</strong>: commands.html viewBox widened to 610 (fixes "weekly" text clipping). key-concepts.html and context.html SVGs changed from fixed <code>width</code>/<code>height</code> attributes to <code>width:100%;height:auto</code> so they scale responsively. Container padding reduced across all diagram containers.</li>
+            <li><strong>SVG diagrams across 3 pages</strong>: commands.html viewBox widened to 610 (fixes &quot;weekly&quot; text clipping). key-concepts.html and context.html SVGs changed from fixed <code>width</code>/<code>height</code> attributes to <code>width:100%;height:auto</code> so they scale responsively. Container padding reduced across all diagram containers.</li>
           </ul>
         </div>
 
@@ -882,7 +1388,7 @@
           <h4 class="changed">Changed</h4>
           <ul>
             <li><strong>Command card layout</strong> (commands.html): badge + origin tag now share a row (flex-wrap), summary text forced below via <code>flex-basis: 100%</code>. Reduced card padding from 20px 24px to 18px 20px.</li>
-            <li><strong>"Built-in" renamed to "Default"</strong> across all 6 command entries, section heading, and TOC link. CSS class <code>.cmd-origin.builtin</code> renamed to <code>.cmd-origin.default</code>.</li>
+            <li><strong>&quot;Built-in&quot; renamed to &quot;Default&quot;</strong> across all 6 command entries, section heading, and TOC link. CSS class <code>.cmd-origin.builtin</code> renamed to <code>.cmd-origin.default</code>.</li>
             <li><strong>Origin tag styling</strong>: now uses <code>display: inline-flex; align-items: center; height: 22px</code> for consistent vertical alignment with the command badge.</li>
             <li><strong>SVG lifecycle diagram</strong>: reduced container padding (28px 24px → 20px 16px 12px), reduced bottom margin (40px → 24px), SVG width changed from <code>max-width: 100%</code> to <code>width: 100%</code> to fill container.</li>
             <li><strong>Annotation list specificity</strong>: <code>.annotation-list</code> → <code>.content .annotation-list</code> to override <code>.content ul { padding-left: 20px }</code> without relying on source order.</li>
@@ -907,8 +1413,8 @@
           </div>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong>testing.html</strong>: New "The Snagging Checklist" section explaining the automated results card (4 metric tiles, status badge, dark mode toggle), baseline updates, and the new /snagging flow. Updated /snagging command card, "What Runs When" table, "Your Role" section, and signposting description.</li>
-            <li><strong>troubleshooting.html</strong>: New "Snagging v2 Issues" section with 5 scenario cards (Lighthouse errors, port conflicts, APP_PATH mismatch, visual regression diffs, dark mode toggle). TOC link and Quick Reference table updated.</li>
+            <li><strong>testing.html</strong>: New &quot;The Snagging Checklist&quot; section explaining the automated results card (4 metric tiles, status badge, dark mode toggle), baseline updates, and the new /snagging flow. Updated /snagging command card, &quot;What Runs When&quot; table, &quot;Your Role&quot; section, and signposting description.</li>
+            <li><strong>troubleshooting.html</strong>: New &quot;Snagging v2 Issues&quot; section with 5 scenario cards (Lighthouse errors, port conflicts, APP_PATH mismatch, visual regression diffs, dark mode toggle). TOC link and Quick Reference table updated.</li>
             <li><strong>commands.html</strong>: /snagging entry updated to describe automated test suite integration, results card, dark mode toggle, and baseline updates.</li>
           </ul>
         </div>
@@ -922,9 +1428,9 @@
           <ul>
             <li><strong>Snagging v2: Automated test results integration</strong> — <code>/snagging</code> now runs <code>execution/run_test_suite.py</code> (if it exists) before generating the checklist. Results rendered as an automated results card with status badge (ALL PASS / WARNINGS / FAILURES), metric tile strip (Browser Tests, Visual Regression, Accessibility, Performance), expandable detail sections (health check, route coverage), and banner divider separating auto from manual checks.</li>
             <li><strong>Dark mode toggle</strong> on snagging checklists — moon/sun button in the top bar, preference persisted in localStorage. Light mode is always the default.</li>
-            <li><strong>Concept C step stripes</strong> — section cards now have a thin header stripe showing step pill, completion timestamp, and "N of M" position indicator. Card title is just the clean feature name.</li>
+            <li><strong>Concept C step stripes</strong> — section cards now have a thin header stripe showing step pill, completion timestamp, and &quot;N of M&quot; position indicator. Card title is just the clean feature name.</li>
             <li><strong><code>--test-results</code> argument</strong> for <code>generate_test_checklist.py</code> — accepts path to orchestrator JSON output. When omitted, generator produces the same output as before (manual checks only). Fully backwards-compatible.</li>
-            <li><strong>Signpost banner divider</strong> — "YOUR REVIEW — N checks below" separates automated results from manual check sections.</li>
+            <li><strong>Signpost banner divider</strong> — &quot;YOUR REVIEW — N checks below&quot; separates automated results from manual check sections.</li>
             <li><strong>Baseline update instructions</strong> in <code>/snagging</code> command — <code>--update-baselines</code>, <code>--update-visual</code>, <code>--update-lighthouse</code>, <code>--update-a11y</code>.</li>
           </ul>
           <h4 class="changed">Changed</h4>
@@ -932,7 +1438,7 @@
             <li>Snagging command restructured: new Step 2 (run test suite, portability-guarded), steps renumbered, paste-back handling documented.</li>
             <li>Checkbox indentation tightened — less left padding, narrower number column, smaller gaps.</li>
             <li>Disclosure arrows upgraded from tiny unicode triangles to proportional SVG chevrons with rotation animation.</li>
-            <li>Heading parser now handles <code>[APP]</code>/<code>[INFRA]</code> tags without version ranges (e.g. <code>### Feature [INFRA]</code>).</li>
+            <li>Heading parser now handles <code><span class="tag app">APP</span></code>/<code><span class="tag infra">INFRA</span></code> tags without version ranges (e.g. <code>### Feature <span class="tag infra">INFRA</span></code>).</li>
             <li><code>extract_console_commands()</code> genericized — project-specific patterns replaced with commented examples.</li>
           </ul>
         </div>
@@ -945,13 +1451,13 @@
           <h4>Added</h4>
           <ul>
             <li><strong>New command: <code>/code-trace</code></strong> — AI-driven code tracing with three modes: single module (deep logic trace with BUG/WARN/INFO severity), integration (cross-module data flow), and full sweep. The probabilistic layer of the Quality Stack.</li>
-            <li><strong>New tutorial page: Testing & Quality</strong> (<code>docs/tutorial/testing.html</code>) — explains the three-layer defence (deterministic/probabilistic/empirical), what runs when, the user's role, and the signposting system.</li>
-            <li><strong>New tutorial page: Troubleshooting</strong> (<code>docs/tutorial/troubleshooting.html</code>) — every tool covered with "what you see / what it means / what to do" format. ESLint, Playwright, Lighthouse, health check, /code-trace, npm/Node, and git hook scenarios.</li>
-            <li><strong>Quality sidebar section</strong> added to all 15 tutorial pages linking to Testing & Quality and Troubleshooting.</li>
-            <li><strong>ESLint + stub detection</strong> in pre-commit hook — lints staged JS files (blocks on errors, bypassable with <code>SKIP_ESLINT=1</code>), warns on stubs (<code>return null</code>, <code>return []</code>, empty functions, "not implemented" markers). Path configurable via <code>JS_PATH</code> variable.</li>
+            <li><strong>New tutorial page: Testing &amp; Quality</strong> (<code>docs/tutorial/testing.html</code>) — explains the three-layer defence (deterministic/probabilistic/empirical), what runs when, the user&#x27;s role, and the signposting system.</li>
+            <li><strong>New tutorial page: Troubleshooting</strong> (<code>docs/tutorial/troubleshooting.html</code>) — every tool covered with &quot;what you see / what it means / what to do&quot; format. ESLint, Playwright, Lighthouse, health check, /code-trace, npm/Node, and git hook scenarios.</li>
+            <li><strong>Quality sidebar section</strong> added to all 15 tutorial pages linking to Testing &amp; Quality and Troubleshooting.</li>
+            <li><strong>ESLint + stub detection</strong> in pre-commit hook — lints staged JS files (blocks on errors, bypassable with <code>SKIP_ESLINT=1</code>), warns on stubs (<code>return null</code>, <code>return []</code>, empty functions, &quot;not implemented&quot; markers). Path configurable via <code>JS_PATH</code> variable.</li>
             <li><strong>TEST HEALTH row</strong> in <code>/stand-up</code> kick-off card — shows regression suite count and health check results at session start.</li>
             <li><strong>Health check step</strong> in <code>/wrap</code> housekeeping — runs <code>health_check.py --quick</code> + regression suite at session end, records results in System Checks.</li>
-            <li><code>/code-trace</code> and <code>/health-check</code> added to commands.html Quality & Review section.</li>
+            <li><code>/code-trace</code> and <code>/health-check</code> added to commands.html Quality &amp; Review section.</li>
             <li>npm/package.json setup note added to getting-started.html.</li>
             <li>Quality stack callout added to daily-flow.html work cycle.</li>
           </ul>
@@ -964,7 +1470,7 @@
           </div>
           <h4 class="fixed">Fixed</h4>
           <ul>
-            <li><code>execution/audit_claims.py</code>: retro steps (name starting with "Retro") now exempt from version tag check, same as <code>[INFRA]</code> steps. Prevents false WARN on <code>[APP]</code> feature retros which structurally don't get their own version bump.</li>
+            <li><code>execution/audit_claims.py</code>: retro steps (name starting with &quot;Retro&quot;) now exempt from version tag check, same as <code><span class="tag infra">INFRA</span></code> steps. Prevents false WARN on <code><span class="tag app">APP</span></code> feature retros which structurally don&#x27;t get their own version bump.</li>
           </ul>
         </div>
 
@@ -986,7 +1492,7 @@
           </div>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><code>execution/generate_test_checklist.py</code>: Option C header redesign — feature name as h1 with [APP] pill badge, env cards (Browser/Viewport/OS) top-right, 12px split progress bar (green pass + red fail), elapsed timer bottom-left with label, progress card with subtitle, Copy Bugs button (amber, conditional), Reset All with red styling, buttons right-aligned</li>
+            <li><code>execution/generate_test_checklist.py</code>: Option C header redesign — feature name as h1 with <span class="tag app">APP</span> pill badge, env cards (Browser/Viewport/OS) top-right, 12px split progress bar (green pass + red fail), elapsed timer bottom-left with label, progress card with subtitle, Copy Bugs button (amber, conditional), Reset All with red styling, buttons right-aligned</li>
             <li><code>execution/generate_test_checklist.py</code>: added <code>--verify</code> mode — re-checks known bugs via code trace and outputs unicode-bordered terminal summary instead of regenerating full HTML</li>
           </ul>
         </div>
@@ -1012,7 +1518,7 @@
           <h4 class="fixed">Fixed</h4>
           <ul>
             <li><code>global-commands/snagging.md</code>: report box now uses Unicode box-drawing characters (<code>┌─┐</code>, <code>├─┤</code>, <code>└─┘</code>, <code>│</code>) instead of ASCII (<code>+</code>, <code>--</code>, <code>|</code>) for consistency with all other DOE command output</li>
-            <li><code>docs/tutorial/*.html</code>: fixed stale footer version stamps (v1.32.0 -> v1.36.0) across all 13 tutorial pages</li>
+            <li><code>docs/tutorial/*.html</code>: fixed stale footer version stamps (v1.32.0 -&gt; v1.36.0) across all 13 tutorial pages</li>
           </ul>
           <h4>Added</h4>
           <ul>
@@ -1035,7 +1541,7 @@
             <li><code>global-commands/snagging.md</code>: <code>/snagging</code> command — auto-generates interactive HTML test checklists from todo.md <code>[manual]</code> contract items</li>
             <li><code>directives/manual-testing.md</code>: SOP for the manual testing workflow (generation, testing, feedback loop, sign-off)</li>
             <li><code>execution/generate_test_checklist.py</code>: HTML checklist generator with three-state toggles, timer, localStorage persistence, console code blocks with copy buttons, and export-to-clipboard</li>
-            <li><code>docs/tutorial/workflows.html</code>: "Manual Testing & Sign-off" section covering the /snagging workflow</li>
+            <li><code>docs/tutorial/workflows.html</code>: &quot;Manual Testing &amp; Sign-off&quot; section covering the /snagging workflow</li>
             <li><code>docs/tutorial/commands.html</code>: <code>/snagging</code> command reference entry</li>
             <li><code>CLAUDE.md</code>: Progressive Disclosure trigger for manual testing</li>
           </ul>
@@ -1080,7 +1586,7 @@
           <h4>Added</h4>
           <ul>
             <li><code>docs/tutorial/multi-agent.html</code> — new Multi-Agent Workflows tutorial page covering waves, /agent-launch, /agent-status, worked example, merge process, and common pitfalls</li>
-            <li><code>docs/tutorial/faq.html</code> — new FAQ page with 12 Q&A pairs across 3 categories (Setup, Session, Framework problems) with cross-links to relevant pages</li>
+            <li><code>docs/tutorial/faq.html</code> — new FAQ page with 12 Q&amp;A pairs across 3 categories (Setup, Session, Framework problems) with cross-links to relevant pages</li>
             <li>Right-side Table of Contents (TOC) with scrollspy on 3 content-heavy pages: commands, daily-flow, context</li>
             <li>Git basics orientation expandable section in getting-started page</li>
           </ul>
@@ -1126,7 +1632,7 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><code>docs/tutorial/</code> — 10 self-contained HTML tutorial pages in Mintlify-style design system: landing page, getting started, first session, key concepts, commands, daily flow, workflows, example apps, tips & mistakes, glossary</li>
+            <li><code>docs/tutorial/</code> — 10 self-contained HTML tutorial pages in Mintlify-style design system: landing page, getting started, first session, key concepts, commands, daily flow, workflows, example apps, tips &amp; mistakes, glossary</li>
             <li><code>docs/reference/</code> — 33 markdown reference docs covering commands, concepts, workflows, examples, file formats, and glossary</li>
             <li>Tutorial features: fixed sidebar navigation, dark mode toggle, terminal mockups with macOS dots, card grids, step components, callout boxes, expandable accordions, pagination, responsive layout (375px/768px/1440px)</li>
             <li>README: documentation section with tutorial and reference doc descriptions</li>
@@ -1140,8 +1646,8 @@
           </div>
           <h4 class="fixed">Fixed</h4>
           <ul>
-            <li><code>CLAUDE.md</code> Rule 1 point (3): Awaiting Sign-off move now happens immediately when last step's <code>[auto]</code> criteria pass, not at session wrap — fixes circular dependency where manual checks couldn't be presented until a ceremony that required manual checks</li>
-            <li><code>todo.md</code> format rules step (6): Awaiting Sign-off is now the default destination for completed features; Done section description clarified to "all contracts verified"</li>
+            <li><code>CLAUDE.md</code> Rule 1 point (3): Awaiting Sign-off move now happens immediately when last step&#x27;s <code>[auto]</code> criteria pass, not at session wrap — fixes circular dependency where manual checks couldn&#x27;t be presented until a ceremony that required manual checks</li>
+            <li><code>todo.md</code> format rules step (6): Awaiting Sign-off is now the default destination for completed features; Done section description clarified to &quot;all contracts verified&quot;</li>
           </ul>
         </div>
 
@@ -1157,7 +1663,7 @@
             <li>SIGN-OFF row in <code>stand-up.md</code> (both kick-off and status modes) — surfaces pending manual verification counts</li>
             <li>SIGN-OFF row in <code>sitrep.md</code> — same pending count between COMMITS and ELAPSED</li>
             <li><code>awaitingSignOff</code> field in <code>wrap.md</code> JSON schema — collapsible grouped cards for manual test items</li>
-            <li><code>render_awaiting_signoff()</code> in <code>wrap_html.py</code> — collapsible <code><details>/<summary></code> cards with themed groups, amber styling</li>
+            <li><code>render_awaiting_signoff()</code> in <code>wrap_html.py</code> — collapsible <code>&lt;details&gt;/&lt;summary&gt;</code> cards with themed groups, amber styling</li>
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
@@ -1187,7 +1693,7 @@
           <h4 class="fixed">Fixed</h4>
           <ul>
             <li><code>eod_html.py</code>: breakdown bar CSS overflow (flex-shrink + max-width + overflow:hidden)</li>
-            <li><code>.githooks/commit-msg</code>: cross-platform temp file approach replaces macOS-only <code>sed -i ''</code></li>
+            <li><code>.githooks/commit-msg</code>: cross-platform temp file approach replaces macOS-only <code>sed -i &#x27;&#x27;</code></li>
             <li><code>.githooks/pre-commit</code>: added <code>PYTHONIOENCODING=utf-8</code> for Windows cp1252 compatibility</li>
           </ul>
         </div>
@@ -1210,7 +1716,7 @@
           </div>
           <h4 class="fixed">Fixed</h4>
           <ul>
-            <li><code>build_hq.py</code>: HQ "This Week" summary now shows one headline activity per project (max 3) instead of dumping multiple semicolon-separated summary fragments that got truncated.</li>
+            <li><code>build_hq.py</code>: HQ &quot;This Week&quot; summary now shows one headline activity per project (max 3) instead of dumping multiple semicolon-separated summary fragments that got truncated.</li>
           </ul>
         </div>
 
@@ -1232,7 +1738,7 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><code>wrap_stats.py</code>: automatic git version tagging at wrap time. Reads <code><strong>Current app version:</strong></code> from STATE.md and creates the git tag if it doesn't exist. Ensures HQ dashboard always shows the project version.</li>
+            <li><code>wrap_stats.py</code>: automatic git version tagging at wrap time. Reads <code><strong>Current app version:</strong></code> from STATE.md and creates the git tag if it doesn&#x27;t exist. Ensures HQ dashboard always shows the project version.</li>
           </ul>
         </div>
 
@@ -1287,7 +1793,7 @@
           <h4>Added</h4>
           <ul>
             <li><code>/scope</code> command: conversational feature scoping through 3 phases (Explore, Define, Bound). Produces structured brief in <code>.claude/plans/</code> and updates ROADMAP.md with SCOPED status tag.</li>
-            <li>New "Product" section in README grouping <code>/scope</code> and <code>/pitch</code>.</li>
+            <li>New &quot;Product&quot; section in README grouping <code>/scope</code> and <code>/pitch</code>.</li>
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
@@ -1328,7 +1834,7 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><code>/stand-up</code> BLOCKERS row: reads STATE.md <code>## Blockers & Edge Cases</code> and surfaces them with <code>!!</code> prefix in both kick-off and status mode cards. Positioned between CONTRACT and DOE KIT. Omitted when no blockers exist.</li>
+            <li><code>/stand-up</code> BLOCKERS row: reads STATE.md <code>## Blockers &amp; Edge Cases</code> and surfaces them with <code>!!</code> prefix in both kick-off and status mode cards. Positioned between CONTRACT and DOE KIT. Omitted when no blockers exist.</li>
           </ul>
         </div>
 
@@ -1339,7 +1845,7 @@
           </div>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><code>/sync-doe</code> and <code>/pull-doe</code> now update STATE.md's DOE kit version as a final step, preventing false "inbound update pending" signals in <code>/stand-up</code></li>
+            <li><code>/sync-doe</code> and <code>/pull-doe</code> now update STATE.md&#x27;s DOE kit version as a final step, preventing false &quot;inbound update pending&quot; signals in <code>/stand-up</code></li>
           </ul>
         </div>
 
@@ -1350,7 +1856,7 @@
           </div>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li>EOD report stats bar format: "Friday 6th March | HH:MM | X Day streak" (human-readable date with ordinal suffix, current time, streak count)</li>
+            <li>EOD report stats bar format: &quot;Friday 6th March | HH:MM | X Day streak&quot; (human-readable date with ordinal suffix, current time, streak count)</li>
           </ul>
         </div>
 
@@ -1361,12 +1867,12 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li>Report label divider above title card in both wrap and eod HTML reports ("Session Report" / "End of Day Report")</li>
+            <li>Report label divider above title card in both wrap and eod HTML reports (&quot;Session Report&quot; / &quot;End of Day Report&quot;)</li>
             <li>Session stats bar below title card (session number, streak, lifetime commits) — moved from footer</li>
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><code>wrap_html.py</code>: title card no longer includes "Session N —" prefix (session number now in stats bar)</li>
+            <li><code>wrap_html.py</code>: title card no longer includes &quot;Session N —&quot; prefix (session number now in stats bar)</li>
             <li><code>eod_html.py</code>: title card no longer includes date (date now in stats bar)</li>
             <li>Footer simplified to DOE attribution only in both reports</li>
             <li><code>wrap_stats.py</code>: session stats template includes <code>summary</code> field</li>
@@ -1387,7 +1893,7 @@
           <h4 class="changed">Changed</h4>
           <ul>
             <li><code>/stand-up</code>: reads ROADMAP.md in kick-off mode</li>
-            <li><code>/agent-status</code>: card header renamed from "AGENT STATUS" to "HQ"</li>
+            <li><code>/agent-status</code>: card header renamed from &quot;AGENT STATUS&quot; to &quot;HQ&quot;</li>
             <li><code>global-commands/README.md</code>: <code>/stand-up</code> description updated to mention pipeline sync</li>
           </ul>
         </div>
@@ -1436,7 +1942,7 @@
             <li>Commits: grouped by feature with headers and counts</li>
             <li>Decisions: Problem/Solution format with coloured pill labels</li>
             <li>Learnings: Discovery/Change format with coloured pill labels</li>
-            <li>Today's Sessions: new section showing all sessions with duration and summary</li>
+            <li>Today&#x27;s Sessions: new section showing all sessions with duration and summary</li>
             <li>Section reorder: Timeline → Metrics → Commits → Decisions → Checks → Sessions → Next Up</li>
             <li>Removed Journey section, narrative guidance tightened to 2-3 sentences</li>
             <li>Session summary stored in stats.json for cross-session recall</li>
@@ -1495,7 +2001,7 @@
           </div>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong>Retro step 3</strong> — expanded from "update status tags" to also move feature from Up Next to Complete and refresh Suggested Next if it references the completed feature. Prevents stale roadmap entries accumulating.</li>
+            <li><strong>Retro step 3</strong> — expanded from &quot;update status tags&quot; to also move feature from Up Next to Complete and refresh Suggested Next if it references the completed feature. Prevents stale roadmap entries accumulating.</li>
           </ul>
         </div>
 
@@ -1506,13 +2012,13 @@
           </div>
           <h4 class="fixed">Fixed</h4>
           <ul>
-            <li><strong>Audit version tag regex</strong> — now accepts both <code>→</code> (unicode) and <code>-></code> (ASCII), fixing false WARNs on wave-generated todo.md steps</li>
-            <li><strong>Audit name extraction</strong> — split pattern updated to handle <code>-></code> arrow format in task names</li>
+            <li><strong>Audit version tag regex</strong> — now accepts both <code>→</code> (unicode) and <code>-&gt;</code> (ASCII), fixing false WARNs on wave-generated todo.md steps</li>
+            <li><strong>Audit name extraction</strong> — split pattern updated to handle <code>-&gt;</code> arrow format in task names</li>
             <li><strong>Wave file cleanup</strong> — <code>--merge</code> now deletes completed wave JSON and log files instead of leaving them on disk (caused stale <code>active_wave</code> audit warnings)</li>
           </ul>
           <h4>Added</h4>
           <ul>
-            <li><strong>Post-merge governed doc staleness check</strong> — after merge completes, scans front-matter <code>Applies to</code> versions and warns if any governed doc is >1 minor version behind current app version</li>
+            <li><strong>Post-merge governed doc staleness check</strong> — after merge completes, scans front-matter <code>Applies to</code> versions and warns if any governed doc is &gt;1 minor version behind current app version</li>
             <li><strong>Updated post-merge message</strong> — now explicitly mentions governed doc updates in the housekeeping checklist</li>
           </ul>
         </div>
@@ -1600,7 +2106,7 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong><code>execution/check_contract.py</code></strong> — parses todo.md, finds current step's contract, blocks commit if any criteria unchecked</li>
+            <li><strong><code>execution/check_contract.py</code></strong> — parses todo.md, finds current step&#x27;s contract, blocks commit if any criteria unchecked</li>
             <li><strong><code>global-hooks/pre-commit</code></strong> — contract verification section appended (gated by <code>SKIP_CONTRACT_CHECK=1</code> env var)</li>
           </ul>
         </div>
@@ -1642,13 +2148,13 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong>ROADMAP.md</strong> — 4 new sections: Suggested Next (Claude's strategic recommendation), Must Plan (important items needing scoping), Claude Suggested Ideas (AI-pitched additions), plus HTML comment block with section rules for Claude</li>
+            <li><strong>ROADMAP.md</strong> — 4 new sections: Suggested Next (Claude&#x27;s strategic recommendation), Must Plan (important items needing scoping), Claude Suggested Ideas (AI-pitched additions), plus HTML comment block with section rules for Claude</li>
             <li><strong>ROADMAP.md</strong> — every entry now requires a <code>*(pitched/added DD/MM/YY)*</code> timestamp</li>
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
             <li><strong>CLAUDE.md Rule 9</strong> — pitch routing now specifies Ideas (casual) vs Must Plan (important) sections</li>
-            <li><strong>ROADMAP.md</strong> — description updated from "living notepad" to "sections flow from most concrete to most speculative"</li>
+            <li><strong>ROADMAP.md</strong> — description updated from &quot;living notepad&quot; to &quot;sections flow from most concrete to most speculative&quot;</li>
           </ul>
         </div>
 
@@ -1687,11 +2193,11 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong><code>/agent-start</code> command</strong> — claims a wave task, cd's into the worktree, shows the assignment, and starts working. Replaces manual <code>python3 multi_agent.py --claim</code> + <code>cd</code> workflow.</li>
+            <li><strong><code>/agent-start</code> command</strong> — claims a wave task, cd&#x27;s into the worktree, shows the assignment, and starts working. Replaces manual <code>python3 multi_agent.py --claim</code> + <code>cd</code> workflow.</li>
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong><code>/agent-launch</code> instructions</strong> — "go" output now shows <code>/agent-start</code> instead of manual python3 commands. Cleaner onboarding for new terminals.</li>
+            <li><strong><code>/agent-launch</code> instructions</strong> — &quot;go&quot; output now shows <code>/agent-start</code> instead of manual python3 commands. Cleaner onboarding for new terminals.</li>
           </ul>
         </div>
 
@@ -1726,7 +2232,7 @@
           </div>
           <h4 class="fixed">Fixed</h4>
           <ul>
-            <li><strong>CRITICAL: Session ID isolation (take 3)</strong> — per-terminal files using Claude Code PID (<code>os.getppid()</code> in hooks, <code>$PPID</code> in Bash). Each terminal gets <code>.session-id-{pid}</code>, <code>.last-heartbeat-{pid}</code>, <code>.context-usage-{pid}.json</code>, <code>.context-warned-{pid}</code>. Solves the two-directory problem: hooks stay in project root, coordination files stay in project root, but each terminal's markers are isolated.</li>
+            <li><strong>CRITICAL: Session ID isolation (take 3)</strong> — per-terminal files using Claude Code PID (<code>os.getppid()</code> in hooks, <code>$PPID</code> in Bash). Each terminal gets <code>.session-id-{pid}</code>, <code>.last-heartbeat-{pid}</code>, <code>.context-usage-{pid}.json</code>, <code>.context-warned-{pid}</code>. Solves the two-directory problem: hooks stay in project root, coordination files stay in project root, but each terminal&#x27;s markers are isolated.</li>
             <li><strong>Wave completion cleanup</strong> — glob-based cleanup of all PID-specific marker files (<code>*.session-id-*</code>, etc.)</li>
             <li><strong>agent-launch draft wave</strong> — wave file written to <code>.draft-wave.json</code> (dotfile) until user approves, then moved to <code>wave-{N}.json</code>. Prevents orphaned wave files if session crashes before approval.</li>
             <li><strong>Wave file filtering</strong> — <code>find_active_wave</code>/<code>find_latest_wave</code> now skip dotfiles (draft waves)</li>
@@ -1845,7 +2351,7 @@
           </div>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong>Self-Annealing</strong> section in CLAUDE.md — added "diagnose WHY" step, two-tier format (routine one-liners vs structured significant failures)</li>
+            <li><strong>Self-Annealing</strong> section in CLAUDE.md — added &quot;diagnose WHY&quot; step, two-tier format (routine one-liners vs structured significant failures)</li>
             <li><strong>learnings.md</strong> template — added structured failure format with What/Root cause/Fix/Prevention fields</li>
           </ul>
         </div>
@@ -1894,7 +2400,7 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong>Task contract format</strong> in todo.md format rules — <code>Contract:</code> block with verifiable criteria. Prevents premature "done" marking on complex steps.</li>
+            <li><strong>Task contract format</strong> in todo.md format rules — <code>Contract:</code> block with verifiable criteria. Prevents premature &quot;done&quot; marking on complex steps.</li>
           </ul>
         </div>
 
@@ -1905,7 +2411,7 @@
           </div>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong>Who We Are</strong> — reframed from role-specific ("non-technical founder") to generic ("human defines intent, Claude builds")</li>
+            <li><strong>Who We Are</strong> — reframed from role-specific (&quot;non-technical founder&quot;) to generic (&quot;human defines intent, Claude builds&quot;)</li>
             <li><strong>Rule 2</strong> — added research/implementation separation guidance for significant research tasks (3+ approaches)</li>
             <li><strong>Rule 4</strong> — added sycophancy-aware evaluation: use neutral verification prompts, not leading questions</li>
             <li><strong>Rule 7</strong> — added concrete context savings numbers (15k tokens → 500-token summary = 30x saving)</li>
@@ -1953,7 +2459,7 @@
           <h4 class="changed">Changed</h4>
           <ul>
             <li>All bordered commands: explicit <code>line()</code> helper pattern in BORDER rules — prevents header misalignment</li>
-            <li>All bordered commands: mandate "never construct <code>f"│{...}│"</code> manually" in generation rules</li>
+            <li>All bordered commands: mandate &quot;never construct <code>f&quot;│{...}│&quot;</code> manually&quot; in generation rules</li>
             <li>5 commands: bidirectional sync detection (inbound tag comparison + outbound file diff, not just file diff)</li>
             <li>Files: commands, crack-on, eod, sitrep, stand-up, sync-doe, vitals, wrap</li>
           </ul>
@@ -1968,7 +2474,7 @@
           <ul>
             <li>Rule 1: plans must include recommended model + thinking level per step</li>
             <li>Rule 7: subagents must use deliberate model selection (Opus/Sonnet/Haiku)</li>
-            <li><code>/sitrep</code>: DOE KIT diff wording fix ("check" vs "count")</li>
+            <li><code>/sitrep</code>: DOE KIT diff wording fix (&quot;check&quot; vs &quot;count&quot;)</li>
           </ul>
         </div>
 
@@ -1980,9 +2486,9 @@
           <h4 class="changed">Changed</h4>
           <ul>
             <li>DOE sync status: compact <code>*</code> format across <code>/commands</code>, <code>/crack-on</code>, <code>/sitrep</code>, <code>/stand-up</code>, <code>/vitals</code>, <code>/wrap</code></li>
-            <li>Synced state: bare version (no tick, no "synced" text)</li>
+            <li>Synced state: bare version (no tick, no &quot;synced&quot; text)</li>
             <li>Unsynced state: <code>vX.Y.Z *</code> (asterisk suffix)</li>
-            <li><code>/stand-up</code> WARNINGS: omit section when all PASS (was showing "None ✓")</li>
+            <li><code>/stand-up</code> WARNINGS: omit section when all PASS (was showing &quot;None ✓&quot;)</li>
           </ul>
         </div>
 
@@ -2031,7 +2537,7 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong>Universal learnings template</strong> — added 3 Shell & Platform entries (emoji box-drawing, zsh nullglob, <code>$$</code> subshell PID), new Hooks & Session Files section (orphan file prevention), new Output section (single-block assembly, re-present script output as text). Template now has 6 sections and 11 learnings.</li>
+            <li><strong>Universal learnings template</strong> — added 3 Shell &amp; Platform entries (emoji box-drawing, zsh nullglob, <code>$$</code> subshell PID), new Hooks &amp; Session Files section (orphan file prevention), new Output section (single-block assembly, re-present script output as text). Template now has 6 sections and 11 learnings.</li>
           </ul>
         </div>
 
@@ -2119,11 +2625,11 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong><code>/wrap</code> agents stat</strong> — new "agents spawned" metric in The Numbers section, counted from Agent tool calls in the session</li>
+            <li><strong><code>/wrap</code> agents stat</strong> — new &quot;agents spawned&quot; metric in The Numbers section, counted from Agent tool calls in the session</li>
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong><code>/wrap</code> session time label</strong> — shortened from "total session time" to "session time"</li>
+            <li><strong><code>/wrap</code> session time label</strong> — shortened from &quot;total session time&quot; to &quot;session time&quot;</li>
             <li><strong><code>/wrap</code> system checks box</strong> — replaced hand-padded example boxes with programmatic generation instruction (collect lines, find max length, <code>.ljust()</code>)</li>
           </ul>
           <h4 class="removed">Removed</h4>
@@ -2196,7 +2702,7 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong>Code Hygiene rule: plans go in the project.</strong> New CLAUDE.md rule requiring plans to be written to the project's <code>.claude/plans/</code> directory with descriptive filenames, not to <code>~/.claude/plans/</code>. Prevents plan files from landing in the global directory where they're invisible to the project.</li>
+            <li><strong>Code Hygiene rule: plans go in the project.</strong> New CLAUDE.md rule requiring plans to be written to the project&#x27;s <code>.claude/plans/</code> directory with descriptive filenames, not to <code>~/.claude/plans/</code>. Prevents plan files from landing in the global directory where they&#x27;re invisible to the project.</li>
           </ul>
         </div>
 
@@ -2207,7 +2713,7 @@
           </div>
           <h4 class="fixed">Fixed</h4>
           <ul>
-            <li><strong><code>wrap_stats.py</code> step counting</strong> — <code>count_steps_completed_today()</code> counted all <code>[x]</code> steps with today's date, inflating <code>stepsCompleted</code> across multiple sessions on the same day. Replaced with <code>count_steps_completed_since()</code> which parses the <code>HH:MM DD/MM/YY</code> timestamp and only counts steps completed after the session start time.</li>
+            <li><strong><code>wrap_stats.py</code> step counting</strong> — <code>count_steps_completed_today()</code> counted all <code>[x]</code> steps with today&#x27;s date, inflating <code>stepsCompleted</code> across multiple sessions on the same day. Replaced with <code>count_steps_completed_since()</code> which parses the <code>HH:MM DD/MM/YY</code> timestamp and only counts steps completed after the session start time.</li>
           </ul>
         </div>
 
@@ -2229,7 +2735,7 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong><code>copy_plan_to_project.py</code> hook</strong> — PostToolUse hook that auto-copies plans written to <code>~/.claude/plans/</code> into the current project's <code>.claude/plans/</code> directory. Fires after <code>write|edit</code> tool calls targeting <code>~/.claude/plans/*.md</code>.</li>
+            <li><strong><code>copy_plan_to_project.py</code> hook</strong> — PostToolUse hook that auto-copies plans written to <code>~/.claude/plans/</code> into the current project&#x27;s <code>.claude/plans/</code> directory. Fires after <code>write|edit</code> tool calls targeting <code>~/.claude/plans/*.md</code>.</li>
             <li><strong>PostToolUse section in <code>settings.json</code></strong> — registers the plan-copy hook</li>
           </ul>
         </div>
@@ -2258,7 +2764,7 @@
           <ul>
             <li><strong>Multi-agent coordination system</strong> — <code>execution/multi_agent.py</code> for running 2-4 parallel Claude Code sessions. Wave management, task claiming, session registry, heartbeats, merge protocol, cost tracking. All state in <code>.tmp/waves/</code>.</li>
             <li><strong><code>/hq</code> command</strong> — <code>.claude/commands/hq.md</code> project-level dashboard. Shows wave status, terminal liveness, task progress, cost estimates, merge order. Modes: no_wave (help), active (live dashboard).</li>
-            <li><strong>Heartbeat hook</strong> — <code>.claude/hooks/heartbeat.py</code> PostToolUse hook updating session liveness every 30s during active waves. Stale sessions (>2 min) are detectable and reclaimable.</li>
+            <li><strong>Heartbeat hook</strong> — <code>.claude/hooks/heartbeat.py</code> PostToolUse hook updating session liveness every 30s during active waves. Stale sessions (&gt;2 min) are detectable and reclaimable.</li>
             <li><strong>Context monitor hook</strong> — <code>.claude/hooks/context_monitor.py</code> PostToolUse hook tracking estimated context usage. Warns at 60%, stops at 80% for graceful handoff. Model-aware budgets during waves (haiku: 30k, sonnet: 80k, opus: 200k).</li>
             <li><strong>Active wave audit check</strong> — <code>check_active_wave</code> in <code>audit_claims.py</code> warns when a wave is active and results may be incomplete until merge. Runs in fast/hook mode.</li>
             <li><strong>PostToolUse hooks in settings.json</strong> — heartbeat and context monitor fire after every tool use</li>
@@ -2294,7 +2800,7 @@
           </div>
           <h4 class="fixed">Fixed</h4>
           <ul>
-            <li><strong><code>execution/audit_claims.py</code></strong> — skip version tag WARN for <code>[INFRA]</code> tasks. Infrastructure features don't bump app version, so their todo steps never have version tags. <code>parse_completed_tasks()</code> now tracks heading context and <code>check_task_format()</code> skips the check for <code>[INFRA]</code> sections.</li>
+            <li><strong><code>execution/audit_claims.py</code></strong> — skip version tag WARN for <code><span class="tag infra">INFRA</span></code> tasks. Infrastructure features don&#x27;t bump app version, so their todo steps never have version tags. <code>parse_completed_tasks()</code> now tracks heading context and <code>check_task_format()</code> skips the check for <code><span class="tag infra">INFRA</span></code> sections.</li>
           </ul>
         </div>
 
@@ -2307,7 +2813,7 @@
           <ul>
             <li><strong><code>/wrap</code></strong> — lightweight rewrite. Removed scoring/badges/genre system. One dramatic narrative (no genre selection), added session haiku, one-stat highlight, fortune cookie footer. Leaderboard now shows commits/lines instead of scores. Vibe check determined inline instead of by script.</li>
             <li><strong><code>/roast</code></strong> — removed score trend and badge pattern analysis bullets (stats.json no longer has these fields)</li>
-            <li><strong><code>/stand-up</code></strong> — removed "score trends" FOCUS bullet</li>
+            <li><strong><code>/stand-up</code></strong> — removed &quot;score trends&quot; FOCUS bullet</li>
             <li><strong><code>/eod</code></strong> — removed SCORE line from card, simplified session list to title + duration (no scores/badges)</li>
             <li><strong><code>/commands</code></strong> — updated <code>/wrap</code> and <code>/roast</code> descriptions to reflect lightweight wrap</li>
           </ul>
@@ -2325,14 +2831,14 @@
           </div>
           <h4>Added</h4>
           <ul>
-            <li><strong><code>/eod</code></strong> — new end-of-day report command. Aggregates all sessions, commits, features, and position into one bordered summary. Shows day stats, session list, semantic "What Got Done" grouping, position at EOD, and day vibe.</li>
+            <li><strong><code>/eod</code></strong> — new end-of-day report command. Aggregates all sessions, commits, features, and position into one bordered summary. Shows day stats, session list, semantic &quot;What Got Done&quot; grouping, position at EOD, and day vibe.</li>
             <li><strong><code>execution/wrap_stats.py</code></strong> — new deterministic scoring script (978 lines). Handles all session scoring computation: git metrics, streak, multiplier, raw/final score, badge evaluation (with once-per-day dedup), high score check, leaderboard consolidation. Outputs JSON for the <code>/wrap</code> prompt to render.</li>
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong><code>/stand-up</code></strong> — added WARNINGS section (surfaces audit WARN/FAIL findings in kick-off card with detail lines and "Fix now?" suggestions) and FOCUS section (2-3 coaching bullets from <code>stats.json</code> analysis: infra/product ratio, stale WARNs, commits/session trends, steps completed, time-of-day patterns, score trends)</li>
+            <li><strong><code>/stand-up</code></strong> — added WARNINGS section (surfaces audit WARN/FAIL findings in kick-off card with detail lines and &quot;Fix now?&quot; suggestions) and FOCUS section (2-3 coaching bullets from <code>stats.json</code> analysis: infra/product ratio, stale WARNs, commits/session trends, steps completed, time-of-day patterns, score trends)</li>
             <li><strong><code>/vitals</code></strong> — added mandatory audit detail lines rule: WARN/FAIL items must each be shown on indented detail lines, using <code>--json</code> flag for reliable parsing</li>
-            <li><strong><code>/roast</code></strong> — added "And you..." developer habit analysis section: roasts session timing, infra/product ratio, score trends, badge patterns, commits/session, steps throughput, and streak from <code>stats.json</code></li>
+            <li><strong><code>/roast</code></strong> — added &quot;And you...&quot; developer habit analysis section: roasts session timing, infra/product ratio, score trends, badge patterns, commits/session, steps throughput, and streak from <code>stats.json</code></li>
             <li><strong><code>/wrap</code></strong> — rewrote to delegate all scoring computation to <code>execution/wrap_stats.py</code>. Steps 2+3 replaced with single script call. Display sections now reference <code>result.*</code> JSON fields. Prompt reduced from ~22K to ~17K chars.</li>
           </ul>
         </div>
@@ -2362,7 +2868,7 @@
           </ul>
           <h4 class="changed">Changed</h4>
           <ul>
-            <li><strong><code>/wrap</code></strong> — added quick audit to Step 1 housekeeping; replaced plain footer with bordered "System Checks" section showing audit results and DOE Kit sync status together</li>
+            <li><strong><code>/wrap</code></strong> — added quick audit to Step 1 housekeeping; replaced plain footer with bordered &quot;System Checks&quot; section showing audit results and DOE Kit sync status together</li>
             <li><strong><code>/commands</code></strong> — updated to 13 commands, added <code>/vitals</code> under Quality category</li>
             <li><strong>README</strong> — command count 12 → 13, added <code>/vitals</code> to Quality row in table</li>
             <li><strong>SYSTEM-MAP</strong> — added vitals.md to file table, command reference, and directory tree</li>
@@ -2475,7 +2981,7 @@
           </ul>
           <h4 class="fixed">Fixed</h4>
           <ul>
-            <li><code>commit-msg</code> hook uses macOS-compatible <code>sed -i ''</code> syntax</li>
+            <li><code>commit-msg</code> hook uses macOS-compatible <code>sed -i &#x27;&#x27;</code> syntax</li>
             <li><code>/sitrep</code> STATUS field has clearer instruction wording</li>
             <li><code>/wrap</code> score table has separate high score / non-high score templates with <code>d[streak]</code> multiplier format</li>
           </ul>
@@ -2488,6 +2994,7 @@
 
         </details>
 
+        <!-- Pagination -->
         <div class="pagination">
           <a href="glossary.html">
             <div class="pg-label">Previous</div>
@@ -2497,15 +3004,17 @@
 
         <footer class="site-footer">DOE Starter Kit v1.54.2</footer>
 
-      </div>
-    </div>
+      </div><!-- /content -->
+    </div><!-- /content-area -->
 
-  </div>
+  </div><!-- /layout -->
 
   <script>
+    // Dark mode
     (function () {
       var btn  = document.getElementById('themeBtn');
       var html = document.documentElement;
+
       function applyTheme(dark) {
         if (dark) {
           html.setAttribute('data-theme', 'dark');
@@ -2515,8 +3024,10 @@
           btn.textContent = '\u263D';
         }
       }
+
       var stored = localStorage.getItem('doe-docs-theme');
       applyTheme(stored === 'dark');
+
       btn.addEventListener('click', function () {
         var isDark = html.getAttribute('data-theme') === 'dark';
         localStorage.setItem('doe-docs-theme', isDark ? 'light' : 'dark');
@@ -2524,12 +3035,15 @@
       });
     })();
 
+    // Mobile sidebar
     (function () {
       var hamburger = document.getElementById('hamburger');
       var sidebar   = document.getElementById('sidebar');
       var overlay   = document.getElementById('sidebarOverlay');
+
       function open()  { sidebar.classList.add('open');    overlay.classList.add('visible'); }
       function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
+
       hamburger.addEventListener('click', function () {
         sidebar.classList.contains('open') ? close() : open();
       });
