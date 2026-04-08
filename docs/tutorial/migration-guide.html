@@ -1024,18 +1024,140 @@ Directive -> Orchestration -> Execution. Non-negotiable.
 
         <p>The key difference: rules are now one-liners with pointers, not paragraphs. The detail lives in directive files that only get loaded when relevant.</p>
 
-        <h3>Preserving Your Customisations</h3>
+        <h3>Step-by-Step: Migrating Your CLAUDE.md</h3>
+
+        <p>If you have an active project using an older DOE version, follow these steps. Nothing gets lost &mdash; every piece of your current CLAUDE.md has a home in the new structure.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h4>Audit your current CLAUDE.md</h4>
+            <p>Open your CLAUDE.md and identify what's <strong>DOE-standard</strong> (came from the kit) vs what's <strong>yours</strong> (you added it). The easiest way: compare your file against the kit's template for your era. Anything that differs is your customisation.</p>
+            <p>Common customisations to look for:</p>
+            <ul style="margin: 8px 0 12px 16px;">
+              <li>Custom entries in the Directory Structure section</li>
+              <li>Custom triggers you added (e.g. "When importing census data -> learnings.md")</li>
+              <li>Project-specific rules or guardrails you wrote</li>
+              <li>Build commands specific to your project</li>
+              <li>Gotchas or caveats about your codebase</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <div class="step-number">2</div>
+            <h4>Save your customisations to a temporary file</h4>
+            <p>Copy everything you identified as custom into a scratch file. Be generous &mdash; it's better to save too much than miss something.</p>
+            <div class="code-block"><pre># Back up the whole file first
+cp CLAUDE.md CLAUDE.md.backup
+
+# Create a scratch file with your custom content
+# Paste: custom triggers, project rules, directory entries, build commands</pre></div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">3</div>
+            <h4>Replace CLAUDE.md with the new thin router template</h4>
+            <p>Copy the kit's current CLAUDE.md into your project. This gives you the new structure with the trigger table, Core Behaviour rules, and Context Rules section.</p>
+            <div class="code-block"><pre>cp ~/doe-starter-kit/CLAUDE.md ./CLAUDE.md</pre></div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">4</div>
+            <h4>Merge your customisations back in</h4>
+            <p>Open the new CLAUDE.md and add your custom content to the right sections. Here's where everything goes:</p>
+          </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin: 0 0 24px;">
+          <thead>
+            <tr>
+              <th style="background: var(--bg-sidebar); padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--border);">What you had</th>
+              <th style="background: var(--bg-sidebar); padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--border);">Where it goes now</th>
+              <th style="background: var(--bg-sidebar); padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--border);">Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;">Custom directory entries</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;"><code>## Directory Structure</code> section (unchanged)</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text-muted);">Add <code>src/data/</code>, <code>public/</code>, etc. to the structure block</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;">Custom triggers / Progressive Disclosure entries</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;"><code>## Triggers</code> table at the bottom</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text-muted);"><code>- Census data import -> learnings.md ## API Patterns</code></td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;">Inline rules (e.g. "Always run build.py after editing src/")</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;">Move to a project-specific directive, add a trigger</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text-muted);">Create <code>directives/project-rules.md</code>, add trigger: <code>- Building/coding -> directives/project-rules.md</code></td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;">Build/test/deploy commands</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;"><code>## Common Commands</code> section (add if missing)</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text-muted);"><code>python3 execution/build.py</code>, <code>npm run dev</code></td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;">Project-specific guardrails (e.g. "Never modify legacy API")</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;">Move to <code>directives/project-rules.md</code> or <code>## Gotchas</code> section</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text-muted);">Add a Gotchas section below Directory Structure</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;">Numbered rules you wrote (e.g. "Rule 10: Always seed test DB")</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;">Move to a directive file. Numbered rules are gone.</td>
+              <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text-muted);">Rule content goes in <code>directives/project-rules.md</code>, CLAUDE.md just has the trigger pointer</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">5</div>
+            <h4>Copy the phase directives</h4>
+            <p>The rules that used to be inline in CLAUDE.md now live in directive files. Copy all 6 from the kit:</p>
+            <div class="code-block"><pre>cp ~/doe-starter-kit/directives/planning-rules.md directives/
+cp ~/doe-starter-kit/directives/building-rules.md directives/
+cp ~/doe-starter-kit/directives/delivery-rules.md directives/
+cp ~/doe-starter-kit/directives/context-management.md directives/
+cp ~/doe-starter-kit/directives/self-annealing.md directives/
+cp ~/doe-starter-kit/directives/framework-evolution.md directives/</pre></div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">6</div>
+            <h4>Verify CFA is working</h4>
+            <p>The thin router only works if Claude can find and load the directive files. Test it:</p>
+            <ul style="margin: 8px 0 12px 16px;">
+              <li>Start a new session with <code>/stand-up</code> &mdash; it should render without errors</li>
+              <li>Ask Claude to plan a small task &mdash; it should read <code>directives/planning-rules.md</code> (you'll see it in the tool calls)</li>
+              <li>Start building something with <code>/crack-on</code> &mdash; it should read <code>directives/building-rules.md</code></li>
+              <li>If Claude doesn't load any directives, check the Triggers table in CLAUDE.md &mdash; the format must be <code>- Situation -> directives/file.md</code></li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <div class="step-number">7</div>
+            <h4>Check nothing was missed</h4>
+            <p>Compare your new CLAUDE.md + directive files against your backup:</p>
+            <div class="code-block"><pre># Look at your backup for anything you didn't migrate
+diff CLAUDE.md.backup CLAUDE.md
+
+# Run methodology checks
+/doe-health</pre></div>
+            <p>If <code>/doe-health</code> reports issues, the most common cause is a missing directive file or a trigger pointing to a file that doesn't exist.</p>
+          </div>
+        </div>
 
         <div class="callout tip">
           <span class="callout-icon">&#9432;</span>
           <div class="callout-body">
-            <strong>Your customisations survive the migration.</strong> Here's where each type goes in the new structure:
-            <ul style="margin: 8px 0 0 16px; padding: 0;">
-              <li style="margin-bottom: 4px;"><strong>Custom triggers:</strong> Add them to the Triggers table in the new format (<code>- When X happens -> directives/your-file.md</code>).</li>
-              <li style="margin-bottom: 4px;"><strong>Project-specific directory entries:</strong> Keep them in the Directory Structure section &mdash; this section is unchanged.</li>
-              <li style="margin-bottom: 4px;"><strong>Custom rules:</strong> Move them to a project-specific directive file (e.g. <code>directives/project-rules.md</code>) and add a trigger for when they apply.</li>
-            </ul>
+            <strong>Working on an active feature?</strong> Finish your current feature before migrating. The migration changes CLAUDE.md structure, which affects how Claude loads rules. Mid-feature is the worst time for that. Wrap your session, merge your PR, then migrate on a clean main branch.
           </div>
+        </div>
+
+        <div class="plain-english">
+          <h4>In Plain English</h4>
+          <p>The old CLAUDE.md was a book that Claude read cover to cover every session &mdash; even chapters that weren't relevant. The new CLAUDE.md is a table of contents. Claude reads the table of contents, finds the right chapter for what it's doing right now, and reads just that chapter. Your project-specific content doesn't disappear &mdash; it moves from being inline in the book to being its own chapter with an entry in the table of contents.</p>
         </div>
 
         <!-- Fresh Start vs Surgical Upgrade -->
