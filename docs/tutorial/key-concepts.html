@@ -629,8 +629,12 @@
 
     <!-- ── Sidebar ── -->
     <nav class="sidebar" id="sidebar">
-      <a class="sidebar-brand" href="index.html">DOE Starter Kit <span class="sidebar-version">v1.54.2</span></a>
+      <a class="sidebar-brand" href="index.html">DOE Starter Kit <span class="sidebar-version">v1.55.0</span></a>
       <div class="sidebar-nav">
+
+        <div class="sidebar-section">
+          <a class="sidebar-link" href="whats-new.html">What's New</a>
+        </div>
 
         <div class="sidebar-section">
           <div class="sidebar-section-title">Getting Started</div>
@@ -649,6 +653,9 @@
           <a class="sidebar-link" href="context.html">Context &amp; Sessions</a>
           <a class="sidebar-link" href="key-concepts.html#contracts">Contracts</a>
           <a class="sidebar-link" href="key-concepts.html#self-annealing">Self-Annealing</a>
+          <a class="sidebar-link" href="key-concepts.html#thin-router">Thin Router</a>
+          <a class="sidebar-link" href="key-concepts.html#adversarial-review">Adversarial Review</a>
+          <a class="sidebar-link" href="key-concepts.html#defence-in-depth">Defence in Depth</a>
         </div>
 
         <div class="sidebar-section">
@@ -680,6 +687,7 @@
         <div class="sidebar-section">
           <div class="sidebar-section-title">Reference</div>
           <a class="sidebar-link" href="tips-and-mistakes.html">Tips &amp; Mistakes</a>
+          <a class="sidebar-link" href="migration-guide.html">Migration Guide</a>
           <a class="sidebar-link" href="faq.html">FAQ</a>
           <a class="sidebar-link" href="ide-setup.html">IDE Compatibility</a>
           <a class="sidebar-link nested" href="ide-setup.html#cursor">Cursor Setup</a>
@@ -861,6 +869,232 @@ Contract:
 
         <p>Significant failures (cost &gt;30 minutes, broke something important, or recurred) get a structured entry with four parts: What happened, Root cause, Fix applied, Prevention added.</p>
 
+        <!-- Advanced Architecture -->
+        <h2 id="thin-router">Thin Router (CLAUDE.md)</h2>
+        <p>When a DOE project starts a session, Claude reads <code>CLAUDE.md</code> first. In early versions, this file contained every rule inline &mdash; over 100 lines of operating rules, guardrails, and instructions. The problem: Claude's context window is finite, and loading irrelevant rules wastes space and degrades performance.</p>
+        <p>The current design treats <code>CLAUDE.md</code> as a <strong>thin router</strong> &mdash; roughly 55 lines that define the project's identity, core behaviour rules, and a trigger table. The trigger table maps situations to directive files:</p>
+
+        <div class="code-block"><pre># Example triggers from CLAUDE.md
+- Planning/scoping        -> directives/planning-rules.md
+- Building/coding         -> directives/building-rules.md
+- Delivering (retro, PR)  -> directives/delivery-rules.md
+- Adversarial review      -> directives/adversarial-review/
+- Something went wrong    -> directives/break-glass.md</pre></div>
+
+        <p>When Claude encounters a planning task, it loads <code>planning-rules.md</code>. When building, it loads <code>building-rules.md</code>. Rules that aren't relevant to the current task never enter the context window at all.</p>
+
+        <div class="plain-english">
+          <h4>In Plain English</h4>
+          <p>Think of CLAUDE.md as a phone directory, not an encyclopaedia. It tells Claude where to find the right instructions for the current task. The instructions themselves live in separate files that only get loaded when needed. This keeps each session focused on what matters right now.</p>
+        </div>
+
+        <h2 id="phase-directives">Phase-Based Directives</h2>
+        <p>DOE groups its rules by workflow phase &mdash; what you're doing right now, not what type of rule it is. There are six phase-based directive files:</p>
+
+        <div class="card-grid cols-3">
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon indigo">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <h4>Planning Rules</h4>
+            <p>Contracts, dependencies, scale-aware session planning. Loaded when scoping or starting a new feature.</p>
+          </div>
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon green">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <h4>Building Rules</h4>
+            <p>Branch discipline, code hygiene, subagent protocol, file ownership. Loaded when writing code.</p>
+          </div>
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon amber">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h4>Delivery Rules</h4>
+            <p>Retros, quality gates, guardrails, governance. Loaded when finishing or shipping work.</p>
+          </div>
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon blue">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h4>Context Management</h4>
+            <p>Post-compaction recovery, solo vs parallel modes, shared-file awareness. Loaded after /clear or during parallel work.</p>
+          </div>
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon rose">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <h4>Self-Annealing</h4>
+            <p>Failure response, learnings curation, performance monitoring. Loaded when recording or reviewing learnings.</p>
+          </div>
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon indigo">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <h4>Framework Evolution</h4>
+            <p>Tracking Claude Code platform changes, absorption decisions. Loaded when evaluating new platform features.</p>
+          </div>
+        </div>
+
+        <p>The benefit: when you're building, you get all the coding rules in one read &mdash; branch discipline, code hygiene, file ownership, quality gates. You don't get delivery rules or planning rules cluttering the view. Each phase gets exactly the context it needs.</p>
+
+        <h2 id="dependency-graphs">Dependency Graphs (DAGs)</h2>
+        <p>A DAG is a <strong>Directed Acyclic Graph</strong> &mdash; a map of steps connected by what actually depends on what. Instead of a numbered list where step 2 always follows step 1, a DAG identifies which steps are genuinely independent and can run simultaneously.</p>
+
+        <p>In DOE, each step in <code>tasks/todo.md</code> can declare two things:</p>
+        <ul style="margin: 12px 0 12px 20px;">
+          <li><code>Depends:</code> &mdash; which other steps must finish before this one can start</li>
+          <li><code>Owns:</code> &mdash; which files this step is allowed to modify</li>
+        </ul>
+
+        <div class="code-block"><pre># From tasks/todo.md
+0. [ ] Foundation -- Next.js + Tailwind setup
+   Depends: none. Owns: package.json, tsconfig.json
+
+1. [ ] App shell -- sidebar and topbar
+   Depends: Step 0. Owns: components/shell/
+
+2. [ ] Data layer -- JSON conversion + stores
+   Depends: Step 0. Owns: lib/data/, lib/stores/
+
+3. [ ] Dashboard page
+   Depends: Steps 1, 2. Owns: app/page.tsx, components/dashboard/</pre></div>
+
+        <p>The DAG executor reads this metadata and groups steps into <strong>waves</strong>. Steps 1 and 2 share no files and both only depend on Step 0, so they can run in parallel. Step 3 depends on both, so it waits. The executor handles this automatically &mdash; you describe the dependencies, the system figures out the parallelism.</p>
+
+        <div class="plain-english">
+          <h4>In Plain English</h4>
+          <p>Instead of doing steps one after another like a recipe, DOE looks at which steps are actually independent and runs them at the same time. "Build the sidebar" and "convert the data files" don't interfere with each other, so they happen simultaneously. "Build the dashboard" needs both, so it waits for them to finish.</p>
+        </div>
+
+        <h2 id="rationalisation-tables">Rationalisation Tables</h2>
+        <p>AI agents are surprisingly good at constructing plausible reasons to skip guardrails. "This is too simple to test." "I'll add that later." "The contract is basically passing." These are <strong>rationalisations</strong> &mdash; convincing-sounding excuses that lead to real problems.</p>
+        <p>DOE includes rationalisation tables that map common excuses to their actual consequences. There are six tables covering TDD, verification, code review, contracts, scope creep, and trigger loading. Each row follows the same format:</p>
+
+        <div class="card-grid">
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon rose">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <h4>The Excuse</h4>
+            <p>"This is too simple to test &mdash; it's a one-liner."</p>
+          </div>
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon amber">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <h4>Why It's Wrong</h4>
+            <p>One-liners have edge cases. <code>x.trim()</code> fails on null. The test takes less time than this thought.</p>
+          </div>
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon green">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <h4>What To Do Instead</h4>
+            <p>Write the test. If it's truly trivial, it takes 10 seconds. If it's not, you just caught a bug.</p>
+          </div>
+        </div>
+
+        <p>The <strong>1% rule</strong> ties into this: if there's even a 1% chance a guardrail applies to your current task, load it. The cost of loading unnecessarily is a few hundred tokens of context. The cost of skipping is a bug that could have been prevented.</p>
+
+        <div class="plain-english">
+          <h4>In Plain English</h4>
+          <p>AI is good at convincing itself that rules don't apply. "Just this once" and "it's too simple to bother" are the most common paths to bugs. Rationalisation tables are a cheat sheet that maps these excuses to what actually happens when you follow them. When Claude catches itself thinking "this probably doesn't need...", it checks the table.</p>
+        </div>
+
+        <h2 id="adversarial-review">Adversarial Review</h2>
+        <p>Self-review has a blind spot: the person who wrote the code tends to read what they intended, not what they actually wrote. DOE addresses this with <strong>adversarial review</strong> &mdash; a structured process where multiple AI agents review code from different angles with different incentives.</p>
+
+        <p>Three agents play distinct roles:</p>
+        <ul style="margin: 12px 0 12px 20px;">
+          <li><strong>Finder</strong> &mdash; reads the implementation and identifies potential issues. Rewarded for real findings, penalised for false positives.</li>
+          <li><strong>Adversarial</strong> &mdash; cross-examines the Finder's report against the actual code. Its job is to filter noise, not add findings. Penalised heavily for letting false positives through.</li>
+          <li><strong>Referee</strong> &mdash; final arbiter for disputed findings. Scored on calibration accuracy.</li>
+        </ul>
+
+        <p>The scoring incentives matter. The Finder is motivated to find real issues (not imaginary ones &mdash; false positives cost points). The Adversarial agent is motivated to be sceptical (letting a false positive through costs double). This creates a natural tension that surfaces genuine problems while filtering noise.</p>
+
+        <p>The level of review scales with risk. High blast-radius changes (shared files, API changes, security) get all three agents. Medium changes get Finder and Adversarial. Low-risk changes (docs, comments, config) can skip review entirely. The <code>/review</code> command triggers this process.</p>
+
+        <div class="plain-english">
+          <h4>In Plain English</h4>
+          <p>Instead of Claude reviewing its own work (and seeing what it wanted to see), three separate agents review it from different angles. One looks for problems, another challenges those findings, and a third settles disagreements. It's like having a code review team, except the reviewers are designed to disagree with each other.</p>
+        </div>
+
+        <h2 id="defence-in-depth">Defence in Depth</h2>
+        <p>No single safety measure is enough. DOE uses <strong>layered security</strong> where multiple independent mechanisms protect against the same class of failure. If one layer fails, the next catches it.</p>
+
+        <div class="card-grid cols-2">
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon amber">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h4>Layer 1: Hooks (Speed Bumps)</h4>
+            <p>Pre-commit and pre-tool hooks catch common mistakes before they happen. Block secrets in code, warn about dangerous commands, enforce step marking. Fast, automatic, always running.</p>
+          </div>
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon indigo">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h4>Layer 2: CI (Gates)</h4>
+            <p>Continuous integration runs methodology checks, linting, and tests on every push. Catches issues that got past local hooks. Three tiers: gate (blocking), project (blocking), advisory (informational).</p>
+          </div>
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon green">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <h4>Layer 3: Human Review</h4>
+            <p>CODEOWNERS ensures the right people review changes to critical files. PR-based workflow means no code reaches production without human approval.</p>
+          </div>
+          <div class="m-card" style="cursor: default;">
+            <div class="card-icon rose">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <h4>Layer 4: Runtime (Last Resort)</h4>
+            <p>Content Security Policy headers, input validation, and data isolation provide protection even if all other layers are bypassed. The final safety net.</p>
+          </div>
+        </div>
+
+        <p>The principle: <strong>deterministic beats probabilistic for enforcement</strong>. A directive that says "don't commit secrets" is probabilistic &mdash; the AI might forget. A pre-commit hook that scans for API key patterns is deterministic &mdash; it physically cannot be bypassed by forgetfulness. DOE pushes as many rules as possible into deterministic enforcement.</p>
+
+        <h2 id="deterministic-hooks">Deterministic Hooks</h2>
+        <p>DOE converts rules into mechanical enforcement wherever possible. Instead of relying on Claude to remember a rule, a hook physically blocks the action if the rule isn't followed.</p>
+
+        <p>Examples from the DOE hook system:</p>
+        <ul style="margin: 12px 0 12px 20px;">
+          <li><strong>Step-marking enforcement</strong> &mdash; a commit with "Step 3" in the message is blocked unless <code>tasks/todo.md</code> is staged with the step marked <code>[x]</code>. No bypass without an explicit skip flag.</li>
+          <li><strong>Secret detection</strong> &mdash; pre-commit scans staged files for patterns that look like API keys, tokens, or passwords. Blocks the commit with a clear error message.</li>
+          <li><strong>Review gate</strong> &mdash; PR creation is blocked on feature branches unless adversarial review artifacts exist. Forces review before shipping.</li>
+          <li><strong>Sign-off routing</strong> &mdash; features with unchecked <code>[manual]</code> items are blocked from moving to Done. They must go through Awaiting Sign-off first.</li>
+          <li><strong>Main branch protection</strong> &mdash; direct commits to main/master are blocked locally. Work must go through feature branches and PRs.</li>
+        </ul>
+
+        <p>Each hook has a skip flag (e.g. <code>SKIP_STEP_MARK_CHECK=1</code>) for genuine edge cases, but the flags themselves are blocked by another hook if used on feature branches. The system is designed so that the path of least resistance is the correct path.</p>
+
+        <div class="plain-english">
+          <h4>In Plain English</h4>
+          <p>Rules that rely on someone remembering to follow them get forgotten. DOE converts its most important rules into automatic checks that physically prevent the wrong thing from happening. It's like a spell-checker that won't let you send the email until you fix the red underlines &mdash; except for code quality, not spelling.</p>
+        </div>
+
+        <h2 id="context-recovery">Context Recovery</h2>
+        <p>Long sessions eventually hit the context window limit. When this happens, Claude <strong>compacts</strong> the conversation &mdash; summarising earlier exchanges to free up space. This is necessary but lossy: details from earlier in the session, including loaded directives, can be forgotten.</p>
+
+        <p>DOE has a recovery protocol for this. After compaction (or after running <code>/clear</code>), Claude treats all directives as unloaded and re-reads the triggers relevant to the current task. <code>CLAUDE.md</code> includes explicit instructions for this:</p>
+
+        <div class="code-block"><pre># From CLAUDE.md Context Rules
+After context compaction, treat ALL directives as unloaded.
+Re-read triggers for your current task.
+In wave/DAG mode: also re-read step assignment and ownership list.</pre></div>
+
+        <p>This is why the thin router design matters. If all rules were inline in <code>CLAUDE.md</code>, compaction might lose some rules with no way to recover them (they'd be in the compacted summary somewhere, degraded). With the trigger table, recovery is simple: re-read the triggers, re-load the relevant directives. The directives are on disk, not in the conversation &mdash; they can always be re-read in full.</p>
+
+        <div class="callout tip">
+          <span class="callout-icon">&#9432;</span>
+          <div class="callout-body">
+            <strong>Prevention is better than recovery.</strong> Keep sessions focused on one task. Use <code>/wrap</code> to end a session cleanly when it's getting long. The <a href="context.html">Context &amp; Sessions</a> page covers this in detail.
+          </div>
+        </div>
+
         <!-- AI Concepts -->
         <h2 id="ai-concepts">AI Concepts You'll Encounter</h2>
         <p>DOE builds on top of Claude Code. To use DOE effectively, it helps to understand a few core concepts that affect how you work day to day. None of these require technical background &mdash; just a basic understanding of what's happening under the hood.</p>
@@ -898,7 +1132,7 @@ Contract:
           </a>
         </div>
 
-        <footer class="site-footer">DOE Starter Kit v1.54.2</footer>
+        <footer class="site-footer">DOE Starter Kit v1.55.0</footer>
 
       </div><!-- /content -->
     </div><!-- /content-area -->
@@ -911,6 +1145,14 @@ Contract:
       <a href="#contracts" class="toc-link">Contracts</a>
       <a href="#key-files" class="toc-link">Key Files</a>
       <a href="#self-annealing" class="toc-link">Self-Annealing</a>
+      <a href="#thin-router" class="toc-link">Thin Router</a>
+      <a href="#phase-directives" class="toc-link">Phase-Based Directives</a>
+      <a href="#dependency-graphs" class="toc-link">Dependency Graphs</a>
+      <a href="#rationalisation-tables" class="toc-link">Rationalisation Tables</a>
+      <a href="#adversarial-review" class="toc-link">Adversarial Review</a>
+      <a href="#defence-in-depth" class="toc-link">Defence in Depth</a>
+      <a href="#deterministic-hooks" class="toc-link">Deterministic Hooks</a>
+      <a href="#context-recovery" class="toc-link">Context Recovery</a>
       <a href="#ai-concepts" class="toc-link">AI Concepts</a>
     </nav>
 

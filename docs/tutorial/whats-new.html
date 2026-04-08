@@ -1,0 +1,3142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What's New &mdash; DOE Starter Kit</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-body: #FFFFFF;
+      --bg-sidebar: #FAFAFA;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8FAFC;
+      --bg-code: #0F172A;
+      --bg-callout-info: #EFF6FF;
+      --bg-callout-tip: #F0FDF4;
+      --bg-callout-warn: #FFFBEB;
+      --border: #E2E8F0;
+      --border-light: #F1F5F9;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #64748B;
+      --text-sidebar: #334155;
+      --text-sidebar-active: #0F172A;
+      --accent: #6366F1;
+      --accent-light: #EEF2FF;
+      --accent-green: #10B981;
+      --accent-amber: #F59E0B;
+      --accent-blue: #3B82F6;
+      --accent-rose: #F43F5E;
+      --sidebar-w: 260px;
+      --toc-w: 220px;
+      --content-max: 840px;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.08);
+      --font: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0B1120;
+      --bg-sidebar: #0F172A;
+      --bg-card: #1E293B;
+      --bg-card-hover: #243347;
+      --bg-code: #020617;
+      --bg-callout-info: #1E293B;
+      --bg-callout-tip: #1E293B;
+      --bg-callout-warn: #1E293B;
+      --border: #1E293B;
+      --border-light: #1E293B;
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --text-sidebar: #94A3B8;
+      --text-sidebar-active: #F1F5F9;
+      --accent-light: #1E1B4B;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      background: var(--bg-body);
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* -- Layout -- */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* -- Sidebar -- */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, background 0.2s, border-color 0.2s;
+    }
+
+    .sidebar-brand {
+      display: block;
+      padding: 20px 16px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.01em;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .sidebar-brand:hover { color: var(--accent); }
+    .sidebar-version { font-weight: 400; font-size: 11px; color: var(--text-muted); margin-left: 4px; }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 10px 24px;
+      overflow-y: auto;
+    }
+
+    .sidebar-section { margin-bottom: 20px; }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 0 4px;
+      margin-bottom: 6px;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-sidebar);
+      text-decoration: none;
+      line-height: 1.4;
+      transition: background 0.1s, color 0.1s;
+    }
+    .sidebar-link:hover {
+      background: var(--border-light);
+      color: var(--text-sidebar-active);
+    }
+    .sidebar-link.active {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .sidebar-link.nested {
+      padding-left: 20px;
+      font-size: 12.5px;
+    }
+
+    /* -- Hamburger (mobile) -- */
+    .hamburger {
+      display: none;
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 200;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+      padding: 0;
+      transition: background 0.2s;
+    }
+    .hamburger span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--text-primary);
+      border-radius: 2px;
+    }
+
+    /* -- Dark mode button -- */
+    .theme-btn {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 200;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .theme-btn:hover { background: var(--bg-card-hover); }
+
+    /* -- Sidebar overlay (mobile) -- */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 99;
+    }
+    .sidebar-overlay.visible { display: block; }
+
+    /* -- Content area -- */
+    .content-area {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 40px 48px;
+      min-width: 0;
+    }
+
+    .content {
+      max-width: var(--content-max);
+      width: 100%;
+    }
+
+    /* -- Typography -- */
+    .content h1 {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .content h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .content h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .content p {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .content ul, .content ol {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      padding-left: 20px;
+    }
+    .content li { margin-bottom: 6px; }
+
+    .content a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+    .content a:hover { text-decoration: underline; }
+
+    .content code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      background: var(--bg-sidebar);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* -- Cards -- */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .m-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      background: var(--bg-card);
+      transition: all 0.15s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .m-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-1px);
+      text-decoration: none;
+    }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .card-icon.indigo { background: var(--accent-light); color: var(--accent); }
+    .card-icon.green  { background: #ECFDF5; color: var(--accent-green); }
+    .card-icon.amber  { background: #FEF3C7; color: var(--accent-amber); }
+    .card-icon.blue   { background: #DBEAFE; color: var(--accent-blue); }
+    .card-icon.rose   { background: #FFE4E6; color: var(--accent-rose); }
+
+    [data-theme="dark"] .card-icon.indigo { background: #312E81; }
+    [data-theme="dark"] .card-icon.green  { background: #064E3B; }
+    [data-theme="dark"] .card-icon.amber  { background: #78350F; }
+    [data-theme="dark"] .card-icon.blue   { background: #1E3A5F; }
+    [data-theme="dark"] .card-icon.rose   { background: #4C0519; }
+
+    .m-card h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+    .m-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* -- Terminal -- */
+    .terminal {
+      background: #0F172A;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin: 24px 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #1E293B;
+    }
+    .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .terminal-dot.red    { background: #EF4444; }
+    .terminal-dot.yellow { background: #F59E0B; }
+    .terminal-dot.green  { background: #22C55E; }
+    .terminal-title {
+      margin-left: 8px;
+      font-size: 12px;
+      color: #64748B;
+      font-family: var(--font-mono);
+    }
+    .terminal pre {
+      padding: 20px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: #CBD5E1;
+      overflow-x: auto;
+      margin: 0;
+    }
+    .t-comment { color: #64748B; }
+    .t-prompt  { color: #F59E0B; }
+    .t-cmd     { color: #6EE7B7; }
+
+    /* -- Callout -- */
+    .callout {
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: flex;
+      gap: 10px;
+      line-height: 1.5;
+    }
+    .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .callout.tip {
+      background: var(--bg-callout-tip);
+      border: 1px solid #BBF7D0;
+      color: #166534;
+    }
+    [data-theme="dark"] .callout.tip { border-color: #064E3B; color: #6EE7B7; }
+    .callout strong { font-weight: 600; }
+    .callout a { color: inherit; font-weight: 500; }
+    .callout .callout-body { color: inherit; }
+
+    /* -- Steps -- */
+    .steps {
+      margin: 24px 0;
+      padding: 0;
+      list-style: none;
+    }
+    .step {
+      position: relative;
+      padding-left: 48px;
+      padding-bottom: 24px;
+      border-left: 2px solid var(--border);
+      margin-left: 14px;
+    }
+    .step:last-child { border-left: 2px solid transparent; padding-bottom: 0; }
+    .step-number {
+      position: absolute;
+      left: -15px;
+      top: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+    .step p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0 0 8px;
+    }
+    .step code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--bg-sidebar);
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+    }
+    .step a { color: var(--accent); }
+
+    /* -- Code block -- */
+    .code-block {
+      background: var(--bg-code);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 12px 0 16px;
+      overflow-x: auto;
+    }
+    .code-block pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      color: #CBD5E1;
+    }
+
+    /* -- Plain English box -- */
+    .plain-english {
+      background: linear-gradient(135deg, var(--accent-light), var(--bg-card));
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    .plain-english h4 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .plain-english p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    /* -- Diagram container -- */
+    .diagram {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 16px 12px;
+      margin: 24px 0;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+      overflow-x: auto;
+    }
+    .diagram svg {
+      width: 100%;
+      height: auto;
+    }
+
+    /* -- Pagination -- */
+    .pagination {
+      display: flex;
+      gap: 16px;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .pagination a {
+      flex: 1;
+      display: block;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.15s;
+    }
+    .pagination a:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-card);
+      text-decoration: none;
+    }
+    .pg-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .pg-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+    .pagination .next { text-align: right; }
+
+    /* -- Footer -- */
+    .site-footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* -- Responsive -- */
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+      .sidebar.open { transform: translateX(0); }
+      .content-area { margin-left: 0; padding: 24px 20px; padding-top: 60px; }
+      .hamburger { display: flex; }
+    }
+
+    @media (max-width: 600px) {
+      .card-grid { grid-template-columns: 1fr; }
+      .card-grid.cols-3 { grid-template-columns: 1fr; }
+    }
+
+    @media (min-width: 601px) and (max-width: 900px) {
+      .card-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* -- Right-side TOC -- */
+    .toc {
+      width: var(--toc-w);
+      min-width: var(--toc-w);
+      position: fixed;
+      right: 24px;
+      top: 120px;
+      font-size: 12px;
+    }
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .toc-link {
+      display: block;
+      padding: 3px 0 3px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid var(--border);
+      transition: all 0.1s;
+    }
+    .toc-link:hover {
+      color: var(--text-secondary);
+      border-color: var(--text-muted);
+    }
+    .toc-link.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    @media (min-width: 1201px) {
+      .content-area { padding-right: calc(var(--toc-w) + 48px); }
+    }
+    @media (max-width: 1200px) {
+      .toc { display: none; }
+      .content-area { padding-right: 0 !important; }
+    }
+
+    /* -- Release-specific styles -- */
+    .version-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 5px 14px;
+      border-radius: 20px;
+      letter-spacing: -0.01em;
+    }
+    .release-date {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-left: 12px;
+    }
+    .release-hero {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      margin: 10px 0 14px;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, var(--accent-light), var(--bg-card));
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    .release {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .release-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .release h4 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-green);
+      margin: 10px 0 4px;
+    }
+    .release h4.changed { color: var(--accent-blue); }
+    .release h4.fixed { color: var(--accent-amber); }
+    .release h4.removed { color: var(--accent-rose); }
+    .release h4.docs { color: var(--text-muted); }
+    .release ul {
+      margin: 0 0 4px 18px;
+      padding: 0;
+    }
+    .release li {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+      line-height: 1.55;
+    }
+    .release li strong {
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+    /* Description after the bold title is de-emphasised */
+    .release li {
+      color: var(--text-muted);
+    }
+    .release li strong {
+      color: var(--text-primary);
+    }
+    .release li code {
+      font-size: 11px;
+      padding: 1px 4px;
+      color: var(--text-muted);
+      background: var(--border-light);
+      border-color: transparent;
+    }
+    [data-theme="dark"] .release li code {
+      background: var(--bg-code);
+      border-color: transparent;
+    }
+    /* Patch releases (few items) get compact treatment */
+    .release-compact {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+    }
+    .release-compact .release-header {
+      margin-bottom: 4px;
+    }
+    .release-compact h4 {
+      margin: 6px 0 2px;
+    }
+    .release-compact .version-badge {
+      font-size: 13px;
+      padding: 3px 10px;
+    }
+
+    /* -- Tag badges -- */
+    .tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 10px;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+    .tag.app {
+      background: #DBEAFE;
+      color: #1D4ED8;
+    }
+    .tag.infra {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+    [data-theme="dark"] .tag.app {
+      background: #1E3A5F;
+      color: #93C5FD;
+    }
+    [data-theme="dark"] .tag.infra {
+      background: #78350F;
+      color: #FDE68A;
+    }
+
+    /* -- Month groups (collapsed) -- */
+    .month-group {
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .month-group summary {
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      background: var(--bg-sidebar);
+      transition: background 0.1s;
+      list-style: none;
+    }
+    .month-group summary::-webkit-details-marker { display: none; }
+    .month-group summary::before {
+      content: "\25B6";
+      display: inline-block;
+      margin-right: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+    .month-group[open] summary::before { transform: rotate(90deg); }
+    .month-group summary:hover { background: var(--bg-card-hover); }
+    .month-group .release {
+      margin: 0;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .month-group .release:last-child { border-bottom: none; }
+    .month-group .release-compact {
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile hamburger -->
+  <button class="hamburger" id="hamburger" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <!-- Dark mode toggle -->
+  <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">&#9789;</button>
+
+  <!-- Sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <a class="sidebar-brand" href="index.html">DOE Starter Kit <span class="sidebar-version">v1.54.2</span></a>
+      <div class="sidebar-nav">
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">What's New</div>
+          <a class="sidebar-link active" href="whats-new.html">What's New</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Getting Started</div>
+          <a class="sidebar-link" href="index.html">Welcome</a>
+          <a class="sidebar-link" href="getting-started.html">Installation</a>
+          <a class="sidebar-link" href="new-project.html">Starting a New Project</a>
+          <a class="sidebar-link" href="first-session.html">Your First Session</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Core Concepts</div>
+          <a class="sidebar-link" href="key-concepts.html">DOE Architecture</a>
+          <a class="sidebar-link nested" href="key-concepts.html#directives">Directives</a>
+          <a class="sidebar-link nested" href="key-concepts.html#execution">Execution Scripts</a>
+          <a class="sidebar-link" href="first-session.html#state">Sessions &amp; State</a>
+          <a class="sidebar-link" href="context.html">Context &amp; Sessions</a>
+          <a class="sidebar-link" href="key-concepts.html#contracts">Contracts</a>
+          <a class="sidebar-link" href="key-concepts.html#self-annealing">Self-Annealing</a>
+          <a class="sidebar-link" href="key-concepts.html#thin-router">Thin Router</a>
+          <a class="sidebar-link" href="key-concepts.html#adversarial-review">Adversarial Review</a>
+          <a class="sidebar-link" href="key-concepts.html#defence-in-depth">Defence in Depth</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Commands</div>
+          <a class="sidebar-link" href="commands.html">Session Lifecycle</a>
+          <a class="sidebar-link" href="commands.html#quality">Quality &amp; Review</a>
+          <a class="sidebar-link" href="commands.html#reports">Visual Reports</a>
+          <a class="sidebar-link nested" href="commands.html#planning">Planning &amp; Ideas</a>
+          <a class="sidebar-link nested" href="commands.html#multiagent">Advanced</a>
+          <a class="sidebar-link nested" href="commands.html#maintenance">Maintenance</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Workflows</div>
+          <a class="sidebar-link" href="daily-flow.html">A Day with DOE</a>
+          <a class="sidebar-link" href="workflows.html">Feature Lifecycle</a>
+          <a class="sidebar-link" href="workflows.html#planning">Planning &amp; Prompts</a>
+          <a class="sidebar-link" href="multi-agent.html">Multi-Agent</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Examples</div>
+          <a class="sidebar-link" href="example-apps.html#recipe">Recipe Book</a>
+          <a class="sidebar-link" href="example-apps.html#fitness">Fitness Tracker</a>
+          <a class="sidebar-link" href="example-apps.html#events">Events Board</a>
+          <a class="sidebar-link" href="example-apps.html#dashboard">Team Dashboard</a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Reference</div>
+          <a class="sidebar-link" href="tips-and-mistakes.html">Tips &amp; Mistakes</a>
+          <a class="sidebar-link" href="faq.html">FAQ</a>
+          <a class="sidebar-link" href="ide-setup.html">IDE Compatibility</a>
+          <a class="sidebar-link nested" href="ide-setup.html#cursor">Cursor Setup</a>
+          <a class="sidebar-link" href="glossary.html">Glossary</a>
+        </div>
+
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="content-area">
+      <div class="content">
+
+        <h1>What's New</h1>
+        <p style="font-size: 17px; color: var(--text-secondary); margin-bottom: 32px;">Every release of the DOE Starter Kit, newest first.</p>
+
+        <div class="release" id="v1-55-0">
+          <div class="release-header">
+            <span class="version-badge">v1.55.0</span>
+            <span class="release-date">8 April 2026</span>
+          </div>
+          <p class="release-hero">The most comprehensive documentation update since the tutorials launched. Eight new concept sections on the Key Concepts page cover everything from DAGs to adversarial review. A brand-new Migration Guide walks users through upgrading from any DOE version with per-era checklists and CLAUDE.md before/after examples. The What&#x27;s New page — generated from CHANGELOG.md and auto-regenerated on every release — gives every DOE user a single place to see what changed.</p>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Migration Guide</strong> (<code>docs/tutorial/migration-guide.html</code>) — comprehensive upgrade page with Find Your Version, 10-era overview table, 4 migration paths (v1.47 LOW, v1.49 HIGH, v1.51 MEDIUM, v1.52 MEDIUM), CLAUDE.md before/after, fresh-start vs surgical-upgrade decision tree, post-migration verification checklist</li>
+            <li><strong>What&#x27;s New page</strong> (<code>docs/tutorial/whats-new.html</code>) — Conductor-inspired changelog page generated from CHANGELOG.md. Version badges, hero prose sections for major releases, expand/collapse by month for older releases, APP/INFRA tag badges, dark mode</li>
+            <li><strong>What&#x27;s New generator</strong> (<code>execution/generate_whats_new.py</code>) — deterministic Python script, stdlib only. Parses both CHANGELOG heading formats, extracts hero blocks, renders HTML matching tutorial styling. Wired into <code>/sync-doe</code> Step 10</li>
+            <li><strong>8 Key Concepts sections</strong> — Thin Router, Phase-Based Directives, Dependency Graphs (DAGs), Rationalisation Tables, Adversarial Review, Defence in Depth, Deterministic Hooks, Context Recovery</li>
+            <li><strong>6 CHANGELOG hero blocks</strong> — v1.42.0 (Quality Stack), v1.44.0 (PR Workflow), v1.48.0 (Agent Discipline), v1.49.0 (CFA), v1.51.4 (Security), v1.52.0 (Init Wizard)</li>
+            <li><strong>Missing v1.44.0 CHANGELOG entry</strong> — PR Workflow Migration tag existed but changelog entry was never written</li>
+            <li><strong>CLAUDE.md trigger</strong> — <code>Updating CHANGELOG.md -&gt; regenerate whats-new.html</code></li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>CUSTOMIZATION.md</strong> — expanded &quot;Upgrading from Older Kit Versions&quot; from v1.49-only section to comprehensive per-era migration guides with checklists for v1.47, v1.49, v1.51, v1.52. Added version identification section and link to tutorial</li>
+            <li><strong>commands.html</strong> — DOE KIT version v1.36.0 updated to v1.54.2 in terminal mockup</li>
+            <li><strong>new-project.html</strong> — DONE version v1.51.7 updated to v1.54.2. Project types expanded from 5 to 12 (added desktop, browser ext, library, monorepo, hardware, other). Framework card shows &quot;Show all&quot; (40 frameworks) and &quot;Other&quot; escape hatch</li>
+            <li><strong>tips-and-mistakes.html</strong> — example project version v1.28.0 updated to v1.50.0</li>
+            <li><strong>Sidebar</strong> — &quot;What&#x27;s New&quot; added as first link (before Getting Started), &quot;Migration Guide&quot; added to Reference section across all 20 tutorial pages</li>
+            <li><strong>starter-kit-sync.md</strong> — <code>generate_whats_new.py</code> added to Step 10 (after version stamp, before git add)</li>
+            <li><strong>Footer versions</strong> — stamped to v1.55.0 across all 20 pages</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-54-0">
+          <div class="release-header">
+            <span class="version-badge">v1.54.0</span>
+            <span class="release-date">7 April 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>FRAMEWORKS registry</strong> &mdash; unified source of truth for 40 frameworks (6 Tier 1 with full templates, 34 Tier 2 with <code>_generic</code> fallback). Replaces 4 separate data structures (DETECT_PATTERNS, FRAMEWORK_OPTIONS, FRAMEWORK_PROJECT_TYPE, get_init_command dict). Computed shims preserve backwards compatibility.</li>
+            <li><strong>11 project types</strong> (was 5) &mdash; desktop, browser extension, library/package, monorepo, hardware/IoT, plus &quot;Other&quot; with free-text on every selection.</li>
+            <li><strong>&quot;Other&quot; escape hatch</strong> &mdash; every type and framework list ends with &quot;Other (I&#x27;ll describe it)&quot; with free-text prompt. Custom text embedded verbatim in CLAUDE.md.</li>
+            <li><strong>templates/_generic/</strong> &mdash; fallback template directory for Tier 2 frameworks. Contains scaffold.json, .gitignore, .env.example.</li>
+            <li><strong>Platform targets</strong> &mdash; new <code>card_platform_targets()</code> question for desktop/mobile projects. Multi-select (macOS, Windows, Linux, iOS, Android, Web). Injected into CLAUDE.md.</li>
+            <li><strong>execution/check_pending_prs.py</strong> &mdash; pre-commit hook validates ## Pending PRs in todo.md against <code>gh pr list</code>. Blocks stale entries (merged PRs), warns about missing entries (open PRs). Skips gracefully offline.</li>
+            <li><strong>global-scripts/html_builder.py</strong> &mdash; shared HTML generation library (25+ components). Colour tokens, card components, status badges, progress bars, metric grids, data tables. Single source for DOE visual language.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>doe_init wizard flow</strong> &mdash; framework selection decoupled from project type (&quot;Show all&quot; option reveals full categorised list). Detection override opens full list without re-asking project type. Types with no dedicated frameworks skip straight to free-text.</li>
+            <li><strong>Card functions return tuples</strong> &mdash; <code>card_project_type()</code> and <code>card_framework()</code> return <code>(key, custom_text)</code> instead of string. <code>run_wizard()</code> unpacks both.</li>
+            <li><strong>write_doe_version()</strong> &mdash; switched from positional format to key=value format for forwards compatibility with future <code>doe update</code>.</li>
+            <li><strong>get_active_layers()</strong> &mdash; browser_extension projects now get public_facing layer.</li>
+            <li><strong>global-scripts/wrap_html.py</strong> &mdash; refactored to use html_builder (eliminated duplicated CSS).</li>
+            <li><strong>global-scripts/eod_html.py</strong> &mdash; refactored to use html_builder (eliminated duplicated CSS).</li>
+            <li><strong>manifest.json</strong> &mdash; added check_pending_prs.py to universal execution list.</li>
+            <li><strong>.githooks/pre-commit</strong> &mdash; added Pending PRs sync validation section.</li>
+            <li><strong>Test suite</strong> &mdash; 356 checks (was 142). 6 new tests: _other framework, _other project type, platform targets, new project types, registry regression guard, registry consistency.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-53-1">
+          <div class="release-header">
+            <span class="version-badge">v1.53.1</span>
+            <span class="release-date">7 April 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>building-rules.md: monty-specific content</strong> &mdash; removed <code>execution/build.py</code> trigger (project-specific), replaced &quot;PCON24 constituency codes&quot; and &quot;vote shares&quot; examples with generic equivalents.</li>
+            <li><strong>20_structure.md: phantom CHANGELOG.md</strong> &mdash; removed CHANGELOG.md from directory structure listing since <code>doe init</code> doesn&#x27;t create it.</li>
+            <li><strong>manifest.json: bad legal trigger</strong> &mdash; removed &quot;Legal (email, donations, content)&quot; trigger that pointed to documentation-governance.md (a document-versioning directive, not legal guidance).</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-53-0">
+          <div class="release-header">
+            <span class="version-badge">v1.53.0</span>
+            <span class="release-date">7 April 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>todo.md: contract Verify: patterns spec</strong> &mdash; formal specification of 4 executable verification patterns (<code>run:</code>, <code>file: exists</code>, <code>file: contains</code>, <code>html: has</code>), <code>[auto]</code> vs <code>[manual]</code> guidance, and validation rules. Previously the template just said &quot;must have a Contract: block&quot; with no detail on what valid patterns look like.</li>
+            <li><strong>todo.md: retro as mandatory final step</strong> &mdash; quick/full escalation rules, wave deferral format, and when to escalate from quick to full retro.</li>
+            <li><strong>todo.md: Pending PRs detailed format</strong> &mdash; entry format spec (heading, summary, contains, detail table, post-merge checklist), merge order pointer, conflict tracking. Previously just an empty section.</li>
+            <li><strong>todo.md: collapsible details for complex features</strong> &mdash; <code>&lt;details&gt;&lt;summary&gt;</code> for 3+ step features with plan file linking.</li>
+            <li><strong>todo.md: general format improvements</strong> &mdash; &quot;this file tracks immediate work only&quot; preamble, progress tracking belongs here not in plans, format is changeable.</li>
+            <li><strong>manifest.json: 2 new triggers</strong> &mdash; &quot;External data / API integration&quot; (universal, points to building-rules.md) and &quot;Legal (email, donations, content)&quot; (regulated layer, points to documentation-governance.md).</li>
+            <li><strong>20_structure.md: added CHANGELOG.md</strong> to directory structure listing.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-52-11">
+          <div class="release-header">
+            <span class="version-badge">v1.52.11</span>
+            <span class="release-date">7 April 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>todo.md template: missing sections</strong> — added <code>## Awaiting Sign-off</code> and <code>## Pending PRs</code> sections with format rule documentation. These existed in mature projects but were never in the kit template, so fresh inits lacked them.</li>
+          </ul>
+        </div>
+
+        <details class="month-group">
+
+          <summary>April 2026 (11 releases)</summary>
+
+        <div class="release" id="v1-52-10">
+          <div class="release-header">
+            <span class="version-badge">v1.52.10</span>
+            <span class="release-date">7 April 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>audit_claims.py: false router WARNs</strong> — <code>check_router_coverage</code> didn&#x27;t recognize directory triggers (<code>adversarial-review/</code>, <code>best-practices/</code>), causing 7 false WARNs on every fresh init. Added <code>dir_refs</code> matching from <code>test_methodology.py</code>.</li>
+            <li><strong>audit_claims.py: false cross-ref WARNs</strong> — <code>check_cross_reference_consistency</code> lacked home-directory (<code>~/.claude/</code>) and kit-directory fallback paths, causing 8 false WARNs. Also skips <code>_TEMPLATE.md</code> files now.</li>
+            <li><strong>data-safety.md: monty-specific content</strong> — replaced &quot;Monty&quot; with &quot;the system&quot; and removed 2 monty-specific <code>.claude/plans/</code> cross-references that don&#x27;t exist in other projects.</li>
+            <li><strong>manifest.json: chrome-verification framework gate</strong> — removed <code>frameworks</code> restriction from chrome-verification trigger. The <code>public_facing</code> layer gate is sufficient; framework filter caused install/trigger mismatch.</li>
+            <li><strong>10_methodology.md: missing rule pointers</strong> — added <code>-&gt;</code> directive pointers to Core Behaviour rules 2, 3, and 5.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-52-1">
+          <div class="release-header">
+            <span class="version-badge">v1.52.1</span>
+            <span class="release-date">3 April 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>Init wizard: dead hooks</strong> — <code>.claude/settings.json</code> (hook configuration) was never created. All 7 guardrail hooks were installed as files but never wired up. Now generated with PreToolUse + PostToolUse hooks, stripping kit-contributor-only entries.</li>
+            <li><strong>Init wizard: missing files</strong> — <code>.claude/agents/</code> (4 agent definitions), <code>.claude/plans/</code> (multi-agent coordination), <code>.claude/stats.json</code>, <code>ROADMAP.md</code>, <code>tasks/archive.md</code> were never scaffolded despite being referenced by commands and directives.</li>
+            <li><strong>Init wizard: incomplete manifest</strong> — 23/31 commands, 7/16 execution scripts, 8/24 directives, 3/9 global scripts, pre-push hook, and <code>data-safety.md</code> were missing from <code>manifest.json</code>. New projects got a fraction of the kit&#x27;s capabilities.</li>
+            <li><strong>Init wizard: NameError crash</strong> — <code>DETECT_PATTERNS</code> referenced after rename to <code>_FALLBACK_DETECT_PATTERNS</code>. Wizard could not reach the confirmation card.</li>
+            <li><strong>Init wizard: regulated layer</strong> — <code>data-governance.md</code> and <code>legal-framework.md</code> were promised in the confirmation card but the template files didn&#x27;t exist. Now created as proper GDPR/compliance scaffolds.</li>
+            <li><strong>Review gate broken</strong> — <code>/review</code> never called <code>record_review_result.py</code>, so <code>enforce_review_gate.py</code> blocked PR creation with no way to pass. Review command now records the verdict.</li>
+            <li><strong>setup.sh: STATE.md written to kit repo</strong> — <code>STATE_FILE</code> pointed to <code>$SCRIPT_DIR/STATE.md</code> (the kit) instead of the project&#x27;s <code>STATE.md</code>. Fixed.</li>
+            <li><strong>setup.sh: git hooks activated on kit</strong> — <code>git config core.hooksPath</code> ran against the kit repo, not the user&#x27;s project. Fixed.</li>
+            <li><strong>setup.sh: Linux incompatibility</strong> — <code>sed -i &#x27;&#x27;</code> is macOS-only. Now uses cross-platform detection.</li>
+            <li><strong>Git init message never shown</strong> — inverted <code>has_git</code> condition after successful init.</li>
+            <li><strong>Test suite crash</strong> — <code>test_doe_init.py</code> imported deleted <code>DETECT_PATTERNS</code> symbol.</li>
+            <li><strong>Command paths broken</strong> — <code>/report-doe-bug</code> and <code>/request-doe-feature</code> referenced <code>execution/</code> paths that only exist in the kit, not user projects. Fixed to <code>~/doe-starter-kit/execution/</code>.</li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>best-practices/</code> directives</strong> — 5 language-specific best practice files (HTML/CSS, JavaScript, Python, React, TDD) now installed to projects.</li>
+            <li><strong>Quality Gate trigger</strong> — <code>&quot;Completed 4+ steps on current feature&quot;</code> trigger added to manifest. Ensures mid-build verification on long features.</li>
+            <li><strong>6 new triggers</strong> — subagent-protocol, starter-kit-pull, tdd-and-debugging, multi-agent-coordination, incident-response, quality gate.</li>
+            <li><strong>Framework detection from scaffold.json</strong> — replaces hardcoded <code>DETECT_PATTERNS</code> dict. Single source of truth with fallback.</li>
+            <li><strong>First-time <code>~/.claude/CLAUDE.md</code></strong> — universal learnings template installed for users who don&#x27;t have one.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>SYSTEM-MAP.md</strong> — updated to reflect actual installed files (was documenting 3 hooks when 7 are installed, missing agents/plans/stats.json from project tree).</li>
+            <li><strong>README.md</strong> — corrected file counts (49→120+, 29→31 commands, 15→18 tutorials, 43→55 docs).</li>
+            <li><strong>CUSTOMIZATION.md</strong> — corrected command count (24→31).</li>
+            <li><strong>Commands README</strong> — added <code>/doe-health</code> and <code>/code-trace</code> documentation.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-52-0">
+          <div class="release-header">
+            <span class="version-badge">v1.52.0</span>
+            <span class="release-date">2 April 2026</span>
+          </div>
+          <p class="release-hero">DOE becomes a conversation, not a copy-paste. The init wizard replaces blind setup.sh with an 8-card interactive flow that detects your framework, asks what you&#x27;re building, and scaffolds a project with exactly the files you need. Composable capability layers (universal, public-facing, data-handling, regulated) mean a static HTML site and a GDPR-regulated SaaS app both start from the same wizard — they just get different files.</p>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>DOE Init Wizard</strong> (<code>execution/doe_init.py</code>) — conversational scaffolding tool replacing blind setup.sh copy. 8-card bordered UX, framework auto-detection, composable CLAUDE.md generation, additive capability layers (universal, public-facing, data-handling, regulated). Supports Next.js, Vite, Python, Go, Flutter, static HTML.</li>
+            <li><strong>Framework templates</strong> (<code>templates/</code>) — per-framework scaffold.json, claude_section.md, .gitignore, .env.example for 6 frameworks. Base templates for CLAUDE.md sections and capability layers.</li>
+            <li><strong>Manifest</strong> (<code>manifest.json</code>) — single source of truth mapping layers to kit files and trigger lists. Data-driven file installation.</li>
+            <li><strong>Integration tests</strong> (<code>execution/test_doe_init.py</code>) — 142 checks across 6 frameworks, new-project and existing-project paths.</li>
+            <li><strong>Tutorial: Starting a New Project</strong> (<code>docs/tutorial/new-project.html</code>) — full walkthrough for new and existing projects with terminal card mockups.</li>
+            <li><strong>IDE Compatibility</strong> (<code>docs/tutorial/ide-setup.html</code>) — setup guidance for Cursor and other IDEs.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Global script reorg</strong> — 6 shared tooling scripts moved from <code>execution/</code> to <code>global-scripts/</code> (wrap_html.py, eod_html.py, dispatch_dag.py, run_snagging.py, record_review_result.py, persist_review_findings.py). Installed to <code>~/.claude/scripts/</code> by setup.sh.</li>
+            <li><strong>setup.sh</strong> — delegates to init wizard for new projects. Copies global-scripts/ to ~/.claude/scripts/.</li>
+            <li><strong>Global commands</strong> (wrap.md, eod.md, crack-on.md) — updated paths from <code>execution/</code> to <code>~/.claude/scripts/</code>.</li>
+            <li><strong>Agent definitions</strong> (Finder, Adversarial, Referee) — updated persist_review_findings.py path.</li>
+            <li><strong>Sidebar navigation</strong> — all 17 tutorial pages updated with new entries.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-51-7">
+          <div class="release-header">
+            <span class="version-badge">v1.51.7</span>
+            <span class="release-date">2 April 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>PR merge confirmation hook</strong> (<code>confirm_pr_merge.py</code>) — blocks <code>gh pr merge</code> and forces a two-step confirmation flow. Claude shows a bordered card with PR details and asks before merging. No bypass without user approval.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Dangerous commands</strong> (<code>block_dangerous_commands.py</code>) — <code>gh pr merge</code> moved from absolute block to dedicated confirmation hook. Claude can now merge with user approval instead of never.</li>
+            <li><strong>Settings</strong> (<code>settings.json</code>) — registered <code>confirm_pr_merge.py</code> as PreToolUse bash hook.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-51-6">
+          <div class="release-header">
+            <span class="version-badge">v1.51.6</span>
+            <span class="release-date">2 April 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>Contract check false positive</strong> (<code>check_contract.py</code>) — only blocks on unchecked <code>[auto]</code> criteria, no longer treats <code>[manual]</code> items as blocking. Eliminates need for <code>SKIP_CONTRACT_CHECK=1</code> on every commit after a step with pending manual items.</li>
+            <li><strong>Review gate scope</strong> (<code>enforce_review_gate.py</code>) — gates (steps-complete + adversarial review) now only apply to <code>feature/*</code> branches. Housekeeping, wrap, and other non-feature branches pass through freely.</li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Step-marking enforcement</strong> (<code>commit-msg</code> hook) — blocks commits with &quot;Step N&quot; or version tag <code>(vX.Y.Z)</code> in the message unless <code>tasks/todo.md</code> is staged. Skip: <code>SKIP_STEP_MARK_CHECK=1</code>.</li>
+            <li><strong>Main-branch protection</strong> (<code>pre-commit</code> hook) — blocks direct commits to main/master locally (allows merge commits). Skip: <code>SKIP_MAIN_PROTECTION=1</code>.</li>
+            <li><strong>Steps-complete PR gate</strong> (<code>enforce_review_gate.py</code>) — blocks <code>gh pr create</code> on feature branches if not all steps in ## Current are complete. Prevents mid-feature PRs.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Building rules</strong> (<code>building-rules.md</code>) — documents step-marking enforcement hook.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-51-5">
+          <div class="release-header">
+            <span class="version-badge">v1.51.5</span>
+            <span class="release-date">2 April 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>No mid-feature PRs rule</strong> (<code>building-rules.md</code>) — push to feature branch to save work between sessions, PRs created at retro only. Reduces PR overhead for multi-session features.</li>
+            <li><strong>Wrap mid-feature branch handling</strong> (<code>wrap.md</code>) — Step 0 rewritten: mid-feature sessions stay on the feature branch, wrap data commits directly to it. No separate housekeeping branch or PR. Step 1 no longer suggests creating PRs mid-feature.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-51-4">
+          <div class="release-header">
+            <span class="version-badge">v1.51.4</span>
+            <span class="release-date">1 April 2026</span>
+          </div>
+          <p class="release-hero">Professional security defaults for every DOE project. Review gates block PR creation without adversarial review proof-of-work. Step-marking enforcement ensures todo.md tracks progress mechanically. Slack notifications, integrations directive, and sync audit self-tests round out the release. The principle: deterministic enforcement beats probabilistic rules.</p>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Review gate hook</strong> (<code>enforce_review_gate.py</code>) — blocks PR creation without Finder subagent proof-of-work</li>
+            <li><strong>Review findings persistence</strong> (<code>persist_review_findings.py</code>, <code>record_review_result.py</code>) — proof-of-work artifacts for adversarial review gate</li>
+            <li><strong>Slack wrap notification</strong> (<code>slack_notify.py</code>) — posts session wrap summaries to Slack via incoming webhook with Block Kit formatting</li>
+            <li><strong>Integrations directive</strong> (<code>directives/integrations.md</code>) — setup guide for GitHub + Slack notifications (recommended, not required)</li>
+            <li><strong>Sync audit self-test</strong> in <code>audit_sync.py</code> — validates classification logic with <code>--self-test</code> flag</li>
+            <li><strong>Step 0 pre-flight</strong> in sync directive — documents <code>audit_sync.py</code> workflow and file classification rules</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Agent definitions</strong> (Finder, Adversarial, Referee) — persist findings section for review gate integration</li>
+            <li><strong>Delivery rules</strong> — <code>/review</code> step before PR creation, hook enforces review artifact exists</li>
+            <li><strong>Dangerous commands hook</strong> — blocks <code>SKIP_REVIEW_GATE</code>, <code>SKIP_CONTRACT_CHECK</code>, <code>SKIP_SIGNOFF_CHECK</code> bypass flags</li>
+            <li><strong>Documentation governance</strong> — clearer staleness rule (1 minor version threshold)</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-50-1">
+          <div class="release-header">
+            <span class="version-badge">v1.50.1</span>
+            <span class="release-date">1 April 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Sync gap check</strong> in <code>/wrap</code> command — runs <code>audit_sync.py --json</code> and warns if universal files are missing from kit</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-50-0">
+          <div class="release-header">
+            <span class="version-badge">v1.50.0</span>
+            <span class="release-date">1 April 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Sync audit script</strong> (<code>execution/audit_sync.py</code>) — pre-flight for /sync-doe that compares project vs kit across 7 directories, flags universal files missing from kit</li>
+            <li><strong>Feature request handler</strong> (<code>execution/doe_feature_request.py</code>) — scans kit for overlap, searches GitHub issues, files sanitised bug reports</li>
+            <li><strong>Snagging orchestrator</strong> (<code>execution/run_snagging.py</code>) — pre-merge verification gate, reads contracts from todo.md</li>
+            <li><strong>Documentation scanner</strong> (<code>execution/scan_docs.py</code>) — audits tutorial/reference docs against kit version</li>
+            <li><strong>DOE health command</strong> (<code>global-commands/doe-health.md</code>) — <code>/doe-health</code> wrapper for methodology tests</li>
+            <li><strong>Unit tests</strong> for 4 shared execution scripts (<code>tests/execution/test_audit_claims.py</code>, <code>test_health_check.py</code>, <code>test_verify.py</code>, <code>test_wrap_stats.py</code>)</li>
+            <li><strong>Quality Gate section</strong> in <code>building-rules.md</code> — mid-feature checkpoints every 4 steps with blast radius assessment</li>
+            <li><strong>Pre-Retro Quality Gate</strong> in <code>delivery-rules.md</code> — mandatory methodology + Finder pass before retro</li>
+            <li><strong>Invariant promotion step</strong> in retro procedure (step 7) — auto-promote lasting contracts to <code>tests/invariants.txt</code></li>
+            <li><strong>Playwright MCP section</strong> in <code>testing-strategy.md</code> — guidance on converting <code>[manual]</code> criteria to <code>[auto]</code> with browser automation</li>
+            <li><strong>Cross-file consistency check</strong> (item 6) in <code>Finder.md</code> agent definition</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>eod_html.py</strong> — DOE Kit sync indicator now shows user/creator change counts (e.g. &quot;not synced (3u 2c)&quot;)</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-49-1">
+          <div class="release-header">
+            <span class="version-badge">v1.49.1</span>
+            <span class="release-date">1 April 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>todo.md structural linter</strong> (<code>execution/lint_todo.py</code>) — enforces contract existence on every step, retro as last step, <span class="tag app">APP</span> features require [manual] criteria</li>
+            <li><strong>Quality gate runner</strong> (<code>execution/quality_gate.py</code>) — wrapper for mid-feature checkpoints (<code>--checkpoint</code>) and pre-retro gates (<code>--pre-retro</code>), writes markers to <code>.tmp/</code></li>
+            <li><strong>Invariant bootstrap</strong> (<code>execution/bootstrap_invariants.py</code>) — scans completed contracts and promotes lasting patterns to <code>tests/invariants.txt</code></li>
+            <li><strong>Invariants template</strong> (<code>tests/invariants.txt</code>) — empty file with format docs, ready for project-specific invariants</li>
+            <li><strong>5 new pre-commit checks</strong> in <code>.githooks/pre-commit</code>: - Sign-off enforcement — blocks <code>[ ] [manual]</code> in <code>## Done</code> (<code>SKIP_SIGNOFF_CHECK=1</code>) - Structural lint — calls <code>lint_todo.py</code> when <code>todo.md</code> is staged (<code>SKIP_TODO_LINT=1</code>) - Quality gate checkpoint — blocks after 4+ steps without running gate (<code>SKIP_QUALITY_GATE=1</code>) - Pre-retro gate — blocks retro commit without methodology pass (<code>SKIP_RETRO_GATE=1</code>)</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-49-0">
+          <div class="release-header">
+            <span class="version-badge">v1.49.0</span>
+            <span class="release-date">1 April 2026</span>
+          </div>
+          <p class="release-hero">The biggest structural change in DOE history. CLAUDE.md was rewritten from a 113-line inline rulebook into a 55-line thin router that loads directives on demand. Every token of irrelevant context degrades agent performance — this release operationalises that principle. Six phase-based directives now handle planning, building, delivery, context management, self-annealing, and framework evolution. A DAG executor enables parallel step dispatch, and custom adversarial review agents (Finder, Adversarial, Referee) provide structured multi-agent code review.</p>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Phase-based directives</strong> — 6 new directives extracted from CLAUDE.md: <code>planning-rules.md</code>, <code>building-rules.md</code>, <code>delivery-rules.md</code>, <code>context-management.md</code>, <code>self-annealing.md</code>, <code>framework-evolution.md</code></li>
+            <li><strong>Adversarial review guide</strong> (<code>directives/adversarial-review/README.md</code>) — blast radius matrix, Finder/Adversarial/Referee agent roles with scoring, invocation modes, DAG integration</li>
+            <li><strong>DAG executor</strong> (<code>execution/dispatch_dag.py</code>) — dependency graph from <code>Depends:</code>/<code>Owns:</code> metadata in todo.md. Modes: <code>--validate</code>, <code>--graph</code>, <code>--dispatch</code>, <code>--status</code></li>
+            <li><strong>Custom agent definitions</strong> (<code>.claude/agents/</code>) — Finder, Adversarial, Referee, ReadOnly agents for adversarial review with mechanically blocked Edit/Write</li>
+            <li><strong>8 new methodology scenarios</strong> (10-17) in <code>audit_claims.py</code> and <code>test_methodology.py</code> — router coverage, rule completeness, scale consistency, DAG validation, directive schema, cross-reference consistency, agent definition integrity, plan vs actual</li>
+            <li><strong>Three-Level Verification</strong> section in <code>directives/testing-strategy.md</code> — Exists/Substantive/Wired depth levels for contract criteria</li>
+            <li><strong>Pre-push methodology checks</strong> (<code>.githooks/pre-push</code>) — runs <code>test_methodology.py --quick</code> before every push</li>
+            <li><strong>Methodology Tests CI step</strong> in <code>doe-ci.yml</code> — runs methodology checks in the DOE Gate tier</li>
+            <li><strong>Upgrade guide</strong> in <code>CUSTOMIZATION.md</code> — documents v1.49.0 CFA changes for existing users</li>
+            <li><strong>Safe/Change with Care/Do Not Change</strong> sections in <code>CUSTOMIZATION.md</code> — clear trichotomy for customisation risk</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>CLAUDE.md</strong> — rewritten from ~113-line monolith to ~55-line thin router. Rules replaced with one-liner pointers to phase directives. Trigger table replaces Progressive Disclosure section</li>
+            <li><strong>SYSTEM-MAP.md</strong> — updated to document CFA architecture (phase directives, agents, DAG executor, pre-push hook)</li>
+            <li><strong>crack-on.md</strong> — dependency analysis from DAG executor, session blocking for large features</li>
+            <li><strong>test_methodology.py</strong> — <code>--scenario</code> flag now accepts multiple values (<code>action=&quot;append&quot;</code>)</li>
+          </ul>
+        </div>
+
+        </details>
+
+        <details class="month-group">
+
+          <summary>March 2026 (121 releases)</summary>
+
+        <div class="release" id="v1-48-0">
+          <div class="release-header">
+            <span class="version-badge">v1.48.0</span>
+            <span class="release-date">31 March 2026</span>
+          </div>
+          <p class="release-hero">Superpowers-inspired discipline enforcement for AI agents. Rationalisation tables map every common excuse for skipping guardrails to reality across 6 domains. Serial dispatch protocol (SDD) provides a structured workflow for sequential step execution. Adversarial review with confidence-scored findings, universal CI pipeline with three tiers, and 9 updated session commands complete the Agent Discipline era.</p>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Agent Discipline directives</strong> — rationalisation tables (6 domains, excuse-reality format), serial dispatch protocol (SDD workflow with decision tree), subagent status protocol (DONE/DONE_WITH_CONCERNS/NEEDS_CONTEXT/BLOCKED)</li>
+            <li><strong>Adversarial review templates</strong> (<code>directives/adversarial-review/</code>) — spec-reviewer, code-quality-reviewer, and implementer-prompt templates for two-pass confidence-scored code review</li>
+            <li><strong>Data compliance directive</strong> (<code>directives/data-compliance.md</code>) — UK GDPR, DPA 2018, PPERA guidance for personal data handling</li>
+            <li><strong>Data safety directive</strong> (<code>directives/data-safety.md</code>) — data protection, backup, and integrity rules</li>
+            <li><strong>Kit write guard hook</strong> (<code>.claude/hooks/guard_kit_writes.py</code>) — blocks direct writes to ~/doe-starter-kit, enforces /sync-doe workflow. File-based flag for bypass during sync, SKIP_KIT_GUARD=1 for kit-native work</li>
+            <li><strong>DOE health checks</strong> (<code>execution/test_methodology.py</code>) — 9 methodology scenarios including CLAUDE.md quality scoring with letter grades</li>
+            <li><strong>/request-doe-feature</strong> command — structured feature request filing for the DOE starter kit</li>
+            <li><strong>Universal CI pipeline</strong> (<code>.github/workflows/doe-ci.yml</code>) — three-tier auto-detecting CI (gates/advisory/AI review) with path filters and CI Result aggregator</li>
+            <li><strong>Auto-rebase Action</strong> (<code>.github/workflows/auto-rebase.yml</code>) — keeps open PR branches current with main</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>9 commands updated</strong> — crack-on, stand-up, sitrep, wrap, review, snagging, eod, hq, sync-doe. All now include PR conflict detection, branch staleness warnings, and open PR awareness</li>
+            <li><strong>/review</strong> — now supports arguments (--spec, --code, --tests, commit hash), confidence scoring (80+ threshold), bordered output with SPEC+CODE passes and verdict</li>
+            <li><strong>/eod</strong> — date argument support, Gist source fallback for past dates</li>
+            <li><strong>/hq</strong> — auto source (Gist + local fallback)</li>
+            <li><strong>/sync-doe</strong> — kit write guard flag integration</li>
+            <li><strong>block_dangerous_commands.py</strong> — added Supabase guards (DISABLE ROW LEVEL SECURITY, db reset, deleteMany, emptyBucket)</li>
+            <li><strong>PR template</strong> — CI Result replaces hardcoded ESLint/Playwright/Lighthouse checks</li>
+            <li><strong>setup.sh</strong> — enhanced for CI pipeline and org rename</li>
+            <li><strong>GitHub org</strong> — references updated from iPolyphian to Albion-Labs</li>
+            <li><strong>Tutorial pages</strong> — version badge in sidebar, PR workflow updates</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-47-0">
+          <div class="release-header">
+            <span class="version-badge">v1.47.0</span>
+            <span class="release-date">22 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>TDD &amp; debugging directive</strong> (<code>directives/best-practices/tdd-and-debugging.md</code>) — Red-Green-Refactor enforcement with 7-excuse rationalisation table, 4-phase systematic debugging protocol (Investigate, Pattern Analysis, Hypothesis Testing, Implementation). Includes &quot;when to test&quot; decision table by code type</li>
+            <li><strong>Chrome verification directive</strong> (<code>directives/chrome-verification.md</code>) — protocol for using Claude Code&#x27;s Chrome MCP integration to auto-verify <code>[manual]</code> contract items. DOM checks, console checks, layout screenshots, with graceful degradation</li>
+            <li><strong>4 CLAUDE.md triggers</strong> — TDD enforcement on new code, systematic debugging on failures, Chrome verification in snagging, Chrome prompt in crack-on for <span class="tag app">APP</span> features</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>crack-on</strong> — Chrome enablement prompt for <span class="tag app">APP</span> features. Does not auto-enable (context cost); just asks</li>
+            <li><strong>snagging</strong> — new Chrome verification Step 5 between test generation and report. Auto-verifies DOM, console, and layout items; leaves subjective items as <code>[manual]</code></li>
+          </ul>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>wrap_html.py</strong> — auto-calculate timeline durations from timestamps instead of hand-estimates. Handles midnight crossing. Falls back to session total when timestamps missing</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-46-0">
+          <div class="release-header">
+            <span class="version-badge">v1.46.0</span>
+            <span class="release-date">21 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>DOE Kit sync check simplified</strong> — stand-up, crack-on, and wrap now use version-only comparison (kit tag vs STATE.md). No more file diffs or u/c classification. Eliminates false positives from project-specific customisations</li>
+            <li><strong>/sync-doe reverted to direct push</strong> — commits directly to kit main instead of creating a sync branch + PR. The sync procedure itself is the quality gate</li>
+            <li><strong>/wrap session-specific sync reminder</strong> — at session end, checks if kit-syncable files were modified THIS session and shows a targeted reminder. Replaces the persistent outbound push detection</li>
+            <li><strong>/pull-doe self-correcting</strong> — always updates STATE.md version after sync, even on &quot;already up to date&quot;. Prevents stale version mismatches</li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Code verification rule in manual-testing directive</strong> — verify function names, parameter types, and valid inputs against actual code before presenting test steps. Prevents design-phase language from contracts reaching users as broken test instructions</li>
+            <li><strong>Info banner in test checklist HTML</strong> — reminds testers to verify exact function signatures against the code before testing</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-45-0">
+          <div class="release-header">
+            <span class="version-badge">v1.45.0</span>
+            <span class="release-date">21 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Pre-commit innerHTML/XSS check</strong> — warns (blocking with <code>SKIP_XSS_CHECK=1</code> bypass) when innerHTML is used without escaping in staged JS files</li>
+            <li><strong>Pre-commit STATE.md staleness check</strong> — warns when code changes are committed without updating STATE.md</li>
+            <li><strong>Wrap Step 0: branch cleanup</strong> — checks if on a feature branch with a merged PR before wrapping, offers to switch back to main</li>
+            <li><strong>5 compliance triggers in CLAUDE.md</strong> — auto-load legal/compliance docs when building: personal data features (GDPR), email/SMS (PECR), donations (PPERA), content generation (imprints), opposition research (defamation)</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Rule 6</strong> rewritten for branch+PR workflow — feature branches, commit per step on branch, <code>gh pr create</code> at retro, CI must pass before merge, no direct commits to main</li>
+            <li><strong>Rule 11</strong> updated — retro step now includes PR creation with template auto-filled from contract criteria</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-44-0">
+          <div class="release-header">
+            <span class="version-badge">v1.44.0</span>
+            <span class="release-date">19 March 2026</span>
+          </div>
+          <p class="release-hero">DOE moves from direct-to-main commits to a proper branch-based PR workflow. Feature branches, CI gating with GitHub Actions, branch protection on main, snagging as pre-merge gate with Chrome visual verification, and a complete multi-agent coordination protocol. The master-to-main branch rename, PR template, and session command updates ship together. Released as DOE kit v1.44.0.</p>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Branch-based PR workflow</strong> — feature branches, commit per step on branch, <code>gh pr create</code> at retro, CI must pass before merge, no direct commits to main</li>
+            <li><strong>GitHub Action for AI PR review</strong> — automated adversarial review on pull requests</li>
+            <li><strong>Snagging as pre-merge gate</strong> — Chrome visual verification integrated into snagging workflow</li>
+            <li><strong>PR template</strong> — auto-filled from contract criteria during retro</li>
+            <li><strong>Multi-agent coordination protocol</strong> — wave protocol rewrite for branch-based workflow</li>
+            <li><strong>DOE tutorial page</strong> (<code>docs/tutorial/pr-workflow.html</code>) — PR workflow documentation</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>master to main branch rename</strong> — all references updated across commands and documentation</li>
+            <li><strong>Session commands</strong> (stand-up, crack-on, sitrep, wrap) — updated for branch-based workflow with PR awareness</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-43-0">
+          <div class="release-header">
+            <span class="version-badge">v1.43.0</span>
+            <span class="release-date">19 March 2026</span>
+          </div>
+          <h4 class="changed">Documentation</h4>
+          <ul>
+            <li><strong>Testing tutorial rewrite</strong>: 3 inline SVG diagrams (filter funnel, runs-when timeline, tool map), updated catches/misses table, expanded baselines explanation</li>
+            <li><strong>Maestro getting-started section</strong>: Full mobile testing onboarding (install, flows, template, custom flow guide, config)</li>
+            <li><strong>Troubleshooting expansion</strong>: 4 new sections (Maestro 5 scenarios, bundle size 3 scenarios, CI/GitHub Actions 4 scenarios, tests-pass-but-broken teaching)</li>
+            <li><strong>README accuracy fixes</strong>: Command count (24→29), page count (10→15), file count updated</li>
+          </ul>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li>Broken directive references in getting-started, key-concepts, example-apps tutorials</li>
+            <li>Lighthouse now included in --bootstrap dependency install</li>
+            <li>Lighthouse error message now points to --bootstrap instead of global install</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-42-0">
+          <div class="release-header">
+            <span class="version-badge">v1.42.0</span>
+            <span class="release-date">18 March 2026</span>
+          </div>
+          <p class="release-hero">Quality Stack goes universal. Testing infrastructure now auto-detects and supports 16 project types — from Next.js to Flutter to Go. Maestro handles mobile UI testing with YAML flows. Framework-aware orchestration, multi-language health checks, and config-driven portability mean the same /snagging command works regardless of what you&#x27;re building.</p>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Multi-framework testing</strong> — Quality Stack now supports 16 project types: static HTML, Next.js, Vite/React, Angular, Nuxt, Vue, SvelteKit, Remix, Astro, React Native, Expo, Flutter, Python, Go, PHP/Laravel, and Ruby/Rails. Auto-detects framework from project files and configures testing accordingly.</li>
+            <li><strong>Maestro mobile testing</strong> — React Native, Expo, and Flutter projects use Maestro for YAML-based UI testing. Bootstrap installs Maestro CLI automatically. Template flows in <code>.maestro/</code> (app-launch + navigation).</li>
+            <li><strong>Framework-aware orchestrator</strong> — <code>run_test_suite.py</code> reads <code>projectType</code> from <code>tests/config.json</code>, uses framework-specific build and serve commands. Adapters for all web frameworks, PHP built-in server, Rails, Go, and Python/Django.</li>
+            <li><strong>Multi-language health check</strong> — <code>health_check.py</code> scans 10+ languages with per-framework scan paths, stub patterns, TODO detection, and empty function detection. Supports <code>.js</code>, <code>.jsx</code>, <code>.ts</code>, <code>.tsx</code>, <code>.vue</code>, <code>.svelte</code>, <code>.astro</code>, <code>.py</code>, <code>.go</code>, <code>.php</code>, <code>.rb</code>, <code>.dart</code> files.</li>
+            <li><strong>Path routing support</strong> — <code>routeMode</code> field in <code>tests/config.json</code> — <code>&quot;hash&quot;</code> (default) or <code>&quot;path&quot;</code> (Next.js, Vite, SvelteKit, etc). helpers.js uses root path for path-based routing.</li>
+            <li><strong>Distribution fix</strong> — <code>setup.sh</code> copies Quality Stack execution scripts and test infrastructure to new projects. <code>/pull-doe</code> syncs Quality Stack files between kit and project.</li>
+            <li><strong>Snagging auto-bootstrap</strong> — <code>/snagging</code> automatically runs <code>--bootstrap</code> on first use instead of telling the user to do it manually.</li>
+            <li><strong>Snagging copy dropdown</strong> — Copy Results + Copy Bugs + Export section consolidated into a single dropdown menu with failure count badge.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Generator multi-framework</strong> — <code>generate_test_checklist.py</code> handles <code>maestro_results</code> with framework-specific tile labels, shows <code>projectType</code> badge in automated results header.</li>
+            <li><strong>Health check per-language patterns</strong> — TODO/FIXME detection uses <code>#</code> for Python/Ruby, <code>//</code> for JS/Go/Dart, <code>&lt;!--</code> for Vue/Svelte/Astro templates. Empty function detection uses language-specific syntax (<code>def...pass</code> for Python, <code>func...{}</code> for Go, etc).</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-41-3">
+          <div class="release-header">
+            <span class="version-badge">v1.41.3</span>
+            <span class="release-date">18 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>Snagging dark mode</strong> — section header and export section had <code>background: white</code> without dark mode overrides, causing white strips in dark mode. Both now get <code>background: #1e293b</code>.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-41-2">
+          <div class="release-header">
+            <span class="version-badge">v1.41.2</span>
+            <span class="release-date">18 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/report-doe-bug</code> enhanced issue template</strong> — added Component field (searchable by DOE command/script), Error Output section (sanitised traceback), What Was Tried section, User&#x27;s Description section, Project Type in environment table.</li>
+            <li><strong>Duplicate escalation</strong> — structured duplicate comment format with version/severity/description. Adds +1 reaction to issues for sorting by most-affected. Auto-escalates priority labels: 2+ duplicate reports → <code>priority:high</code>, 5+ → <code>priority:critical</code>.</li>
+            <li><strong>Simplified project type question</strong> — &quot;web app or mobile app?&quot; instead of framework-specific options. Labels: <code>project:web</code> / <code>project:mobile</code>.</li>
+            <li><strong>Draft card</strong> — now shows Component, Error Output, and What Was Tried sections in the preview.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-41-1">
+          <div class="release-header">
+            <span class="version-badge">v1.41.1</span>
+            <span class="release-date">18 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/report-doe-bug</code> UX improvements</strong> — bordered output cards for all phases (environment, version check, user error, duplicates, draft preview, result). Questions asked one at a time instead of batched. Added project type question (Static HTML / Next.js / React Native / Flutter / Other) with <code>project:</code> label for backlog filtering.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-41-0">
+          <div class="release-header">
+            <span class="version-badge">v1.41.0</span>
+            <span class="release-date">18 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>/report-doe-bug</code> command</strong> — triage-first bug reporter for the DOE framework. 5-phase flow: gather user description + Claude reconstruction + environment capture, check if fixed in newer version (route to <code>/pull-doe</code>), detect user error (route to tutorial docs via dynamic HTML scanning), search for duplicates (offer to comment), then sanitise and file a structured GitHub Issue with labels (<code>bug</code>, <code>user-reported</code>, version tag, severity). Falls back to local markdown if <code>gh</code> CLI is unavailable.</li>
+            <li><strong><code>execution/doe_bug_report.py</code></strong> — deterministic execution script supporting the bug reporter. Subcommands: <code>--environment</code> (DOE version, OS, Node, Python, shell), <code>--version-check</code> (compare to upstream releases, parse CHANGELOG), <code>--check-gh</code> (verify GitHub CLI), <code>--scan-tutorials</code> (search tutorial HTML headings via stdlib HTMLParser), <code>--search-duplicates</code> (query existing issues), <code>--sanitise</code> (strip API keys, secrets, paths, emails), <code>--file-issue</code> (create GitHub Issue with labels), <code>--add-comment</code> (add context to duplicates). All output JSON.</li>
+            <li><strong>Tutorial update</strong> — added <code>/report-doe-bug</code> entry to <code>commands.html</code> Quality section.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-40-1">
+          <div class="release-header">
+            <span class="version-badge">v1.40.1</span>
+            <span class="release-date">18 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Universal learning</strong> — DOE Starter Kit section in <code>universal-claude-md-template.md</code>: never commit directly to <code>~/doe-starter-kit</code> during feature work, always use <code>/sync-doe</code> for the full release pipeline.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-40-0">
+          <div class="release-header">
+            <span class="version-badge">v1.40.0</span>
+            <span class="release-date">18 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Quality Stack</strong> — full testing infrastructure now ships with the starter kit. Includes <code>run_test_suite.py</code> (orchestrator with server lifecycle, parallel Playwright + Lighthouse), <code>health_check.py</code> (stub/TODO/empty function detection), <code>verify_tests.py</code> (Playwright wrapper), and <code>playwright.config.js</code>.</li>
+            <li><strong>Template test specs</strong> — generic <code>app.spec.js</code>, <code>accessibility.spec.js</code>, <code>visual.spec.js</code> that auto-discover pages from <code>tests/config.json</code>. Shared <code>helpers.js</code> for config-driven app path resolution.</li>
+            <li><strong>Bootstrap command</strong> — <code>python3 execution/run_test_suite.py --bootstrap</code> installs npm deps, Playwright browser, and creates initial baselines in one step.</li>
+            <li><strong>Code trace in snagging</strong> — <code>/snagging</code> now runs code trace automatically (no more yes/no prompt). Results appear in the automated summary section via new <code>--code-trace</code> flag on <code>generate_test_checklist.py</code>.</li>
+            <li><strong>Enhanced verify.py</strong> — <code>--regression</code> and <code>--deposit</code> flags for regression suite accumulation.</li>
+            <li><strong>Config-driven portability</strong> — <code>tests/config.json</code> extended with <code>appPrefix</code>, <code>routes</code>, <code>initScript</code> fields. All scripts read project-specific values from config instead of hardcoding.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>generate_test_checklist.py</code> renders automated results section when either test suite OR code trace data is available (previously required test suite only).</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-39-5">
+          <div class="release-header">
+            <span class="version-badge">v1.39.5</span>
+            <span class="release-date">17 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>SVG diagrams across 3 pages</strong>: commands.html viewBox widened to 610 (fixes &quot;weekly&quot; text clipping). key-concepts.html and context.html SVGs changed from fixed <code>width</code>/<code>height</code> attributes to <code>width:100%;height:auto</code> so they scale responsively. Container padding reduced across all diagram containers.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-39-4">
+          <div class="release-header">
+            <span class="version-badge">v1.39.4</span>
+            <span class="release-date">17 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>SVG lifecycle diagram</strong>: cropped viewBox from <code>0 0 720 320</code> to <code>0 0 590 254</code> to match actual content bounds. Eliminates ~76px dead whitespace below legend and ~130px unused right margin.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-39-3">
+          <div class="release-header">
+            <span class="version-badge">v1.39.3</span>
+            <span class="release-date">17 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Command card layout</strong> (commands.html): badge + origin tag now share a row (flex-wrap), summary text forced below via <code>flex-basis: 100%</code>. Reduced card padding from 20px 24px to 18px 20px.</li>
+            <li><strong>&quot;Built-in&quot; renamed to &quot;Default&quot;</strong> across all 6 command entries, section heading, and TOC link. CSS class <code>.cmd-origin.builtin</code> renamed to <code>.cmd-origin.default</code>.</li>
+            <li><strong>Origin tag styling</strong>: now uses <code>display: inline-flex; align-items: center; height: 22px</code> for consistent vertical alignment with the command badge.</li>
+            <li><strong>SVG lifecycle diagram</strong>: reduced container padding (28px 24px → 20px 16px 12px), reduced bottom margin (40px → 24px), SVG width changed from <code>max-width: 100%</code> to <code>width: 100%</code> to fill container.</li>
+            <li><strong>Annotation list specificity</strong>: <code>.annotation-list</code> → <code>.content .annotation-list</code> to override <code>.content ul { padding-left: 20px }</code> without relying on source order.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-39-2">
+          <div class="release-header">
+            <span class="version-badge">v1.39.2</span>
+            <span class="release-date">17 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Command card layout</strong> across 3 tutorial pages (commands.html, testing.html, daily-flow.html): command badge now sits above the description text instead of beside it. Cleaner layout for long command names like <code>/code-trace --integration</code>.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-39-1">
+          <div class="release-header">
+            <span class="version-badge">v1.39.1</span>
+            <span class="release-date">17 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>testing.html</strong>: New &quot;The Snagging Checklist&quot; section explaining the automated results card (4 metric tiles, status badge, dark mode toggle), baseline updates, and the new /snagging flow. Updated /snagging command card, &quot;What Runs When&quot; table, &quot;Your Role&quot; section, and signposting description.</li>
+            <li><strong>troubleshooting.html</strong>: New &quot;Snagging v2 Issues&quot; section with 5 scenario cards (Lighthouse errors, port conflicts, APP_PATH mismatch, visual regression diffs, dark mode toggle). TOC link and Quick Reference table updated.</li>
+            <li><strong>commands.html</strong>: /snagging entry updated to describe automated test suite integration, results card, dark mode toggle, and baseline updates.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-39-0">
+          <div class="release-header">
+            <span class="version-badge">v1.39.0</span>
+            <span class="release-date">17 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Snagging v2: Automated test results integration</strong> — <code>/snagging</code> now runs <code>execution/run_test_suite.py</code> (if it exists) before generating the checklist. Results rendered as an automated results card with status badge (ALL PASS / WARNINGS / FAILURES), metric tile strip (Browser Tests, Visual Regression, Accessibility, Performance), expandable detail sections (health check, route coverage), and banner divider separating auto from manual checks.</li>
+            <li><strong>Dark mode toggle</strong> on snagging checklists — moon/sun button in the top bar, preference persisted in localStorage. Light mode is always the default.</li>
+            <li><strong>Concept C step stripes</strong> — section cards now have a thin header stripe showing step pill, completion timestamp, and &quot;N of M&quot; position indicator. Card title is just the clean feature name.</li>
+            <li><strong><code>--test-results</code> argument</strong> for <code>generate_test_checklist.py</code> — accepts path to orchestrator JSON output. When omitted, generator produces the same output as before (manual checks only). Fully backwards-compatible.</li>
+            <li><strong>Signpost banner divider</strong> — &quot;YOUR REVIEW — N checks below&quot; separates automated results from manual check sections.</li>
+            <li><strong>Baseline update instructions</strong> in <code>/snagging</code> command — <code>--update-baselines</code>, <code>--update-visual</code>, <code>--update-lighthouse</code>, <code>--update-a11y</code>.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li>Snagging command restructured: new Step 2 (run test suite, portability-guarded), steps renumbered, paste-back handling documented.</li>
+            <li>Checkbox indentation tightened — less left padding, narrower number column, smaller gaps.</li>
+            <li>Disclosure arrows upgraded from tiny unicode triangles to proportional SVG chevrons with rotation animation.</li>
+            <li>Heading parser now handles <code><span class="tag app">APP</span></code>/<code><span class="tag infra">INFRA</span></code> tags without version ranges (e.g. <code>### Feature <span class="tag infra">INFRA</span></code>).</li>
+            <li><code>extract_console_commands()</code> genericized — project-specific patterns replaced with commented examples.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-38-0">
+          <div class="release-header">
+            <span class="version-badge">v1.38.0</span>
+            <span class="release-date">17 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>New command: <code>/code-trace</code></strong> — AI-driven code tracing with three modes: single module (deep logic trace with BUG/WARN/INFO severity), integration (cross-module data flow), and full sweep. The probabilistic layer of the Quality Stack.</li>
+            <li><strong>New tutorial page: Testing &amp; Quality</strong> (<code>docs/tutorial/testing.html</code>) — explains the three-layer defence (deterministic/probabilistic/empirical), what runs when, the user&#x27;s role, and the signposting system.</li>
+            <li><strong>New tutorial page: Troubleshooting</strong> (<code>docs/tutorial/troubleshooting.html</code>) — every tool covered with &quot;what you see / what it means / what to do&quot; format. ESLint, Playwright, Lighthouse, health check, /code-trace, npm/Node, and git hook scenarios.</li>
+            <li><strong>Quality sidebar section</strong> added to all 15 tutorial pages linking to Testing &amp; Quality and Troubleshooting.</li>
+            <li><strong>ESLint + stub detection</strong> in pre-commit hook — lints staged JS files (blocks on errors, bypassable with <code>SKIP_ESLINT=1</code>), warns on stubs (<code>return null</code>, <code>return []</code>, empty functions, &quot;not implemented&quot; markers). Path configurable via <code>JS_PATH</code> variable.</li>
+            <li><strong>TEST HEALTH row</strong> in <code>/stand-up</code> kick-off card — shows regression suite count and health check results at session start.</li>
+            <li><strong>Health check step</strong> in <code>/wrap</code> housekeeping — runs <code>health_check.py --quick</code> + regression suite at session end, records results in System Checks.</li>
+            <li><code>/code-trace</code> and <code>/health-check</code> added to commands.html Quality &amp; Review section.</li>
+            <li>npm/package.json setup note added to getting-started.html.</li>
+            <li>Quality stack callout added to daily-flow.html work cycle.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-37-4">
+          <div class="release-header">
+            <span class="version-badge">v1.37.4</span>
+            <span class="release-date">16 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><code>execution/audit_claims.py</code>: retro steps (name starting with &quot;Retro&quot;) now exempt from version tag check, same as <code><span class="tag infra">INFRA</span></code> steps. Prevents false WARN on <code><span class="tag app">APP</span></code> feature retros which structurally don&#x27;t get their own version bump.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-37-3">
+          <div class="release-header">
+            <span class="version-badge">v1.37.3</span>
+            <span class="release-date">16 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>.githooks/commit-msg</code>: changelog enforcement — versioned commits (containing <code>(vX.Y.Z)</code> tag) now require <code>CHANGELOG.md</code> to be staged. Prevents shipping versioned steps without a changelog entry. Skippable with <code>SKIP_CHANGELOG_CHECK=1</code>.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-37-1">
+          <div class="release-header">
+            <span class="version-badge">v1.37.1</span>
+            <span class="release-date">16 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>execution/generate_test_checklist.py</code>: Option C header redesign — feature name as h1 with <span class="tag app">APP</span> pill badge, env cards (Browser/Viewport/OS) top-right, 12px split progress bar (green pass + red fail), elapsed timer bottom-left with label, progress card with subtitle, Copy Bugs button (amber, conditional), Reset All with red styling, buttons right-aligned</li>
+            <li><code>execution/generate_test_checklist.py</code>: added <code>--verify</code> mode — re-checks known bugs via code trace and outputs unicode-bordered terminal summary instead of regenerating full HTML</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-37-0">
+          <div class="release-header">
+            <span class="version-badge">v1.37.0</span>
+            <span class="release-date">16 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>global-commands/stand-up.md</code>: DOE KIT line now shows u/c classification — <code>* pull (1u 2c)</code> where <code>u</code> = user-facing (commands, hooks, rules) and <code>c</code> = creator-facing (kit infra, tutorials, setup)</li>
+            <li><code>global-commands/crack-on.md</code>: same u/c classification for DOE KIT line</li>
+            <li><code>global-commands/wrap.md</code>: DOE Kit sync check classifies diffs as u/c, JSON schema includes <code>userCount</code>/<code>creatorCount</code> fields for HTML renderers</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-36-1">
+          <div class="release-header">
+            <span class="version-badge">v1.36.1</span>
+            <span class="release-date">16 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><code>global-commands/snagging.md</code>: report box now uses Unicode box-drawing characters (<code>┌─┐</code>, <code>├─┤</code>, <code>└─┘</code>, <code>│</code>) instead of ASCII (<code>+</code>, <code>--</code>, <code>|</code>) for consistency with all other DOE command output</li>
+            <li><code>docs/tutorial/*.html</code>: fixed stale footer version stamps (v1.32.0 -&gt; v1.36.0) across all 13 tutorial pages</li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li><code>execution/stamp_tutorial_version.py</code>: automation script to update tutorial footer/hero badge version strings; integrated into sync directive and <code>/sync-doe</code> command so footers are stamped before every release commit</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>directives/starter-kit-sync.md</code>: Step 10 now runs <code>stamp_tutorial_version.py</code> before <code>git add -A</code>; post-sync checklist updated to reference auto-stamping</li>
+            <li><code>global-commands/sync-doe.md</code>: added step 11a to run <code>stamp_tutorial_version.py</code> before committing</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-36-0">
+          <div class="release-header">
+            <span class="version-badge">v1.36.0</span>
+            <span class="release-date">16 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>global-commands/snagging.md</code>: <code>/snagging</code> command — auto-generates interactive HTML test checklists from todo.md <code>[manual]</code> contract items</li>
+            <li><code>directives/manual-testing.md</code>: SOP for the manual testing workflow (generation, testing, feedback loop, sign-off)</li>
+            <li><code>execution/generate_test_checklist.py</code>: HTML checklist generator with three-state toggles, timer, localStorage persistence, console code blocks with copy buttons, and export-to-clipboard</li>
+            <li><code>docs/tutorial/workflows.html</code>: &quot;Manual Testing &amp; Sign-off&quot; section covering the /snagging workflow</li>
+            <li><code>docs/tutorial/commands.html</code>: <code>/snagging</code> command reference entry</li>
+            <li><code>CLAUDE.md</code>: Progressive Disclosure trigger for manual testing</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>global-commands/wrap.md</code>: explicit <code>git push</code> at every commit point (housekeeping, stats, wrap data); <code>awaitingSignOff</code> now scans <code>## Current</code> for completed steps with unchecked <code>[manual]</code> items; added <code>checklistPath</code> field for linking to test checklists</li>
+            <li><code>global-commands/README.md</code>: added <code>/snagging</code> entry in Quality section</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-35-0">
+          <div class="release-header">
+            <span class="version-badge">v1.35.0</span>
+            <span class="release-date">16 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li>CLAUDE.md rule 11: retro discipline with escalation triggers and quick/full format</li>
+            <li>CLAUDE.md Self-Annealing: 100-session learnings curation protocol</li>
+            <li>CLAUDE.md Progressive Disclosure: curation trigger (session multiple of 100)</li>
+            <li><code>crack-on.md</code>: curation check at session start</li>
+            <li><code>stand-up.md</code>: curation check at session start</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-34-3">
+          <div class="release-header">
+            <span class="version-badge">v1.34.3</span>
+            <span class="release-date">16 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li>Dev server learning in <code>universal-claude-md-template.md</code>: new <code>## Dev Servers</code> section — kill stale instances before starting new ones to prevent on-demand compilation hangs (macOS + Windows commands)</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-33-0">
+          <div class="release-header">
+            <span class="version-badge">v1.33.0</span>
+            <span class="release-date">16 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>docs/tutorial/multi-agent.html</code> — new Multi-Agent Workflows tutorial page covering waves, /agent-launch, /agent-status, worked example, merge process, and common pitfalls</li>
+            <li><code>docs/tutorial/faq.html</code> — new FAQ page with 12 Q&amp;A pairs across 3 categories (Setup, Session, Framework problems) with cross-links to relevant pages</li>
+            <li>Right-side Table of Contents (TOC) with scrollspy on 3 content-heavy pages: commands, daily-flow, context</li>
+            <li>Git basics orientation expandable section in getting-started page</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li>Footer version updated to v1.32.0 across all tutorial pages</li>
+            <li>Sidebar navigation updated across all 13 pages with multi-agent and FAQ links</li>
+            <li>Pagination chain updated: workflows → multi-agent → example-apps, tips → faq → glossary</li>
+            <li>Post-sync checklist added to starter-kit-sync directive for footer version tracking</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-32-0">
+          <div class="release-header">
+            <span class="version-badge">v1.32.0</span>
+            <span class="release-date">15 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>docs/tutorial/context.html</code> — new Context Management tutorial page covering compaction, danger zone, /context command, /wrap, and recovery flows</li>
+            <li>Tab infrastructure across all tutorial pages: content tabs (card-style toggling) and environment tabs (Terminal vs VSCode toggle)</li>
+            <li>VSCode mockup component system with editor chrome, activity bar, and panel styling</li>
+            <li>Hooks coverage and recovery flows section in tips-and-mistakes page</li>
+            <li>Built-in vs DOE badge distinction on commands page</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li>All 10 existing tutorial pages enhanced with Terminal/VSCode environment tabs (29 mockups across 9 pages)</li>
+            <li>Getting Started: card-tabs for setup options with GitHub clone instructions</li>
+            <li>Workflows: card-tabs with Path A as default active tab</li>
+            <li>Commands: sidebar navigation with Planning/Maintenance section links</li>
+            <li>Daily Flow: box-drawing terminal mockup classes for consistent styling</li>
+            <li>Key Concepts and First Session: glossary cross-links to glossary.html anchors</li>
+            <li>Context page added to sidebar navigation across all pages</li>
+            <li><code>crack-on.md</code>, <code>sitrep.md</code>, <code>stand-up.md</code> global commands: expanded DOE Kit check path mapping documentation</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-31-0">
+          <div class="release-header">
+            <span class="version-badge">v1.31.0</span>
+            <span class="release-date">13 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>docs/tutorial/</code> — 10 self-contained HTML tutorial pages in Mintlify-style design system: landing page, getting started, first session, key concepts, commands, daily flow, workflows, example apps, tips &amp; mistakes, glossary</li>
+            <li><code>docs/reference/</code> — 33 markdown reference docs covering commands, concepts, workflows, examples, file formats, and glossary</li>
+            <li>Tutorial features: fixed sidebar navigation, dark mode toggle, terminal mockups with macOS dots, card grids, step components, callout boxes, expandable accordions, pagination, responsive layout (375px/768px/1440px)</li>
+            <li>README: documentation section with tutorial and reference doc descriptions</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-30-1">
+          <div class="release-header">
+            <span class="version-badge">v1.30.1</span>
+            <span class="release-date">12 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><code>CLAUDE.md</code> Rule 1 point (3): Awaiting Sign-off move now happens immediately when last step&#x27;s <code>[auto]</code> criteria pass, not at session wrap — fixes circular dependency where manual checks couldn&#x27;t be presented until a ceremony that required manual checks</li>
+            <li><code>todo.md</code> format rules step (6): Awaiting Sign-off is now the default destination for completed features; Done section description clarified to &quot;all contracts verified&quot;</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-30-0">
+          <div class="release-header">
+            <span class="version-badge">v1.30.0</span>
+            <span class="release-date">12 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>## Awaiting Sign-off</code> section in todo.md format rules — intermediate state between code-complete and fully verified</li>
+            <li><code>check_manual_signoff</code> audit check in <code>audit_claims.py</code> — WARNs if unchecked <code>[manual]</code> contracts found in <code>## Done</code></li>
+            <li>SIGN-OFF row in <code>stand-up.md</code> (both kick-off and status modes) — surfaces pending manual verification counts</li>
+            <li>SIGN-OFF row in <code>sitrep.md</code> — same pending count between COMMITS and ELAPSED</li>
+            <li><code>awaitingSignOff</code> field in <code>wrap.md</code> JSON schema — collapsible grouped cards for manual test items</li>
+            <li><code>render_awaiting_signoff()</code> in <code>wrap_html.py</code> — collapsible <code>&lt;details&gt;/&lt;summary&gt;</code> cards with themed groups, amber styling</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>CLAUDE.md</code> Rule 1 <code>[manual]</code> criteria point (3): features now move to <code>## Awaiting Sign-off</code> at completion instead of <code>## Done</code>; <code>## Done</code> requires all <code>[manual]</code> criteria <code>[x]</code></li>
+            <li>todo.md format rules: added conditional retro routing — features with unchecked <code>[manual]</code> go to Awaiting Sign-off, not Done</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-29-0">
+          <div class="release-header">
+            <span class="version-badge">v1.29.0</span>
+            <span class="release-date">12 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li>Platform/model/tag tracking in <code>wrap_stats.py</code> (<code>--platform</code>, <code>--model</code>, <code>--tag</code> CLI args, <code>auto_classify_tag()</code>)</li>
+            <li>Badge helpers and CSS in <code>wrap_html.py</code> and <code>eod_html.py</code> (platform/model/tag pills)</li>
+            <li>Dark/light toggle with auto mode (6am-6pm) and manual override via localStorage in all three renderers</li>
+            <li>GitHub-style streak heatmap in <code>build_hq.py</code> (52-week SVG grid, responsive full-width)</li>
+            <li>Side-by-side platform + model stats layout in <code>build_hq.py</code></li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>build_hq.py</code>: search/filters moved below Features This Week swimlane</li>
+            <li><code>build_hq.py</code>: model stats shown even with single model (removed 2+ threshold)</li>
+          </ul>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><code>eod_html.py</code>: breakdown bar CSS overflow (flex-shrink + max-width + overflow:hidden)</li>
+            <li><code>.githooks/commit-msg</code>: cross-platform temp file approach replaces macOS-only <code>sed -i &#x27;&#x27;</code></li>
+            <li><code>.githooks/pre-commit</code>: added <code>PYTHONIOENCODING=utf-8</code> for Windows cp1252 compatibility</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-28-0">
+          <div class="release-header">
+            <span class="version-badge">v1.28.0</span>
+            <span class="release-date">12 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>wrap.md</code>: save session JSON to <code>docs/wraps/</code> instead of copying the rendered HTML. HTML is generated on demand from JSON. Smaller commits, HQ regenerates as needed.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-27-3">
+          <div class="release-header">
+            <span class="version-badge">v1.27.3</span>
+            <span class="release-date">11 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><code>build_hq.py</code>: HQ &quot;This Week&quot; summary now shows one headline activity per project (max 3) instead of dumping multiple semicolon-separated summary fragments that got truncated.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-27-2">
+          <div class="release-header">
+            <span class="version-badge">v1.27.2</span>
+            <span class="release-date">11 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><code>build_hq.py</code>: HQ project cards now read version from git tags (most reliable) with fallback to session summary text. Previously only checked summaries, so projects with tags but no version in summaries showed no version.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-27-1">
+          <div class="release-header">
+            <span class="version-badge">v1.27.1</span>
+            <span class="release-date">11 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>wrap_stats.py</code>: automatic git version tagging at wrap time. Reads <code><strong>Current app version:</strong></code> from STATE.md and creates the git tag if it doesn&#x27;t exist. Ensures HQ dashboard always shows the project version.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-27-0">
+          <div class="release-header">
+            <span class="version-badge">v1.27.0</span>
+            <span class="release-date">10 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>/hq</code> command: unified project dashboard with portfolio view and per-project drill-down (SPA hash routing). Replaces <code>/archive-global</code>.</li>
+            <li><code>build_hq.py</code> global script: generates the HQ dashboard HTML with light/dark theme, search, feature swimlanes, timeline scrubber.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>/wrap</code> registry snippet now preserves existing fields (e.g. <code>displayName</code>) when re-registering a project.</li>
+            <li>Version detection across <code>/commands</code>, <code>/sync-doe</code>, <code>/pull-doe</code> now reads from <code>git describe --tags</code> in <code>~/doe-starter-kit</code> instead of the stale <code>~/.claude/.doe-kit-version</code> file.</li>
+            <li><code>setup.sh</code> no longer writes <code>~/.claude/.doe-kit-version</code> — the git tag is the single source of truth.</li>
+          </ul>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><code>.githooks/commit-msg</code>: case-insensitive regex now catches <code>Co-Authored-By</code> (previously only matched <code>Co-authored-by</code>).</li>
+          </ul>
+          <h4 class="removed">Removed</h4>
+          <ul>
+            <li><code>/archive-global</code> command (superseded by <code>/hq</code>).</li>
+            <li><code>~/.claude/.doe-kit-version</code> file dependency (replaced by git tags).</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-26-0">
+          <div class="release-header">
+            <span class="version-badge">v1.26.0</span>
+            <span class="release-date">10 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>/archive-global</code> command: global portfolio dashboard aggregating all registered projects. Shows time allocation, project health cards (Active/Idle/Dormant), cross-project timeline. Reads <code>~/.claude/project-registry.json</code>.</li>
+            <li>Two universal triggers in CLAUDE.md Progressive Disclosure: multi-agent coordination and <code>/scope</code> feature scoping.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>/wrap</code> now auto-registers the project in <code>~/.claude/project-registry.json</code> after committing stats, enabling the global archive to discover projects automatically.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-25-0">
+          <div class="release-header">
+            <span class="version-badge">v1.25.0</span>
+            <span class="release-date">10 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>/scope</code> command: conversational feature scoping through 3 phases (Explore, Define, Bound). Produces structured brief in <code>.claude/plans/</code> and updates ROADMAP.md with SCOPED status tag.</li>
+            <li>New &quot;Product&quot; section in README grouping <code>/scope</code> and <code>/pitch</code>.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>/stand-up</code> DOE Kit indicator: directional sync labels (<code>* push</code>, <code>* pull</code>, <code>* push+pull</code>) replace generic <code>*</code>. Users now know which direction needs syncing.</li>
+            <li><code>/stand-up</code> kick-off: 100-session milestone celebration card for lifetime session milestones.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-24-5">
+          <div class="release-header">
+            <span class="version-badge">v1.24.5</span>
+            <span class="release-date">9 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>wrap_html.py</code>: <code>--theme light|dark</code> CLI flag for light/dark mode toggle</li>
+            <li><code>wrap_html.py</code>: <code>body.light</code> CSS variables with warm off-white palette (<code>#f0efe9</code> bg, <code>#f8f7f3</code> surface) for daytime readability</li>
+            <li><code>wrap_html.py</code>: body class toggle wiring for theme selection</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-24-4">
+          <div class="release-header">
+            <span class="version-badge">v1.24.4</span>
+            <span class="release-date">9 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>/stand-up</code> SINCE LAST MILESTONE: groups related commits by feature/theme with summaries instead of listing individually (max 6 groups)</li>
+            <li><code>/wrap</code> section 3e: auto-detects light/dark theme based on time of day (6am-6pm = light, otherwise dark)</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-24-3">
+          <div class="release-header">
+            <span class="version-badge">v1.24.3</span>
+            <span class="release-date">7 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>/stand-up</code> BLOCKERS row: reads STATE.md <code>## Blockers &amp; Edge Cases</code> and surfaces them with <code>!!</code> prefix in both kick-off and status mode cards. Positioned between CONTRACT and DOE KIT. Omitted when no blockers exist.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-24-2">
+          <div class="release-header">
+            <span class="version-badge">v1.24.2</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>/sync-doe</code> and <code>/pull-doe</code> now update STATE.md&#x27;s DOE kit version as a final step, preventing false &quot;inbound update pending&quot; signals in <code>/stand-up</code></li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-24-1">
+          <div class="release-header">
+            <span class="version-badge">v1.24.1</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li>EOD report stats bar format: &quot;Friday 6th March | HH:MM | X Day streak&quot; (human-readable date with ordinal suffix, current time, streak count)</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-24-0">
+          <div class="release-header">
+            <span class="version-badge">v1.24.0</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li>Report label divider above title card in both wrap and eod HTML reports (&quot;Session Report&quot; / &quot;End of Day Report&quot;)</li>
+            <li>Session stats bar below title card (session number, streak, lifetime commits) — moved from footer</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>wrap_html.py</code>: title card no longer includes &quot;Session N —&quot; prefix (session number now in stats bar)</li>
+            <li><code>eod_html.py</code>: title card no longer includes date (date now in stats bar)</li>
+            <li>Footer simplified to DOE attribution only in both reports</li>
+            <li><code>wrap_stats.py</code>: session stats template includes <code>summary</code> field</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-23-0">
+          <div class="release-header">
+            <span class="version-badge">v1.23.0</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>/stand-up</code> kick-off: PIPELINE row comparing ROADMAP.md Up Next count vs todo.md Queue count — nudges user to scope and promote features</li>
+            <li><code>sync-doe</code> directive: 3-layer comparison (DOE kit, installed global, local project) catches edits at any layer</li>
+            <li><code>sync-doe</code> directive: README consistency verification step ensures every command has a README entry</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>/stand-up</code>: reads ROADMAP.md in kick-off mode</li>
+            <li><code>/agent-status</code>: card header renamed from &quot;AGENT STATUS&quot; to &quot;HQ&quot;</li>
+            <li><code>global-commands/README.md</code>: <code>/stand-up</code> description updated to mention pipeline sync</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-22-6">
+          <div class="release-header">
+            <span class="version-badge">v1.22.6</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><code>.summary-lead</code> CSS: replaced <code>margin-bottom</code> with <code>padding-bottom</code> to prevent margin collapsing between summary paragraph and first breakdown heading</li>
+            <li><code>.breakdown-group</code> CSS: added <code>margin-top: 0.6rem</code> for consistent spacing between groups</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-22-5">
+          <div class="release-header">
+            <span class="version-badge">v1.22.5</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>/agent-verify</code> entry &mdash; contract verification command (solo + wave mode)</li>
+            <li><code>/test-suite</code> entry &mdash; persistent test suite runner</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>/wrap</code> description updated to reflect HTML output (wrap_html.py, commit groups, decision/learning pills, timeline percentages, vibe)</li>
+            <li><code>/eod</code> description updated to reflect HTML output (eod_html.py, daily timeline, commit breakdown bars, 9-metric grid)</li>
+            <li><code>/audit</code> note added about merged commands (/quick-audit, /vitals, /doe-health)</li>
+            <li><code>/agent-status</code> description updated with full mode list (--plan, --preview, --launch, --merge, --reclaim, --abort, --watch)</li>
+            <li><code>/commands</code> date updated</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-21-1">
+          <div class="release-header">
+            <span class="version-badge">v1.21.1</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4>/wrap overhaul</h4>
+          <ul>
+            <li>Summary section: plain English with vibe merged in (no separate section)</li>
+            <li>Timeline: legend for dot colours, % per entry, total session time</li>
+            <li>Commits: grouped by feature with headers and counts</li>
+            <li>Decisions: Problem/Solution format with coloured pill labels</li>
+            <li>Learnings: Discovery/Change format with coloured pill labels</li>
+            <li>Today&#x27;s Sessions: new section showing all sessions with duration and summary</li>
+            <li>Section reorder: Timeline → Metrics → Commits → Decisions → Checks → Sessions → Next Up</li>
+            <li>Removed Journey section, narrative guidance tightened to 2-3 sentences</li>
+            <li>Session summary stored in stats.json for cross-session recall</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-21-0">
+          <div class="release-header">
+            <span class="version-badge">v1.21.0</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/hq</code> renamed to <code>/agent-status</code></strong> — clearer name for the multi-agent dashboard command. File renamed from <code>hq.md</code> to <code>agent-status.md</code>. All internal references updated.</li>
+            <li><strong><code>/audit</code> now comprehensive</strong> — merged <code>/quick-audit</code>, <code>/vitals</code>, and <code>/doe-health</code> into a single <code>/audit</code> command covering claims, workspace health, and DOE framework integrity in one bordered output.</li>
+            <li>Updated <code>/commands</code> reference card, README, SYSTEM-MAP, CUSTOMIZATION, and global-commands/README to reflect new command set.</li>
+          </ul>
+          <h4 class="removed">Removed</h4>
+          <ul>
+            <li><strong><code>/quick-audit</code></strong> — absorbed into <code>/audit</code></li>
+            <li><strong><code>/vitals</code></strong> — absorbed into <code>/audit</code></li>
+            <li><strong><code>/doe-health</code></strong> — absorbed into <code>/audit</code></li>
+            <li><strong><code>/shower-thought</code></strong> — low usage, removed</li>
+            <li><strong><code>/eli5</code></strong> — low usage, removed</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-20-4">
+          <div class="release-header">
+            <span class="version-badge">v1.20.4</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Solo verification discipline</strong> (CLAUDE.md Rule 1) — <code>[auto]</code> criteria gate each step autonomously. <code>[manual]</code> criteria batched and presented at feature completion as a single test checklist. Mid-feature visual checkpoint for 5+ step features. Prefer converting <code>[manual]</code> to <code>[auto]</code> where possible.</li>
+            <li><strong>todo.md format rules</strong> — <code>[manual]</code> criteria description updated to match: batch at feature end, prefer auto conversion.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-20-3">
+          <div class="release-header">
+            <span class="version-badge">v1.20.3</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Code Hygiene rule</strong> — visual docs (brainstorms, diagrams, guides) go to <code>docs/</code> in the project root, never to <code>~/.agent/diagrams/</code> or other global paths</li>
+            <li><strong>Directory Structure</strong> — <code>docs/</code> entry added for generated visual documents</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-20-2">
+          <div class="release-header">
+            <span class="version-badge">v1.20.2</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Retro step 3</strong> — expanded from &quot;update status tags&quot; to also move feature from Up Next to Complete and refresh Suggested Next if it references the completed feature. Prevents stale roadmap entries accumulating.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-20-1">
+          <div class="release-header">
+            <span class="version-badge">v1.20.1</span>
+            <span class="release-date">6 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>Audit version tag regex</strong> — now accepts both <code>→</code> (unicode) and <code>-&gt;</code> (ASCII), fixing false WARNs on wave-generated todo.md steps</li>
+            <li><strong>Audit name extraction</strong> — split pattern updated to handle <code>-&gt;</code> arrow format in task names</li>
+            <li><strong>Wave file cleanup</strong> — <code>--merge</code> now deletes completed wave JSON and log files instead of leaving them on disk (caused stale <code>active_wave</code> audit warnings)</li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Post-merge governed doc staleness check</strong> — after merge completes, scans front-matter <code>Applies to</code> versions and warns if any governed doc is &gt;1 minor version behind current app version</li>
+            <li><strong>Updated post-merge message</strong> — now explicitly mentions governed doc updates in the housekeeping checklist</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-20-0">
+          <div class="release-header">
+            <span class="version-badge">v1.20.0</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>global-scripts/doe_utils.py</code></strong> — shared utility for worktree detection (<code>resolve_project_root()</code>), used by multi_agent.py, heartbeat.py, context_monitor.py</li>
+            <li><strong><code>--watch</code> flag</strong> — auto-refreshing dashboard every 30 seconds, exits when all tasks complete</li>
+            <li><strong>Wave agent guardrail</strong> in CLAUDE.md — agents must not edit shared files on master during active waves</li>
+            <li><strong>Post-merge auto-rebuild</strong> — runs <code>buildCommand</code> from <code>tests/config.json</code> after each merge step</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>CLAUDE.md Rule 1</strong> — clearer solo vs wave verification distinction (wave mode defers to <code>--complete</code> and <code>--merge</code>)</li>
+            <li><strong><code>_update_todo_after_merge</code></strong> — searches entire todo.md file (not just <code>## Current</code>) and runs incrementally after each merge instead of once at the end</li>
+            <li><strong>Stale threshold</strong> — bumped from 120s to 300s to avoid false positives during long builds</li>
+          </ul>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>Worktree path resolution</strong> — <code>Path.cwd()</code> broke in worktrees; all scripts now use <code>doe_utils.resolve_project_root()</code> to find main repo root</li>
+            <li><strong>Log race condition</strong> — log file initialization moved inside <code>atomic_modify</code> lock to prevent two processes from clobbering each other</li>
+            <li><strong><code>--complete</code> verification</strong> — passes worktree path to verify.py so file checks resolve correctly</li>
+            <li><strong><code>_analyze_wave</code></strong> — no longer rejects <code>manual:</code> prefixed criteria as invalid auto patterns</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-19-0">
+          <div class="release-header">
+            <span class="version-badge">v1.19.0</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/agent-launch</code></strong> — now auto-detects mode: Launch (no active wave) creates wave and auto-claims first task; Join (active wave) claims next unclaimed task. Replaces the two-command workflow with one command for all terminals.</li>
+          </ul>
+          <h4 class="removed">Removed</h4>
+          <ul>
+            <li><strong><code>/agent-start</code></strong> — absorbed into <code>/agent-launch</code> Join mode. No longer needed as a separate command.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-18-4">
+          <div class="release-header">
+            <span class="version-badge">v1.18.4</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>.githooks/pre-commit</code></strong> — contract verification gate calls <code>execution/check_contract.py</code> before commit; skip with <code>SKIP_CONTRACT_CHECK=1</code></li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-18-2">
+          <div class="release-header">
+            <span class="version-badge">v1.18.2</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/agent-launch</code></strong> — added Step 0: scans Queue and Current for missing contracts, auto-generates from plan files, presents for user approval before wave creation</li>
+            <li><strong><code>global-commands/README.md</code></strong> — updated <code>/agent-launch</code> description</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-17-3">
+          <div class="release-header">
+            <span class="version-badge">v1.17.3</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>CLAUDE.md Rule 1</strong> — added solo verification discipline (contract pre-flight + post-completion gate) and ad-hoc work verification (state criteria in conversation, verify before committing)</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-17-2">
+          <div class="release-header">
+            <span class="version-badge">v1.17.2</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>execution/check_contract.py</code></strong> — parses todo.md, finds current step&#x27;s contract, blocks commit if any criteria unchecked</li>
+            <li><strong><code>global-hooks/pre-commit</code></strong> — contract verification section appended (gated by <code>SKIP_CONTRACT_CHECK=1</code> env var)</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-17-1">
+          <div class="release-header">
+            <span class="version-badge">v1.17.1</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/crack-on</code></strong> — contract pre-flight (validates Verify: patterns before starting) + post-completion verification (runs all criteria before marking steps done)</li>
+            <li><strong><code>/stand-up</code></strong> — kick-off mode surfaces contract health for next step (informational CONTRACT line in card)</li>
+            <li><strong>Commands README</strong> — updated /stand-up and /crack-on descriptions, added contract enforcement section</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-17-0">
+          <div class="release-header">
+            <span class="version-badge">v1.17.0</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>todo.md format rules</strong> — contracts now mandatory for every step with <code>[auto]</code>/<code>[manual]</code> tags and 4 executable <code>Verify:</code> patterns (<code>run:</code>, <code>file: exists</code>, <code>file: contains</code>, <code>html: has</code>)</li>
+            <li><strong>CLAUDE.md Rule 1</strong> — appended contract requirement (tasks without testable contracts cannot be started)</li>
+            <li><strong>CLAUDE.md Self-Annealing</strong> — added test failure logging guidance (auto-test fails, regressions, bad contracts)</li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>CLAUDE.md trigger</strong> — testing setup maps to <code>directives/testing-strategy.md</code></li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-16-0">
+          <div class="release-header">
+            <span class="version-badge">v1.16.0</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>ROADMAP.md</strong> — 4 new sections: Suggested Next (Claude&#x27;s strategic recommendation), Must Plan (important items needing scoping), Claude Suggested Ideas (AI-pitched additions), plus HTML comment block with section rules for Claude</li>
+            <li><strong>ROADMAP.md</strong> — every entry now requires a <code>*(pitched/added DD/MM/YY)*</code> timestamp</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>CLAUDE.md Rule 9</strong> — pitch routing now specifies Ideas (casual) vs Must Plan (important) sections</li>
+            <li><strong>ROADMAP.md</strong> — description updated from &quot;living notepad&quot; to &quot;sections flow from most concrete to most speculative&quot;</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-15-1">
+          <div class="release-header">
+            <span class="version-badge">v1.15.1</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="removed">Removed</h4>
+          <ul>
+            <li><strong><code>/wrap</code> Part 8 (Last 10 Days Leaderboard)</strong> &mdash; entire section, template, rules, and <code>result.leaderboard</code> reference</li>
+            <li>Leaderboard mention from README.md /wrap description</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-15-0">
+          <div class="release-header">
+            <span class="version-badge">v1.15.0</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/stand-up</code> kick-off card</strong> — removed BLOCKERS and LEARNINGS rows, PROJECT right-aligned on header row, added last-session SUMMARY above PLAN</li>
+            <li><strong><code>/stand-up</code> status card</strong> — removed BLOCKERS and DECISIONS rows</li>
+            <li><strong><code>/eod</code> card</strong> — removed Blockers from POSITION AT EOD section</li>
+            <li><strong>DOE Kit sync check</strong> (<code>/stand-up</code>, <code>/crack-on</code>, <code>/sitrep</code>, <code>/wrap</code>) — smart CLAUDE.md diff: only flags universal section changes (Operating Rules, Guardrails, Code Hygiene, Self-Annealing), ignores project-specific sections (Directory Structure, triggers)</li>
+            <li><strong><code>/crack-on</code></strong> — genericized project-specific example in header rule</li>
+            <li><strong>README.md</strong> — updated <code>/stand-up</code> description and DOE Kit awareness paragraph</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-14-6">
+          <div class="release-header">
+            <span class="version-badge">v1.14.6</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>/agent-start</code> command</strong> — claims a wave task, cd&#x27;s into the worktree, shows the assignment, and starts working. Replaces manual <code>python3 multi_agent.py --claim</code> + <code>cd</code> workflow.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/agent-launch</code> instructions</strong> — &quot;go&quot; output now shows <code>/agent-start</code> instead of manual python3 commands. Cleaner onboarding for new terminals.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-14-5">
+          <div class="release-header">
+            <span class="version-badge">v1.14.5</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>Command count</strong> — README claimed 15/22 commands; actual count is 27. Updated both READMEs with missing commands: <code>/agent-launch</code>, <code>/codemap</code>, <code>/doe-health</code>, <code>/review</code>, <code>/pull-doe</code></li>
+            <li><strong>Wrap system checks heading</strong> — Added <code>🔍 SYSTEM CHECKS</code> section heading before the bordered audit/DOE Kit box</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-14-4">
+          <div class="release-header">
+            <span class="version-badge">v1.14.4</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>CRITICAL: --complete/--fail/--abandon session resolution</strong> — <code>--parent-pid</code> now auto-reads <code>.session-id-{pid}</code> file and sets <code>_session_override</code> in <code>main()</code>, so ALL commands resolve the correct session ID. Previously only <code>--claim</code> and hooks could find the session.</li>
+            <li><strong>agent-launch instructions</strong> — ALL multi_agent.py commands now include <code>--parent-pid $PPID</code> (claim, complete, fail, abandon)</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-14-3">
+          <div class="release-header">
+            <span class="version-badge">v1.14.3</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>CRITICAL: Session ID isolation (take 3)</strong> — per-terminal files using Claude Code PID (<code>os.getppid()</code> in hooks, <code>$PPID</code> in Bash). Each terminal gets <code>.session-id-{pid}</code>, <code>.last-heartbeat-{pid}</code>, <code>.context-usage-{pid}.json</code>, <code>.context-warned-{pid}</code>. Solves the two-directory problem: hooks stay in project root, coordination files stay in project root, but each terminal&#x27;s markers are isolated.</li>
+            <li><strong>Wave completion cleanup</strong> — glob-based cleanup of all PID-specific marker files (<code>*.session-id-*</code>, etc.)</li>
+            <li><strong>agent-launch draft wave</strong> — wave file written to <code>.draft-wave.json</code> (dotfile) until user approves, then moved to <code>wave-{N}.json</code>. Prevents orphaned wave files if session crashes before approval.</li>
+            <li><strong>Wave file filtering</strong> — <code>find_active_wave</code>/<code>find_latest_wave</code> now skip dotfiles (draft waves)</li>
+            <li><strong>agent-launch instructions</strong> — claim command now includes <code>--parent-pid $PPID</code> and explicit cd-to-worktree step</li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>--parent-pid</code> CLI arg</strong> — passes Claude Code PID to <code>--claim</code> for session-id file naming</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-14-2">
+          <div class="release-header">
+            <span class="version-badge">v1.14.2</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>Reclaim log accuracy</strong> — captures task-to-session mapping before modifying claims, so log entries attribute the correct stale session to each task</li>
+            <li><strong>Context monitor glob</strong> — matches all wave file names (not just <code>wave-*.json</code>), so budget detection works with custom waveIds like <code>comparison-filter</code></li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>/agent-launch</code> command</strong> — reads todo.md Queue, builds wave file, runs preview, launches on approval</li>
+            <li><strong>Failed task retry docs</strong> — documented that failed tasks are intentionally retryable (not terminal state)</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-14-1">
+          <div class="release-header">
+            <span class="version-badge">v1.14.1</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>Reclaim</strong> — preserves worktree branch (<code>delete_branch=False</code>) so new session can continue partial work</li>
+            <li><strong>Wave sort</strong> — <code>find_active_wave</code>/<code>find_latest_wave</code> use numeric index extraction instead of string sort (fixes wave-10 sorting before wave-2)</li>
+            <li><strong>Validation dedup</strong> — <code>cmd_validate</code> now delegates to <code>_analyze_wave</code> internally, eliminating ~100 lines of duplicated logic</li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>--fail</code> subcommand</strong> — marks a task as failed with optional <code>--reason</code>, keeps worktree+branch for debugging, logs failure event</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-14-0">
+          <div class="release-header">
+            <span class="version-badge">v1.14.0</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>Heartbeat hook</strong> — uses fixed marker file (not per-PID) and reads session ID from <code>.tmp/.session-id</code> written by <code>--claim</code></li>
+            <li><strong>Context monitor</strong> — corrected field names (<code>claimedTask</code>/<code>taskId</code> instead of <code>currentTask</code>/<code>id</code>), reads session ID from file instead of PID matching</li>
+            <li><strong>Merge command</strong> — auto-detects default branch (<code>master</code>/<code>main</code>) instead of hardcoding <code>master</code></li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li><code>--claim</code> now writes <code>.tmp/.session-id</code> for hooks to read consistent session identity</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-13-10">
+          <div class="release-header">
+            <span class="version-badge">v1.13.10</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li>3 new triggers in CLAUDE.md: suggest <code>/diff-review</code> before commits, <code>/project-recap</code> after absence, <code>/plan-review</code> for alignment checks</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-13-9">
+          <div class="release-header">
+            <span class="version-badge">v1.13.9</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>hook-templates/javascript.json</code> — Claude Code hook template: warns on <code>console.log</code> and non-strict equality (<code>==</code>/<code>!=</code>) in JS/TS files</li>
+            <li><code>hook-templates/python.json</code> — Claude Code hook template: warns on bare exception catching and <code>shell=True</code> in subprocess calls</li>
+            <li><code>hook-templates/universal.json</code> — reference doc for hooks already included in the kit</li>
+            <li>Pre-commit audit sweep — warnings (non-blocking) for <code>console.log</code> in JS/TS, bare <code>TODO</code> without reference, hardcoded localhost URLs</li>
+            <li>Hook Templates section in CUSTOMIZATION.md — explains activation process</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-13-8">
+          <div class="release-header">
+            <span class="version-badge">v1.13.8</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>/doe-health</code> command — 8-point integrity check (required files, CLAUDE.md line count, Progressive Disclosure targets, commands, hooks, git hooks, STATE.md freshness, kit version). Report only, never modifies.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-13-7">
+          <div class="release-header">
+            <span class="version-badge">v1.13.7</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>/codemap</code> command — generates <code>.claude/codemap.md</code> with project structure, key files, data flow, and active patterns</li>
+            <li><code>/wrap</code> step 8 — detects new/moved/deleted files and prompts to run /codemap</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-13-6">
+          <div class="release-header">
+            <span class="version-badge">v1.13.6</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Self-Annealing</strong> section in CLAUDE.md — added &quot;diagnose WHY&quot; step, two-tier format (routine one-liners vs structured significant failures)</li>
+            <li><strong>learnings.md</strong> template — added structured failure format with What/Root cause/Fix/Prevention fields</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-13-5">
+          <div class="release-header">
+            <span class="version-badge">v1.13.5</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>directives/best-practices/javascript.md</code> — strict equality, async error handling, XSS prevention, cleanup patterns</li>
+            <li><code>directives/best-practices/python.md</code> — specific exceptions, mutable defaults, pathlib, injection prevention</li>
+            <li><code>directives/best-practices/html-css.md</code> — accessibility, semantic HTML, CSS custom properties, no inline styles</li>
+            <li><code>directives/best-practices/react.md</code> — dependency arrays, state immutability, derived state, cleanup effects</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-13-4">
+          <div class="release-header">
+            <span class="version-badge">v1.13.4</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>directives/architectural-invariants.md</code> — 10 invariants covering DOE architecture, session integrity, safety, and extensibility. Includes escalation process when changes would violate an invariant.</li>
+            <li>Progressive Disclosure trigger for architectural changes</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-13-3">
+          <div class="release-header">
+            <span class="version-badge">v1.13.3</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>/review</code> command — reads git diff, checks security/correctness/dead code/breaking changes/contract compliance, outputs PASS/PASS WITH NOTES/FAIL with structured findings. Advisory only, never modifies files.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-13-2">
+          <div class="release-header">
+            <span class="version-badge">v1.13.2</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Task contract format</strong> in todo.md format rules — <code>Contract:</code> block with verifiable criteria. Prevents premature &quot;done&quot; marking on complex steps.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-13-1">
+          <div class="release-header">
+            <span class="version-badge">v1.13.1</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Who We Are</strong> — reframed from role-specific (&quot;non-technical founder&quot;) to generic (&quot;human defines intent, Claude builds&quot;)</li>
+            <li><strong>Rule 2</strong> — added research/implementation separation guidance for significant research tasks (3+ approaches)</li>
+            <li><strong>Rule 4</strong> — added sycophancy-aware evaluation: use neutral verification prompts, not leading questions</li>
+            <li><strong>Rule 7</strong> — added concrete context savings numbers (15k tokens → 500-token summary = 30x saving)</li>
+          </ul>
+          <h4>Added</h4>
+          <ul>
+            <li>Progressive Disclosure trigger: read language best practices directives before writing code</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-13-0">
+          <div class="release-header">
+            <span class="version-badge">v1.13.0</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>/pull-doe</code> command — reverse sync (kit → project) with version-aware diffing, analysis box, and result summary</li>
+            <li><code>directives/starter-kit-pull.md</code> — 15-step pull procedure with file categorization (global installs, hooks, CLAUDE.md, templates, directives, execution scripts)</li>
+            <li>Progressive Disclosure trigger for starter-kit-pull directive</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>/sync-doe</code> — added cross-reference to <code>/pull-doe</code> for reverse direction</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-12-7">
+          <div class="release-header">
+            <span class="version-badge">v1.12.7</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>/crack-on</code>: full bordered card with project in header, feature, progress bar, DOE Kit status, picking-up step with plain English summary, and model row</li>
+            <li><code>/crack-on</code>: removed separate model check paragraph — now integrated into card</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-12-6">
+          <div class="release-header">
+            <span class="version-badge">v1.12.6</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li>All bordered commands: explicit <code>line()</code> helper pattern in BORDER rules — prevents header misalignment</li>
+            <li>All bordered commands: mandate &quot;never construct <code>f&quot;│{...}│&quot;</code> manually&quot; in generation rules</li>
+            <li>5 commands: bidirectional sync detection (inbound tag comparison + outbound file diff, not just file diff)</li>
+            <li>Files: commands, crack-on, eod, sitrep, stand-up, sync-doe, vitals, wrap</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-12-5">
+          <div class="release-header">
+            <span class="version-badge">v1.12.5</span>
+            <span class="release-date">5 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li>Rule 1: plans must include recommended model + thinking level per step</li>
+            <li>Rule 7: subagents must use deliberate model selection (Opus/Sonnet/Haiku)</li>
+            <li><code>/sitrep</code>: DOE KIT diff wording fix (&quot;check&quot; vs &quot;count&quot;)</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-12-4">
+          <div class="release-header">
+            <span class="version-badge">v1.12.4</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li>DOE sync status: compact <code>*</code> format across <code>/commands</code>, <code>/crack-on</code>, <code>/sitrep</code>, <code>/stand-up</code>, <code>/vitals</code>, <code>/wrap</code></li>
+            <li>Synced state: bare version (no tick, no &quot;synced&quot; text)</li>
+            <li>Unsynced state: <code>vX.Y.Z *</code> (asterisk suffix)</li>
+            <li><code>/stand-up</code> WARNINGS: omit section when all PASS (was showing &quot;None ✓&quot;)</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-12-3">
+          <div class="release-header">
+            <span class="version-badge">v1.12.3</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>directives/break-glass.md</code> — emergency recovery procedure (extracted from CLAUDE.md)</li>
+            <li>Progressive Disclosure trigger for break-glass directive</li>
+            <li><code>/sitrep</code> COMPLETED section — cumulative session work log</li>
+            <li><code>/sitrep</code> push status indicator (pushed/committed)</li>
+            <li><code>/sitrep</code> DOE version in header row</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li>CLAUDE.md compressed: Rule 1 (planning), Rule 8 (pre-commit checks), hook response format (117 → 83 lines)</li>
+            <li><code>/sitrep</code> reordered: ACTIVE shown first, DONE second, PENDING renamed to UP NEXT (capped at 5)</li>
+            <li><code>/sitrep</code> box auto-stretches to fit content instead of truncating</li>
+            <li><code>directives/starter-kit-sync.md</code> — Steps 7 and 9 now require bordered boxes (diff summary + changelog) for approval</li>
+          </ul>
+          <h4 class="removed">Removed</h4>
+          <ul>
+            <li>Break Glass section from CLAUDE.md (moved to directive)</li>
+            <li><code>/sitrep</code> BLOCKERS, QUEUE, and DOE KIT rows (DOE version moved to header)</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-12-2">
+          <div class="release-header">
+            <span class="version-badge">v1.12.2</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>/sync-doe</code> analysis box</strong> — new required Analysis Box section showing a bordered diff summary with header (version right-aligned), context summary, numbered file list, verdict, and recommendation. Displayed before proposing changes so the user can approve or reject from a clear overview.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-12-1">
+          <div class="release-header">
+            <span class="version-badge">v1.12.1</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Universal learnings template</strong> — added 3 Shell &amp; Platform entries (emoji box-drawing, zsh nullglob, <code>$$</code> subshell PID), new Hooks &amp; Session Files section (orphan file prevention), new Output section (single-block assembly, re-present script output as text). Template now has 6 sections and 11 learnings.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-12-0">
+          <div class="release-header">
+            <span class="version-badge">v1.12.0</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/commands</code> reference</strong> — updated from 15 to 22 commands. Added <code>/fact-check</code> to Quality section. Added new Visual section with 6 commands: <code>/project-recap</code>, <code>/diff-review</code>, <code>/plan-review</code>, <code>/generate-visual-plan</code>, <code>/generate-web-diagram</code>, <code>/generate-slides</code>.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-11-8">
+          <div class="release-header">
+            <span class="version-badge">v1.11.8</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong><code>/sync-doe</code> result box</strong> — replaced hardcoded box width with dynamic computation (<code>W = max(len(line)) + 4</code>). Long summary lines no longer break the right border.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-11-7">
+          <div class="release-header">
+            <span class="version-badge">v1.11.7</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/wrap</code> layout</strong> — moved NEXT UP section to render after the footer (was between Decisions and Numbers). Renumbered parts 6-9.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-11-6">
+          <div class="release-header">
+            <span class="version-badge">v1.11.6</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong>Session timer</strong> — replaced per-PID <code>.session-start-$$</code> with single <code>.tmp/.session-start</code> file across 6 commands (<code>/stand-up</code>, <code>/crack-on</code>, <code>/sitrep</code>, <code>/wrap</code>, <code>/eod</code>, <code>/commands</code>). <code>$$</code> returned a different subshell PID per Bash tool call, making the timer unreliable. Worktrees handle multi-session isolation, so per-PID files were unnecessary.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-11-5">
+          <div class="release-header">
+            <span class="version-badge">v1.11.5</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Box-drawing rules</strong> — clarified in 5 global commands (<code>/audit</code>, <code>/sitrep</code>, <code>/stand-up</code>, <code>/sync-doe</code>, <code>/wrap</code>): explicitly use Unicode box-drawing characters (<code>┌─┐</code>, <code>├─┤</code>, <code>└─┘</code>, <code>│</code>) for borders, ASCII-only for content inside borders</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-11-4">
+          <div class="release-header">
+            <span class="version-badge">v1.11.4</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Commands README</strong> — updated from 15 to 22 commands, added Visual category (<code>/project-recap</code>, <code>/diff-review</code>, <code>/plan-review</code>, <code>/generate-visual-plan</code>, <code>/generate-web-diagram</code>, <code>/generate-slides</code>), added <code>/fact-check</code> to Quality, reorganised table layout</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-11-3">
+          <div class="release-header">
+            <span class="version-badge">v1.11.3</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/audit</code> result box</strong> — output now ends with a programmatic bordered result box (matching <code>/sync-doe</code> and <code>/wrap</code> style) showing PASS/WARN/FAIL counts and key stats</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-11-2">
+          <div class="release-header">
+            <span class="version-badge">v1.11.2</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>/wrap</code> agents stat</strong> — new &quot;agents spawned&quot; metric in The Numbers section, counted from Agent tool calls in the session</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/wrap</code> session time label</strong> — shortened from &quot;total session time&quot; to &quot;session time&quot;</li>
+            <li><strong><code>/wrap</code> system checks box</strong> — replaced hand-padded example boxes with programmatic generation instruction (collect lines, find max length, <code>.ljust()</code>)</li>
+          </ul>
+          <h4 class="removed">Removed</h4>
+          <ul>
+            <li><strong><code>/wrap</code> One-Stat Highlight</strong> — removed Part 9 (redundant with The Numbers). Parts renumbered from 11 to 10.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-11-1">
+          <div class="release-header">
+            <span class="version-badge">v1.11.1</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/wrap</code> title card</strong> — project name now uses spaced-out uppercase text (e.g. <code>M O N T Y</code>) centered in the box, generated from the current directory name. Narrative lines render as plain paragraphs below the code fence (no indentation).</li>
+            <li><strong><code>/wrap</code> output</strong> — removed haiku section. Parts renumbered from 12 to 11. Narrative sections (vibe, journey, commits, decisions, next up) now appear before data tables (numbers, timeline, leaderboard).</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-11-0">
+          <div class="release-header">
+            <span class="version-badge">v1.11.0</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>7 new universal commands:</strong> <code>diff-review.md</code> (visual HTML diff review), <code>fact-check.md</code> (verify doc accuracy against codebase), <code>generate-slides.md</code> (magazine-quality HTML slide decks), <code>generate-visual-plan.md</code> (visual HTML implementation plans), <code>generate-web-diagram.md</code> (standalone HTML diagrams), <code>plan-review.md</code> (visual HTML plan review), <code>project-recap.md</code> (visual HTML project recap).</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-10-2">
+          <div class="release-header">
+            <span class="version-badge">v1.10.2</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>sync-doe.md</code> result box templates</strong> — moved status emojis above the box as standalone signal lines (e.g. <code>✅ SYNCED</code> before the bordered box). Emojis stay visible for quick-glance scanning without breaking box-drawing alignment.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-10-1">
+          <div class="release-header">
+            <span class="version-badge">v1.10.1</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong><code>sync-doe.md</code> result box templates</strong> — removed emojis from inside bordered boxes (they render double-width, breaking alignment). Added programmatic box generation rule and ASCII-only constraint matching other commands.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-10-0">
+          <div class="release-header">
+            <span class="version-badge">v1.10.0</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Per-PID session timers for multi-terminal safety.</strong> Session clock files changed from <code>.tmp/.session-start</code> to <code>.tmp/.session-start-$$</code> (shell PID). Each terminal gets an independent timer. Stale PID files are pruned on <code>/crack-on</code>, <code>/stand-up</code>, and <code>/wrap</code> via <code>kill -0</code> checks. <code>/eod</code> scans all PID files to detect multiple active sessions. Updated all 6 command files: <code>crack-on.md</code>, <code>stand-up.md</code>, <code>sitrep.md</code>, <code>wrap.md</code>, <code>eod.md</code>, <code>commands.md</code>.</li>
+            <li><strong>Progress bar border exception</strong> in <code>stand-up.md</code> — <code>█</code> and <code>░</code> characters now explicitly permitted inside bordered boxes (they render at fixed width in terminals).</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-9-4">
+          <div class="release-header">
+            <span class="version-badge">v1.9.4</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Code Hygiene rule: plans go in the project.</strong> New CLAUDE.md rule requiring plans to be written to the project&#x27;s <code>.claude/plans/</code> directory with descriptive filenames, not to <code>~/.claude/plans/</code>. Prevents plan files from landing in the global directory where they&#x27;re invisible to the project.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-9-3">
+          <div class="release-header">
+            <span class="version-badge">v1.9.3</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong><code>wrap_stats.py</code> step counting</strong> — <code>count_steps_completed_today()</code> counted all <code>[x]</code> steps with today&#x27;s date, inflating <code>stepsCompleted</code> across multiple sessions on the same day. Replaced with <code>count_steps_completed_since()</code> which parses the <code>HH:MM DD/MM/YY</code> timestamp and only counts steps completed after the session start time.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-9-2">
+          <div class="release-header">
+            <span class="version-badge">v1.9.2</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong><code>context_monitor.py</code> file accumulation</strong> — replaced per-PID tracker files (<code>.context-{pid}.json</code>) with a single <code>.context-usage.json</code> that gets overwritten each tool call. Prevents hundreds of orphan files accumulating in <code>.tmp/</code> per session. Same fix applied to warn marker (<code>.context-warned-{pid}</code> → <code>.context-warned</code>).</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-9-1">
+          <div class="release-header">
+            <span class="version-badge">v1.9.1</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>copy_plan_to_project.py</code> hook</strong> — PostToolUse hook that auto-copies plans written to <code>~/.claude/plans/</code> into the current project&#x27;s <code>.claude/plans/</code> directory. Fires after <code>write|edit</code> tool calls targeting <code>~/.claude/plans/*.md</code>.</li>
+            <li><strong>PostToolUse section in <code>settings.json</code></strong> — registers the plan-copy hook</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-9-0">
+          <div class="release-header">
+            <span class="version-badge">v1.9.0</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong>Multi-agent system moved to global install</strong> — no more per-project copies. <code>multi_agent.py</code> → <code>~/.claude/scripts/</code>, <code>heartbeat.py</code> + <code>context_monitor.py</code> → <code>~/.claude/hooks/</code>, <code>/hq</code> → <code>~/.claude/commands/</code>. Install once, works across all projects.</li>
+            <li><strong><code>setup.sh</code> extended</strong> — 3 new install sections: hooks to <code>~/.claude/hooks/</code>, scripts to <code>~/.claude/scripts/</code>, merges PostToolUse into <code>~/.claude/settings.json</code></li>
+            <li><strong>Path refactor</strong> — all multi-agent Python files use <code>Path.cwd()</code> instead of <code>Path(__file__)</code> for global execution</li>
+            <li><strong><code>--project-root</code> override</strong> — <code>multi_agent.py</code> accepts <code>--project-root DIR</code> to specify the project directory explicitly</li>
+            <li><strong>Template <code>.claude/settings.json</code> now PreToolUse-only</strong> — PostToolUse hooks are merged into the global settings by <code>setup.sh</code></li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-8-0">
+          <div class="release-header">
+            <span class="version-badge">v1.8.0</span>
+            <span class="release-date">4 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>Multi-agent coordination system</strong> — <code>execution/multi_agent.py</code> for running 2-4 parallel Claude Code sessions. Wave management, task claiming, session registry, heartbeats, merge protocol, cost tracking. All state in <code>.tmp/waves/</code>.</li>
+            <li><strong><code>/hq</code> command</strong> — <code>.claude/commands/hq.md</code> project-level dashboard. Shows wave status, terminal liveness, task progress, cost estimates, merge order. Modes: no_wave (help), active (live dashboard).</li>
+            <li><strong>Heartbeat hook</strong> — <code>.claude/hooks/heartbeat.py</code> PostToolUse hook updating session liveness every 30s during active waves. Stale sessions (&gt;2 min) are detectable and reclaimable.</li>
+            <li><strong>Context monitor hook</strong> — <code>.claude/hooks/context_monitor.py</code> PostToolUse hook tracking estimated context usage. Warns at 60%, stops at 80% for graceful handoff. Model-aware budgets during waves (haiku: 30k, sonnet: 80k, opus: 200k).</li>
+            <li><strong>Active wave audit check</strong> — <code>check_active_wave</code> in <code>audit_claims.py</code> warns when a wave is active and results may be incomplete until merge. Runs in fast/hook mode.</li>
+            <li><strong>PostToolUse hooks in settings.json</strong> — heartbeat and context monitor fire after every tool use</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-7-4">
+          <div class="release-header">
+            <span class="version-badge">v1.7.4</span>
+            <span class="release-date">3 March 2026</span>
+          </div>
+          <h4 class="removed">Removed</h4>
+          <ul>
+            <li><strong><code>/wrap</code></strong> — removed fortune cookie line from session footer. Adds noise without value.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-7-3">
+          <div class="release-header">
+            <span class="version-badge">v1.7.3</span>
+            <span class="release-date">3 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/stand-up</code> (status mode)</strong> — reordered card: PHASE GOAL now appears above PROGRESS for better readability. Added NEXT STEP line showing the first uncompleted step from todo.md, so the immediate task is always visible at a glance.</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-7-2">
+          <div class="release-header">
+            <span class="version-badge">v1.7.2</span>
+            <span class="release-date">3 March 2026</span>
+          </div>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><strong><code>execution/audit_claims.py</code></strong> — skip version tag WARN for <code><span class="tag infra">INFRA</span></code> tasks. Infrastructure features don&#x27;t bump app version, so their todo steps never have version tags. <code>parse_completed_tasks()</code> now tracks heading context and <code>check_task_format()</code> skips the check for <code><span class="tag infra">INFRA</span></code> sections.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-7-0">
+          <div class="release-header">
+            <span class="version-badge">v1.7.0</span>
+            <span class="release-date">2 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/wrap</code></strong> — lightweight rewrite. Removed scoring/badges/genre system. One dramatic narrative (no genre selection), added session haiku, one-stat highlight, fortune cookie footer. Leaderboard now shows commits/lines instead of scores. Vibe check determined inline instead of by script.</li>
+            <li><strong><code>/roast</code></strong> — removed score trend and badge pattern analysis bullets (stats.json no longer has these fields)</li>
+            <li><strong><code>/stand-up</code></strong> — removed &quot;score trends&quot; FOCUS bullet</li>
+            <li><strong><code>/eod</code></strong> — removed SCORE line from card, simplified session list to title + duration (no scores/badges)</li>
+            <li><strong><code>/commands</code></strong> — updated <code>/wrap</code> and <code>/roast</code> descriptions to reflect lightweight wrap</li>
+          </ul>
+          <h4 class="removed">Removed</h4>
+          <ul>
+            <li>Scoring formula, badge definitions, genre selection, multiplier system, high score tracking from <code>/wrap</code></li>
+            <li><code>execution/wrap_stats.py</code> scoring logic (978 → ~150 lines, now metrics + streak only)</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-6-0">
+          <div class="release-header">
+            <span class="version-badge">v1.6.0</span>
+            <span class="release-date">2 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>/eod</code></strong> — new end-of-day report command. Aggregates all sessions, commits, features, and position into one bordered summary. Shows day stats, session list, semantic &quot;What Got Done&quot; grouping, position at EOD, and day vibe.</li>
+            <li><strong><code>execution/wrap_stats.py</code></strong> — new deterministic scoring script (978 lines). Handles all session scoring computation: git metrics, streak, multiplier, raw/final score, badge evaluation (with once-per-day dedup), high score check, leaderboard consolidation. Outputs JSON for the <code>/wrap</code> prompt to render.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/stand-up</code></strong> — added WARNINGS section (surfaces audit WARN/FAIL findings in kick-off card with detail lines and &quot;Fix now?&quot; suggestions) and FOCUS section (2-3 coaching bullets from <code>stats.json</code> analysis: infra/product ratio, stale WARNs, commits/session trends, steps completed, time-of-day patterns, score trends)</li>
+            <li><strong><code>/vitals</code></strong> — added mandatory audit detail lines rule: WARN/FAIL items must each be shown on indented detail lines, using <code>--json</code> flag for reliable parsing</li>
+            <li><strong><code>/roast</code></strong> — added &quot;And you...&quot; developer habit analysis section: roasts session timing, infra/product ratio, score trends, badge patterns, commits/session, steps throughput, and streak from <code>stats.json</code></li>
+            <li><strong><code>/wrap</code></strong> — rewrote to delegate all scoring computation to <code>execution/wrap_stats.py</code>. Steps 2+3 replaced with single script call. Display sections now reference <code>result.*</code> JSON fields. Prompt reduced from ~22K to ~17K chars.</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-5-0">
+          <div class="release-header">
+            <span class="version-badge">v1.5.0</span>
+            <span class="release-date">2 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/stand-up</code></strong> — rewritten as context-aware dual-mode command. Detects <code>.tmp/.session-start</code>: <strong>kick-off mode</strong> (no session) starts clock, reads project state, shows bordered card with plan, waits for sign-off. <strong>Status mode</strong> (session active) shows bordered daily status card with progress, momentum, activity since last milestone, blockers, pending decisions, and queue. Read-only in status mode.</li>
+            <li><strong><code>/commands</code></strong> — updated <code>/stand-up</code> description for dual-mode, updated smart filter section</li>
+            <li><strong>Reference docs</strong> — updated stand-up descriptions across README, SYSTEM-MAP, CUSTOMIZATION, and global-commands/README</li>
+            <li><strong>CUSTOMIZATION</strong> — corrected command count from 11 to 13 (added <code>/vitals</code>, <code>/commands</code> to list)</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-4-0">
+          <div class="release-header">
+            <span class="version-badge">v1.4.0</span>
+            <span class="release-date">2 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>/vitals</code></strong> — new workspace health check command: git status, quick audit, DOE Kit sync, STATE.md alignment, stale temp files. Bordered output with ✓/⚠️ per check.</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><strong><code>/wrap</code></strong> — added quick audit to Step 1 housekeeping; replaced plain footer with bordered &quot;System Checks&quot; section showing audit results and DOE Kit sync status together</li>
+            <li><strong><code>/commands</code></strong> — updated to 13 commands, added <code>/vitals</code> under Quality category</li>
+            <li><strong>README</strong> — command count 12 → 13, added <code>/vitals</code> to Quality row in table</li>
+            <li><strong>SYSTEM-MAP</strong> — added vitals.md to file table, command reference, and directory tree</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-3-0">
+          <div class="release-header">
+            <span class="version-badge">v1.3.0</span>
+            <span class="release-date">2 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong><code>setup.sh</code></strong> — one-command installer: copies commands to <code>~/.claude/commands/</code>, copies universal CLAUDE.md template (if none exists), activates git hooks, writes version receipt to <code>~/.claude/.doe-kit-version</code></li>
+            <li><strong><code>/commands</code></strong> — new slash command replacing <code>/README</code>. Shows full command reference by category, checks installation status (missing commands), and checks GitHub for kit updates</li>
+            <li><strong>Slash Commands section in README</strong> — category table with smart filter explanation, links to <code>/commands</code> for full reference</li>
+            <li><strong>Manual setup fallback</strong> — collapsible details block in Quick Start for users who prefer not to use the script</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li>Quick Start simplified from 6 steps to 3 (clone → <code>./setup.sh</code> → <code>/stand-up</code>)</li>
+            <li><code>global-commands/README.md</code> is now a short GitHub directory readme (no longer doubles as a command)</li>
+            <li>Command count updated from 11 → 12 across README and command reference</li>
+          </ul>
+          <h4 class="removed">Removed</h4>
+          <ul>
+            <li><code>/README</code> command — replaced by <code>/commands</code></li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-2-1">
+          <div class="release-header">
+            <span class="version-badge">v1.2.1</span>
+            <span class="release-date">1 March 2026</span>
+          </div>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>/sync-doe</code> now shows a bordered result summary box at the end of every sync — <code>✅ SYNCED</code>, <code>⏭️ NO CHANGES</code>, <code>❌ REJECTED</code>, or <code>⚠️ BLOCKED</code> with explanation and kit version</li>
+          </ul>
+        </div>
+
+        <div class="release release-compact" id="v1-2-0">
+          <div class="release-header">
+            <span class="version-badge">v1.2.0</span>
+            <span class="release-date">1 March 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>CLAUDE.md Rule 10: Parallelise by default</strong> — automatically spawn sub-agents for independent tasks, flag sequential dependencies, commit one-at-a-time per Rule 6</li>
+            <li><strong>CLAUDE.md Guardrail: Protect starter kit</strong> — blocks direct edits to <code>~/doe-starter-kit</code>; all changes must go through <code>/sync-doe</code></li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li>Renamed <code>/sync-kit</code> to <code>/sync-doe</code> across all files — command name, file (<code>sync-doe.md</code>), and 40+ references in 10 files. Better describes syncing DOE framework improvements.</li>
+          </ul>
+        </div>
+
+        </details>
+
+        <details class="month-group">
+
+          <summary>February 2026 (3 releases)</summary>
+
+        <div class="release release-compact" id="v1-1-1">
+          <div class="release-header">
+            <span class="version-badge">v1.1.1</span>
+            <span class="release-date">28 February 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><code>/wrap</code> footer now shows DOE Kit version and sync status as the last line before closing</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-1-0">
+          <div class="release-header">
+            <span class="version-badge">v1.1.0</span>
+            <span class="release-date">28 February 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>DOE Kit awareness</strong> — <code>/stand-up</code>, <code>/crack-on</code>, <code>/sitrep</code>, and <code>/wrap</code> now check <code>~/doe-starter-kit</code> if it exists</li>
+            <li><code>/stand-up</code> and <code>/crack-on</code> show kit version + pending change count at session start</li>
+            <li><code>/sitrep</code> shows <code>DOE KIT</code> row with version and sync status</li>
+            <li><code>/wrap</code> nudges <code>/sync-doe</code> when DOE files have changed since last sync</li>
+            <li>All four commands recommend <code>/sync-doe</code> when pending changes are detected</li>
+          </ul>
+        </div>
+
+        <div class="release" id="v1-0-0">
+          <div class="release-header">
+            <span class="version-badge">v1.0.0</span>
+            <span class="release-date">28 February 2026</span>
+          </div>
+          <h4>Added</h4>
+          <ul>
+            <li><strong>CLAUDE.md</strong> — 9 operating rules, guardrails, progressive disclosure triggers, directory structure</li>
+            <li><strong>STATE.md</strong> — Session memory template</li>
+            <li><strong>ROADMAP.md</strong> — Product roadmap template</li>
+            <li><strong>SYSTEM-MAP.md</strong> — Complete file-by-file documentation and relationship map</li>
+            <li><strong>CUSTOMIZATION.md</strong> — Guide for adapting the kit to new projects</li>
+            <li><strong>Directives</strong> — <code>_TEMPLATE.md</code>, <code>documentation-governance.md</code>, <code>claim-auditing.md</code>, <code>starter-kit-sync.md</code></li>
+            <li><strong>Execution</strong> — <code>audit_claims.py</code> with universal checks and project extension point</li>
+            <li><strong>11 slash commands</strong> — <code>/stand-up</code>, <code>/crack-on</code>, <code>/wrap</code> (gamified), <code>/sitrep</code>, <code>/sync-doe</code>, <code>/pitch</code>, <code>/audit</code>, <code>/quick-audit</code>, <code>/roast</code>, <code>/eli5</code>, <code>/shower-thought</code></li>
+            <li><strong>Guardrail hooks</strong> — <code>block_dangerous_commands.py</code>, <code>block_secrets_in_code.py</code>, <code>protect_directives.py</code></li>
+            <li><strong>Git hooks</strong> — <code>commit-msg</code> (strip AI co-author trailers), <code>pre-commit</code> (fast audit)</li>
+            <li><strong>Session timer</strong> — <code>/stand-up</code> and <code>/crack-on</code> start clock, <code>/sitrep</code> and <code>/wrap</code> report duration</li>
+            <li><strong>Gamification</strong> — Scoring, badges, streaks, leaderboard, themed wrap-up cards</li>
+            <li><strong>README.md</strong> — Quick start guide and feature overview</li>
+          </ul>
+          <h4 class="fixed">Fixed</h4>
+          <ul>
+            <li><code>commit-msg</code> hook uses macOS-compatible <code>sed -i &#x27;&#x27;</code> syntax</li>
+            <li><code>/sitrep</code> STATUS field has clearer instruction wording</li>
+            <li><code>/wrap</code> score table has separate high score / non-high score templates with <code>d[streak]</code> multiplier format</li>
+          </ul>
+          <h4 class="changed">Changed</h4>
+          <ul>
+            <li><code>/sync-doe</code> includes up-to-date check — stops early if nothing to sync</li>
+            <li>Sync directive includes safety guardrails: pull-before-compare, three-way diff, additive merging, git stash backup</li>
+          </ul>
+        </div>
+
+        </details>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <a href="glossary.html">
+            <div class="pg-label">Previous</div>
+            <div class="pg-title">&larr; Glossary</div>
+          </a>
+        </div>
+
+        <footer class="site-footer">DOE Starter Kit v1.54.2</footer>
+
+      </div><!-- /content -->
+    </div><!-- /content-area -->
+
+  </div><!-- /layout -->
+
+  <script>
+    // Dark mode
+    (function () {
+      var btn  = document.getElementById('themeBtn');
+      var html = document.documentElement;
+
+      function applyTheme(dark) {
+        if (dark) {
+          html.setAttribute('data-theme', 'dark');
+          btn.textContent = '\u2604';
+        } else {
+          html.removeAttribute('data-theme');
+          btn.textContent = '\u263D';
+        }
+      }
+
+      var stored = localStorage.getItem('doe-docs-theme');
+      applyTheme(stored === 'dark');
+
+      btn.addEventListener('click', function () {
+        var isDark = html.getAttribute('data-theme') === 'dark';
+        localStorage.setItem('doe-docs-theme', isDark ? 'light' : 'dark');
+        applyTheme(!isDark);
+      });
+    })();
+
+    // Mobile sidebar
+    (function () {
+      var hamburger = document.getElementById('hamburger');
+      var sidebar   = document.getElementById('sidebar');
+      var overlay   = document.getElementById('sidebarOverlay');
+
+      function open()  { sidebar.classList.add('open');    overlay.classList.add('visible'); }
+      function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
+
+      hamburger.addEventListener('click', function () {
+        sidebar.classList.contains('open') ? close() : open();
+      });
+      overlay.addEventListener('click', close);
+    })();
+  </script>
+
+</body>
+</html>

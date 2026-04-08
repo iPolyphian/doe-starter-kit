@@ -151,25 +151,95 @@ These hooks **warn but don't block** — they print to stderr so you see the war
 
 ## Upgrading from Older Kit Versions
 
-If your project was set up with an older version of the kit, here's what changed:
+If your project was set up with an older version of the kit, this section covers what changed and how to upgrade. For a visual walkthrough with terminal mockups and before/after examples, see the [Migration Guide tutorial page](docs/tutorial/migration-guide.html).
 
-### v1.49.0 — Context-First Architecture
+### Find your version
 
-**CLAUDE.md is now a thin router.** The ~113-line inline rulebook is now a ~55-line trigger table that loads directives on demand. If you reference rules by number (e.g. "Rule 6"), update those references to point to the directive file instead.
+Check which DOE version your project uses:
 
-**Phase-based directives replace inline rules:**
-- `directives/planning-rules.md` — contracts, dependencies, scale-aware planning
-- `directives/building-rules.md` — branches, code hygiene, file ownership
-- `directives/delivery-rules.md` — retros, guardrails, performance budgets
-- `directives/context-management.md` — post-compaction, solo/parallel/formal modes
-- `directives/self-annealing.md` — failure response, learnings curation
-- `directives/framework-evolution.md` — track native Claude Code features
+```bash
+# Method 1: STATE.md version line
+grep "DOE Starter Kit" STATE.md
 
-**DAG executor for parallel dispatch.** `~/.claude/scripts/dispatch_dag.py` parses `Depends:` and `Owns:` metadata from todo.md to build a dependency graph. Use `--validate` to check your step metadata, `--graph` to see wave groupings, `--dispatch` to run parallel steps.
+# Method 2: Version file (older projects)
+cat .doe-kit-version
 
-**Custom agent definitions.** `.claude/agents/` contains Finder, Adversarial, Referee, and ReadOnly agents for adversarial review. Edit/Write are mechanically blocked. Run with `claude --agent=Finder`.
+# Method 3: Latest kit tag
+cd ~/doe-starter-kit && git describe --tags --abbrev=0
 
-**Pre-push methodology checks.** `.githooks/pre-push` runs `test_methodology.py --quick` before every push. Catches structural issues (broken cross-refs, invalid contracts) before they reach CI.
+# If none of these work, you're on a pre-v1.20 version
+```
+
+### v1.47.0 — Agent Discipline (LOW impact)
+
+Additive features only — nothing breaks if you skip this, but you miss useful capabilities.
+
+**What's new:** Rationalisation tables (6 domains), serial dispatch protocol, subagent status protocol, TDD directive, Chrome verification directive, universal CI pipeline.
+
+**Quick checklist:**
+- [ ] Copy directives: `rationalisation-tables.md`, `serial-dispatch-protocol.md`, `subagent-protocol.md`, `best-practices/tdd-and-debugging.md`, `chrome-verification.md`
+- [ ] Add triggers to CLAUDE.md trigger table for each new directive
+- [ ] Copy CI: `.github/workflows/doe-ci.yml`, `.github/workflows/auto-rebase.yml`
+
+### v1.49.0 — Context-First Architecture (HIGH impact)
+
+**This is the biggest structural change in DOE history.** CLAUDE.md was rewritten from a ~113-line monolith with numbered rules to a ~55-line thin router with a trigger table. If you reference rules by number (e.g. "Rule 6"), those references must be updated.
+
+**What changed:**
+- Numbered rules (Rule 1-9) replaced with 7 Core Behaviour one-liners pointing to directives
+- "Progressive Disclosure" section replaced with compact Triggers table
+- All rule detail moved to 6 phase-based directive files
+- DAG executor added for parallel step dispatch
+- Custom adversarial review agents added
+- Pre-push methodology checks added
+
+**Quick checklist:**
+- [ ] Back up CLAUDE.md: `cp CLAUDE.md CLAUDE.md.backup`
+- [ ] Replace CLAUDE.md with thin router template (keep your Directory Structure and custom triggers)
+- [ ] Copy 6 phase directives to `directives/`: `planning-rules.md`, `building-rules.md`, `delivery-rules.md`, `context-management.md`, `self-annealing.md`, `framework-evolution.md`
+- [ ] Update any "Rule N" references in todo.md/plans to point to directive files
+- [ ] Copy `dispatch_dag.py` to `~/.claude/scripts/`
+- [ ] Copy `.claude/agents/` (Finder, Adversarial, Referee, ReadOnly)
+- [ ] Copy `.githooks/pre-push`, run `chmod +x .githooks/pre-push`
+- [ ] Run `git config core.hooksPath .githooks`
+
+**What breaks if you skip:** Phase directives won't load. Commands that reference directives may show warnings. DAG parallel dispatch unavailable.
+
+**Preserving customisations:** Your custom triggers go in the new Triggers table format (`- Situation -> directives/file.md`). Your directory structure section is unchanged. Custom inline rules should move to a project-specific directive with a trigger.
+
+### v1.51.0 — Verification & Security (MEDIUM impact)
+
+**What changed:** Executable `Verify:` patterns formalised (4 patterns: `run:`, `file: exists`, `file: contains`, `html: has`). Review gate blocks PR creation without Finder review artifact. Step-marking enforcement hook. Main branch protection.
+
+**Quick checklist:**
+- [ ] Update contracts in todo.md: all `[auto]` criteria must use one of the 4 `Verify:` patterns
+- [ ] Copy hooks: `enforce_review_gate.py`, `record_review_result.py`, `persist_review_findings.py` to `.claude/hooks/`
+- [ ] Update `.githooks/pre-commit` with step-marking and main-branch protection sections
+- [ ] Update `.claude/settings.json` with new hook registrations
+
+**What breaks if you skip:** Old-style free-text contracts won't be validated by `/agent-verify`. PR creation may fail if review gate is partially installed.
+
+### v1.52.0 — Init Wizard & Manifest (MEDIUM impact)
+
+**What changed:** `manifest.json` tracks which files belong to each capability layer. Init wizard replaces `setup.sh` for new projects. Settings.json hooks wired up. Missing standard files added.
+
+**Quick checklist:**
+- [ ] Copy `manifest.json` from kit to project root
+- [ ] Verify `.claude/settings.json` has PreToolUse and PostToolUse hooks wired
+- [ ] Create missing files if needed: `.claude/stats.json`, `ROADMAP.md`, `tasks/archive.md`
+- [ ] Copy `.claude/agents/` if missing
+
+**What breaks if you skip:** `/doe-health` may report missing files. Some hooks may not fire. Commands expecting `manifest.json` will warn.
+
+### Post-upgrade verification
+
+After upgrading, run these checks:
+
+1. `/doe-health` — methodology tests should pass (some WARNs are OK for fresh upgrades)
+2. `/stand-up` — kick-off card should render without errors
+3. `/crack-on` on a small task — verify directive loading works
+4. `git config core.hooksPath` — should show `.githooks`
+5. If stuck: `/report-doe-bug` captures your environment automatically
 
 ---
 

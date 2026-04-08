@@ -7,6 +7,29 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.55.0 (2026-04-08)
+<!-- hero -->
+The most comprehensive documentation update since the tutorials launched. Eight new concept sections on the Key Concepts page cover everything from DAGs to adversarial review. A brand-new Migration Guide walks users through upgrading from any DOE version with per-era checklists and CLAUDE.md before/after examples. The What's New page — generated from CHANGELOG.md and auto-regenerated on every release — gives every DOE user a single place to see what changed.
+<!-- /hero -->
+
+### Added
+- **Migration Guide** (`docs/tutorial/migration-guide.html`) — comprehensive upgrade page with Find Your Version, 10-era overview table, 4 migration paths (v1.47 LOW, v1.49 HIGH, v1.51 MEDIUM, v1.52 MEDIUM), CLAUDE.md before/after, fresh-start vs surgical-upgrade decision tree, post-migration verification checklist
+- **What's New page** (`docs/tutorial/whats-new.html`) — Conductor-inspired changelog page generated from CHANGELOG.md. Version badges, hero prose sections for major releases, expand/collapse by month for older releases, APP/INFRA tag badges, dark mode
+- **What's New generator** (`execution/generate_whats_new.py`) — deterministic Python script, stdlib only. Parses both CHANGELOG heading formats, extracts hero blocks, renders HTML matching tutorial styling. Wired into `/sync-doe` Step 10
+- **8 Key Concepts sections** — Thin Router, Phase-Based Directives, Dependency Graphs (DAGs), Rationalisation Tables, Adversarial Review, Defence in Depth, Deterministic Hooks, Context Recovery
+- **6 CHANGELOG hero blocks** — v1.42.0 (Quality Stack), v1.44.0 (PR Workflow), v1.48.0 (Agent Discipline), v1.49.0 (CFA), v1.51.4 (Security), v1.52.0 (Init Wizard)
+- **Missing v1.44.0 CHANGELOG entry** — PR Workflow Migration tag existed but changelog entry was never written
+- **CLAUDE.md trigger** — `Updating CHANGELOG.md -> regenerate whats-new.html`
+
+### Changed
+- **CUSTOMIZATION.md** — expanded "Upgrading from Older Kit Versions" from v1.49-only section to comprehensive per-era migration guides with checklists for v1.47, v1.49, v1.51, v1.52. Added version identification section and link to tutorial
+- **commands.html** — DOE KIT version v1.36.0 updated to v1.54.2 in terminal mockup
+- **new-project.html** — DONE version v1.51.7 updated to v1.54.2. Project types expanded from 5 to 12 (added desktop, browser ext, library, monorepo, hardware, other). Framework card shows "Show all" (40 frameworks) and "Other" escape hatch
+- **tips-and-mistakes.html** — example project version v1.28.0 updated to v1.50.0
+- **Sidebar** — "What's New" added as first link (before Getting Started), "Migration Guide" added to Reference section across all 20 tutorial pages
+- **starter-kit-sync.md** — `generate_whats_new.py` added to Step 10 (after version stamp, before git add)
+- **Footer versions** — stamped to v1.55.0 across all 20 pages
+
 ## v1.54.0 (2026-04-07)
 
 ### Added
@@ -93,6 +116,9 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 ---
 
 ## v1.52.0 (2026-04-02)
+<!-- hero -->
+DOE becomes a conversation, not a copy-paste. The init wizard replaces blind setup.sh with an 8-card interactive flow that detects your framework, asks what you're building, and scaffolds a project with exactly the files you need. Composable capability layers (universal, public-facing, data-handling, regulated) mean a static HTML site and a GDPR-regulated SaaS app both start from the same wizard — they just get different files.
+<!-- /hero -->
 
 ### Added
 - **DOE Init Wizard** (`execution/doe_init.py`) — conversational scaffolding tool replacing blind setup.sh copy. 8-card bordered UX, framework auto-detection, composable CLAUDE.md generation, additive capability layers (universal, public-facing, data-handling, regulated). Supports Next.js, Vite, Python, Go, Flutter, static HTML.
@@ -139,6 +165,9 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 - **Wrap mid-feature branch handling** (`wrap.md`) — Step 0 rewritten: mid-feature sessions stay on the feature branch, wrap data commits directly to it. No separate housekeeping branch or PR. Step 1 no longer suggests creating PRs mid-feature.
 
 ## v1.51.4 (2026-04-01)
+<!-- hero -->
+Professional security defaults for every DOE project. Review gates block PR creation without adversarial review proof-of-work. Step-marking enforcement ensures todo.md tracks progress mechanically. Slack notifications, integrations directive, and sync audit self-tests round out the release. The principle: deterministic enforcement beats probabilistic rules.
+<!-- /hero -->
 
 ### Added
 - **Review gate hook** (`enforce_review_gate.py`) — blocks PR creation without Finder subagent proof-of-work
@@ -191,6 +220,9 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
   - Pre-retro gate — blocks retro commit without methodology pass (`SKIP_RETRO_GATE=1`)
 
 ## v1.49.0 (2026-04-01)
+<!-- hero -->
+The biggest structural change in DOE history. CLAUDE.md was rewritten from a 113-line inline rulebook into a 55-line thin router that loads directives on demand. Every token of irrelevant context degrades agent performance — this release operationalises that principle. Six phase-based directives now handle planning, building, delivery, context management, self-annealing, and framework evolution. A DAG executor enables parallel step dispatch, and custom adversarial review agents (Finder, Adversarial, Referee) provide structured multi-agent code review.
+<!-- /hero -->
 
 ### Added
 - **Phase-based directives** — 6 new directives extracted from CLAUDE.md: `planning-rules.md`, `building-rules.md`, `delivery-rules.md`, `context-management.md`, `self-annealing.md`, `framework-evolution.md`
@@ -211,6 +243,9 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 - **test_methodology.py** — `--scenario` flag now accepts multiple values (`action="append"`)
 
 ## v1.48.0 (2026-03-31)
+<!-- hero -->
+Superpowers-inspired discipline enforcement for AI agents. Rationalisation tables map every common excuse for skipping guardrails to reality across 6 domains. Serial dispatch protocol (SDD) provides a structured workflow for sequential step execution. Adversarial review with confidence-scored findings, universal CI pipeline with three tiers, and 9 updated session commands complete the Agent Discipline era.
+<!-- /hero -->
 
 ### Added
 - **Agent Discipline directives** — rationalisation tables (6 domains, excuse-reality format), serial dispatch protocol (SDD workflow with decision tree), subagent status protocol (DONE/DONE_WITH_CONCERNS/NEEDS_CONTEXT/BLOCKED)
@@ -273,6 +308,23 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 - **Rule 6** rewritten for branch+PR workflow — feature branches, commit per step on branch, `gh pr create` at retro, CI must pass before merge, no direct commits to main
 - **Rule 11** updated — retro step now includes PR creation with template auto-filled from contract criteria
 
+## v1.44.0 (2026-03-19)
+<!-- hero -->
+DOE moves from direct-to-main commits to a proper branch-based PR workflow. Feature branches, CI gating with GitHub Actions, branch protection on main, snagging as pre-merge gate with Chrome visual verification, and a complete multi-agent coordination protocol. The master-to-main branch rename, PR template, and session command updates ship together. Released as DOE kit v1.44.0.
+<!-- /hero -->
+
+### Added
+- **Branch-based PR workflow** — feature branches, commit per step on branch, `gh pr create` at retro, CI must pass before merge, no direct commits to main
+- **GitHub Action for AI PR review** — automated adversarial review on pull requests
+- **Snagging as pre-merge gate** — Chrome visual verification integrated into snagging workflow
+- **PR template** — auto-filled from contract criteria during retro
+- **Multi-agent coordination protocol** — wave protocol rewrite for branch-based workflow
+- **DOE tutorial page** (`docs/tutorial/pr-workflow.html`) — PR workflow documentation
+
+### Changed
+- **master to main branch rename** — all references updated across commands and documentation
+- **Session commands** (stand-up, crack-on, sitrep, wrap) — updated for branch-based workflow with PR awareness
+
 ## v1.43.0 (2026-03-19)
 
 ### Documentation
@@ -289,6 +341,9 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 ---
 
 ## [v1.42.0] — 2026-03-18
+<!-- hero -->
+Quality Stack goes universal. Testing infrastructure now auto-detects and supports 16 project types — from Next.js to Flutter to Go. Maestro handles mobile UI testing with YAML flows. Framework-aware orchestration, multi-language health checks, and config-driven portability mean the same /snagging command works regardless of what you're building.
+<!-- /hero -->
 
 ### Added
 - **Multi-framework testing** — Quality Stack now supports 16 project types: static HTML, Next.js, Vite/React, Angular, Nuxt, Vue, SvelteKit, Remix, Astro, React Native, Expo, Flutter, Python, Go, PHP/Laravel, and Ruby/Rails. Auto-detects framework from project files and configures testing accordingly.
