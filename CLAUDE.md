@@ -61,4 +61,6 @@ First session on a brand new project: load `directives/planning-rules.md` + `dir
 - New functions / debugging -> `directives/best-practices/tdd-and-debugging.md`
 - DOE feature request -> `/request-doe-feature`
 
+- Updating CHANGELOG.md -> regenerate whats-new.html: `python3 execution/generate_whats_new.py`
+
 <!-- Add project-specific triggers here as the system grows -->

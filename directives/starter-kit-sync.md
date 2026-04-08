@@ -158,6 +158,7 @@ Before committing, update `CHANGELOG.md`:
 ```bash
 cd ~/doe-starter-kit
 python3 ~/doe-starter-kit/execution/stamp_tutorial_version.py v[X.Y.Z]
+python3 ~/doe-starter-kit/execution/generate_whats_new.py
 git add -A
 git diff --staged --stat
 # Show diff, wait for sign-off
