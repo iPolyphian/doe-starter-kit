@@ -7,6 +7,16 @@ Versioning: patch for small fixes, minor for new features/commands/directives, m
 
 ---
 
+## v1.55.2 (2026-04-08)
+
+### Changed
+- **CLAUDE.md migration section** — expanded from 3-bullet callout to 7-step hands-on walkthrough with "what goes where" mapping table, CFA verification, recovery guidance, and timing advice
+- **All 20 sidebars synced** — Core Concepts links (Thin Router, Adversarial Review, Defence in Depth), What's New section title, and Migration Guide now identical across every page
+- **Sidebar versions** stamped to v1.55.2 across all pages
+
+### Fixed
+- **vercel.json reverted** — build command failed (Python3 not available in Vercel static deploy). Serving committed HTML via dashboard config instead
+
 ## v1.55.1 (2026-04-08)
 
 ### Fixed
