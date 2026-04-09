@@ -29,7 +29,14 @@ EXPANDED_COUNT = 5
 
 
 def get_kit_version():
-    """Get the current kit version from the latest git tag or first CHANGELOG entry."""
+    """Get the current kit version from kit-version.js, git tag, or CHANGELOG."""
+    # Primary: read from kit-version.js (single source of truth)
+    version_js = KIT_ROOT / "docs" / "tutorial" / "kit-version.js"
+    if version_js.exists():
+        m = re.search(r"var VERSION = '(v[\d.]+)'", version_js.read_text(encoding="utf-8"))
+        if m:
+            return m.group(1)
+    # Fallback: git tag
     import subprocess
     try:
         result = subprocess.run(
@@ -1164,6 +1171,7 @@ def generate_page(entries):
       overlay.addEventListener('click', close);
     }})();
   </script>
+  <script src="kit-version.js"></script>
 
 </body>
 </html>"""
